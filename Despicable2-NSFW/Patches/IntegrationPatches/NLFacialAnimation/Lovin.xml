@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>[NL] Facial Animation - WIP</li>
+		</mods>
+		<match Class="PatchOperationAdd">
+			<xpath>/Defs/FacialAnimation.FaceAnimationDef[defName="Lovin" or defName="Lovin2"]/targetJobs</xpath>
+            <value>
+				<li>Job_GetLovin</li>
+				<li>Job_GetBedLovin</li>
+				<li>Job_GiveLovin</li>
+            </value>
+		</match>
+	</Operation>
+</Patch>

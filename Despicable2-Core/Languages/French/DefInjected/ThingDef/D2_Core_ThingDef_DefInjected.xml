@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for ThingDef (D2_Core) -->
+	<!-- D2_UIFrameworkDemoThing (label) -->
+	<D2_UIFrameworkDemoThing.label>ancre d'onglet de démo du framework UI</D2_UIFrameworkDemoThing.label>
+	<!-- D2_UIFrameworkDemoThing (description) -->
+	<D2_UIFrameworkDemoThing.description>Objet d'aide réservé au debug, utilisé pour tester la démo ITab du framework UI.</D2_UIFrameworkDemoThing.description>
+</LanguageData>

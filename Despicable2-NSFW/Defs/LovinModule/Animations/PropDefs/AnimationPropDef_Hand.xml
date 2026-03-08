@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<PawnRenderNodeTagDef>
+		<defName>RenderNodeTag_Hand</defName>
+	</PawnRenderNodeTagDef>
+
+	<Despicable.AnimationPropDef>
+		<defName>AnimationProp_Hand</defName>
+		<animPropProperties Class="Despicable.PawnRenderNodeProperties_GraphicVariants">
+			<debugLabel>Hand</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_GraphicVariants</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_GraphicVariants</workerClass>
+			<tagDef>RenderNodeTag_Hand</tagDef>
+			<absoluteTransform>True</absoluteTransform>
+			<parentTagDef>Root</parentTagDef>
+			<texPath>AnimationProps/Hand/Hand</texPath>
+			<!-- for height -->
+			<overlayLayer>Head</overlayLayer>
+			<useSkinShader>True</useSkinShader>
+			<linkedBodyPartsGroup>LeftHand</linkedBodyPartsGroup>
+			<colorType>Skin</colorType>
+			<baseLayer>95</baseLayer>
+			<drawSize>(0.85, 0.85)</drawSize>
+		</animPropProperties>
+	</Despicable.AnimationPropDef>
+	
+</Defs>

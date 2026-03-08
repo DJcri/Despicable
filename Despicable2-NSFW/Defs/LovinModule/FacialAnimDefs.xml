@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_Orgasm</defName>
+		<durationTicks>125</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>5</tick>
+				<expression>FA_Blink_1</expression>
+			</li>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>15</tick>
+				<expression>FA_OrgasmLipBite</expression>
+			</li>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>45</tick>
+				<expression>FacialExpression_Orgasm</expression>
+			</li>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>75</tick>
+				<expression>FacialExpression_Drool</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+	<Despicable.ExpressionDef>
+		<defName>FA_OrgasmLipBite</defName>
+		<texPathEyes>FaceParts/Eyes/eye_shut</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_lipbite</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_LipBite</defName>
+		<durationTicks>30</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>0</tick>
+				<expression>FacialExpression_LipBite</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_Gasp</defName>
+		<durationTicks>30</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>0</tick>
+				<expression>FacialExpression_Gasp</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_Moan</defName>
+		<durationTicks>30</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>0</tick>
+				<expression>FacialExpression_Moan</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_Cheekful</defName>
+		<durationTicks>10</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>0</tick>
+				<expression>FA_Cheekful</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+	<Despicable.ExpressionDef>
+		<defName>FA_Cheekful</defName>
+		<texPathMouth>FaceParts/Mouths/mouth_cheekful</texPathMouth>
+	</Despicable.ExpressionDef>
+</Defs>

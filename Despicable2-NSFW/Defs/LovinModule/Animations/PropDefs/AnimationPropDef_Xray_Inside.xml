@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<PawnRenderNodeTagDef>
+		<defName>RenderNodeTag_Xray_Inside</defName>
+	</PawnRenderNodeTagDef>
+
+	<Despicable.AnimationPropDef>
+		<defName>AnimationProp_Xray_Inside</defName>
+		<animPropProperties Class="Despicable.PawnRenderNodeProperties_GraphicVariants">
+			<debugLabel>Xray Inside</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_GraphicVariants</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_GraphicVariants</workerClass>
+			<tagDef>RenderNodeTag_Xray_Inside</tagDef>
+			<absoluteTransform>True</absoluteTransform>
+			<parentTagDef>Body</parentTagDef>
+			<!-- for height -->
+			<overlayLayer>Head</overlayLayer>
+			<baseLayer>95</baseLayer>
+			<texPathVariantsDef>TexPathVariants_Xray_Inside</texPathVariantsDef>
+		</animPropProperties>
+	</Despicable.AnimationPropDef>
+	
+</Defs>

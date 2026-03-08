@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	
+	<PawnRenderNodeTagDef>
+		<defName>Genitals</defName>
+	</PawnRenderNodeTagDef>
+	
+	<Despicable.GenitalDef>
+		<defName>Genital_Penis</defName>
+		<gender>1</gender>
+		<texPathAroused>Genitals/Penis/erect</texPathAroused>
+		<properties Class="PawnRenderNodeProperties">
+			<debugLabel>Penis</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_Genitals</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_Genitals</workerClass>
+			<texPath>Genitals/Penis/flaccid</texPath>
+			<tagDef>Genitals</tagDef>
+			<rotDrawMode>Fresh, Rotting</rotDrawMode>
+			<colorType>Skin</colorType>
+			<baseLayer>64</baseLayer>
+		</properties>
+	</Despicable.GenitalDef>
+	
+	<!--
+	<Despicable.GenitalDef>
+		<defName>Vagina</defName>
+		<gender>1</gender>
+		<texPathAroused></texPathAroused>
+		<properties Class="PawnRenderNodeProperties">
+			<debugLabel>Vagina</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_Genitals</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_Genitals</workerClass>
+			<texPath></texPath>
+			<tagDef>Genitals</tagDef>
+			<rotDrawMode>Fresh, Rotting</rotDrawMode>
+			<colorType>Skin</colorType>
+			<baseLayer>64</baseLayer>
+		</properties>
+	</Despicable.GenitalDef>
+	-->
+	
+	<!-- Appendage offsets for each bodytype -->
+	<Despicable.BodyTypeGenitalsOffsetDef>
+		<defName>Hulk</defName>
+		<offset>(-0.08, 0, -0.18)</offset>
+	</Despicable.BodyTypeGenitalsOffsetDef>
+	
+	<Despicable.BodyTypeGenitalsOffsetDef>
+		<defName>Male</defName>
+		<offset>(0, 0, 0)</offset>
+	</Despicable.BodyTypeGenitalsOffsetDef>
+	
+	<Despicable.BodyTypeGenitalsOffsetDef>
+		<defName>Thin</defName>
+		<offset>(-0.1, 0, 0)</offset>
+	</Despicable.BodyTypeGenitalsOffsetDef>
+	
+	<Despicable.BodyTypeGenitalsOffsetDef>
+		<defName>Fat</defName>
+		<offset>(0.2, 0, -0.1)</offset>
+	</Despicable.BodyTypeGenitalsOffsetDef>
+
+</Defs>

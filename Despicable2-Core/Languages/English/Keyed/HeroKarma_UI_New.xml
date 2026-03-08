@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2HK_UI_HeroKarma>Hero Karma</D2HK_UI_HeroKarma>
+  <D2HK_UI_OpenHeroKarmaDesc>Open the Hero Karma screen.</D2HK_UI_OpenHeroKarmaDesc>
+  <D2HK_UI_AssignHero>Assign hero</D2HK_UI_AssignHero>
+  <D2HK_UI_AssignHeroDesc>Make this pawn the active hero. Karma, standing, and hero effects follow the active hero.</D2HK_UI_AssignHeroDesc>
+  <D2HK_UI_AssignHeroBody>Choose who carries Hero Karma. Progress is kept. Active effects move to the new hero.</D2HK_UI_AssignHeroBody>
+  <D2HK_UI_AssignHeroAlready>This pawn is already the hero.</D2HK_UI_AssignHeroAlready>
+  <D2HK_UI_HeroAssigned>{0} is now the hero.</D2HK_UI_HeroAssigned>
+  <D2HK_UI_HeaderHero>Hero: {0}</D2HK_UI_HeaderHero>
+  <D2HK_UI_NoneAssigned>None assigned</D2HK_UI_NoneAssigned>
+  <D2HK_UI_NoneAssignedOverview>No hero is assigned. Use Assign hero on a colonist to begin tracking Hero Karma.</D2HK_UI_NoneAssignedOverview>
+  <D2HK_UI_Overview>Overview</D2HK_UI_Overview>
+  <D2HK_UI_Reputation>Reputation</D2HK_UI_Reputation>
+  <D2HK_UI_Status>Status</D2HK_UI_Status>
+  <D2HK_UI_CurrentHero>Current hero</D2HK_UI_CurrentHero>
+  <D2HK_UI_NewHero>New hero</D2HK_UI_NewHero>
+  <D2HK_UI_Karma>Karma</D2HK_UI_Karma>
+  <D2HK_UI_Standing>Standing</D2HK_UI_Standing>
+  <D2HK_UI_KarmaTooltip>Karma reflects how the hero is remembered. It determines which hero effects are active.</D2HK_UI_KarmaTooltip>
+  <D2HK_UI_StandingTooltip>Standing reflects how the colony's ideology judges the hero's conduct. It affects certainty on the hero and opinion from pawns who share the hero's ideology.</D2HK_UI_StandingTooltip>
+  <D2HK_UI_CurrentStandingEffects>Current standing effects</D2HK_UI_CurrentStandingEffects>
+  <D2HK_UI_StandingEffectsDisabled>Standing effects are disabled.</D2HK_UI_StandingEffectsDisabled>
+  <D2HK_UI_CertaintyGains>Certainty gains</D2HK_UI_CertaintyGains>
+  <D2HK_UI_CertaintyLosses>Certainty losses</D2HK_UI_CertaintyLosses>
+  <D2HK_UI_SameIdeologyOpinion>Same-ideology opinion</D2HK_UI_SameIdeologyOpinion>
+  <D2HK_UI_ActiveEffects>Active effects</D2HK_UI_ActiveEffects>
+  <D2HK_UI_NoActiveEffects>No active effects.</D2HK_UI_NoActiveEffects>
+  <D2HK_UI_RecentDeeds>Recent deeds</D2HK_UI_RecentDeeds>
+  <D2HK_UI_NoRecentDeeds>No recent deeds yet.</D2HK_UI_NoRecentDeeds>
+  <D2HK_UI_Search>Search</D2HK_UI_Search>
+  <D2HK_UI_All>All</D2HK_UI_All>
+  <D2HK_UI_People>People</D2HK_UI_People>
+  <D2HK_UI_Factions>Factions</D2HK_UI_Factions>
+  <D2HK_UI_ReputationNone>No notable reputation yet.</D2HK_UI_ReputationNone>
+  <D2HK_UI_ReputationNoMatches>No matches.</D2HK_UI_ReputationNoMatches>
+  <D2HK_UI_SelectReputationTarget>Select a person or faction to inspect reputation.</D2HK_UI_SelectReputationTarget>
+  <D2HK_UI_Summary>Summary</D2HK_UI_Summary>
+  <D2HK_UI_DirectReputation>Direct reputation</D2HK_UI_DirectReputation>
+  <D2HK_UI_FactionEffect>Faction effect</D2HK_UI_FactionEffect>
+  <D2HK_UI_SettlementEffect>Settlement effect</D2HK_UI_SettlementEffect>
+  <D2HK_UI_CurrentEffects>Current effects</D2HK_UI_CurrentEffects>
+  <D2HK_UI_LastChange>Last change</D2HK_UI_LastChange>
+  <D2HK_UI_Event>Event</D2HK_UI_Event>
+  <D2HK_UI_ReputationChange>Reputation change</D2HK_UI_ReputationChange>
+  <D2HK_UI_BaseChange>Base change</D2HK_UI_BaseChange>
+  <D2HK_UI_AffectedBy>Affected by</D2HK_UI_AffectedBy>
+  <D2HK_UI_Reason>Reason</D2HK_UI_Reason>
+  <D2HK_UI_NoDirectEffect>No direct effect right now.</D2HK_UI_NoDirectEffect>
+  <D2HK_UI_ReputationTooltip>Reputation reflects how this target regards the hero. It can affect trade, goodwill, arrests, recruitment, and conversion.</D2HK_UI_ReputationTooltip>
+  <D2HK_UI_ReputationChangeTooltip>The final reputation result after all modifiers.</D2HK_UI_ReputationChangeTooltip>
+  <D2HK_UI_BaseChangeTooltip>The reputation change before ideology influence was applied.</D2HK_UI_BaseChangeTooltip>
+  <D2HK_UI_AffectedByTooltip>An ideology rule or meme changed the base reputation result.</D2HK_UI_AffectedByTooltip>
+  <D2HK_UI_TradeBlockedByTax>Trade Price Improvement blocked by Reputation Tax.</D2HK_UI_TradeBlockedByTax>
+  <D2HK_UI_Cancel>Cancel</D2HK_UI_Cancel>
+  <D2HK_UI_Assign>Assign</D2HK_UI_Assign>
+
+  <D2HK_UI_TradePriceImprovement>Trade Price Improvement</D2HK_UI_TradePriceImprovement>
+  <D2HK_UI_GoodwillGains>Goodwill gains</D2HK_UI_GoodwillGains>
+  <D2HK_UI_GoodwillLosses>Goodwill losses</D2HK_UI_GoodwillLosses>
+  <D2HK_UI_NegotiationAbility>Negotiation Ability</D2HK_UI_NegotiationAbility>
+  <D2HK_UI_SocialImpact>Social Impact</D2HK_UI_SocialImpact>
+  <D2HK_UI_InjuryHealingFactor>Injury Healing Factor</D2HK_UI_InjuryHealingFactor>
+  <D2HK_UI_RecruitResistance>Recruit resistance</D2HK_UI_RecruitResistance>
+  <D2HK_UI_ConvertCertainty>Convert certainty</D2HK_UI_ConvertCertainty>
+  <D2HK_UI_MentalBreakThreshold>Mental Break Threshold</D2HK_UI_MentalBreakThreshold>
+  <D2HK_UI_ArrestSuccessChance>Arrest Success Chance</D2HK_UI_ArrestSuccessChance>
+  <D2HK_UI_MeleeHitChance>Melee Hit Chance</D2HK_UI_MeleeHitChance>
+  <D2HK_UI_MeleeDodgeChance>Melee Dodge Chance</D2HK_UI_MeleeDodgeChance>
+  <D2HK_UI_ArrestCompliance>Arrest compliance</D2HK_UI_ArrestCompliance>
+  <D2HK_UI_ArrestComplianceFear>Arrest compliance from fear</D2HK_UI_ArrestComplianceFear>
+
+  <D2HK_UI_PerkDesc_MercyMagnet>Kindness leaves a mark.</D2HK_UI_PerkDesc_MercyMagnet>
+  <D2HK_UI_PerkDesc_GoodwillTailwind>Good deeds carry farther.</D2HK_UI_PerkDesc_GoodwillTailwind>
+  <D2HK_UI_PerkDesc_SilverTongue>Persuasion comes easier.</D2HK_UI_PerkDesc_SilverTongue>
+  <D2HK_UI_PerkDesc_CommunityBuffer>The room stays calmer around the hero.</D2HK_UI_PerkDesc_CommunityBuffer>
+  <D2HK_UI_PerkDesc_IntimidatingPresence>Compliance comes with a chill.</D2HK_UI_PerkDesc_IntimidatingPresence>
+  <D2HK_UI_PerkDesc_GoodwillFriction>The colony makes a rougher impression.</D2HK_UI_PerkDesc_GoodwillFriction>
+  <D2HK_UI_PerkDesc_TerrorEffect>Fear sharpens every interaction.</D2HK_UI_PerkDesc_TerrorEffect>
+  <D2HK_UI_PerkDesc_ReputationTax>Fear takes its cut.</D2HK_UI_PerkDesc_ReputationTax>
+
+  <D2HK_UI_PerkNote_MercyMagnet>Helping outsiders grants bonus goodwill.</D2HK_UI_PerkNote_MercyMagnet>
+  <D2HK_UI_PerkNote_CommunityBuffer>Nearby allies recover 1.5% mood after insults or slights.</D2HK_UI_PerkNote_CommunityBuffer>
+  <D2HK_UI_PerkNote_IntimidatingPresence>Failed arrests may turn into compliance ({0}).</D2HK_UI_PerkNote_IntimidatingPresence>
+  <D2HK_UI_PerkNote_TerrorEffect>Mental Break Threshold {0}. Failed arrests may turn into compliance ({1}).</D2HK_UI_PerkNote_TerrorEffect>
+</LanguageData>

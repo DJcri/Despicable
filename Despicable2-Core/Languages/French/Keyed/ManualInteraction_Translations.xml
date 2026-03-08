@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!-- Manual interaction menu (Core) -->
+  <InteractionCategory>Interagir avec {0}</InteractionCategory>
+  <InteractionOption_SocialFight>Provoquer {0}</InteractionOption_SocialFight>
+  <!-- Removed trailing apostrophe -->
+  <InteractionOption_Insult>Insulter {0}</InteractionOption_Insult>
+  <!-- Removed trailing apostrophe -->
+  <InteractionOption_Chat>Discuter avec {0}</InteractionOption_Chat>
+  <InteractionOption_Marriage>Demander {0} en mariage</InteractionOption_Marriage>
+</LanguageData>

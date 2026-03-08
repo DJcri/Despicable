@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2N_CODE_90731E3E>做爱</D2N_CODE_90731E3E>
+  <D2N_CODE_C1CB4969>与 {0} 做爱</D2N_CODE_C1CB4969>
+  <D2N_Lovin_DoWithReason>与 {0} 做爱（{1}）</D2N_Lovin_DoWithReason>
+  <D2N_LovinReason_YouPrefix>你</D2N_LovinReason_YouPrefix>
+  <D2N_LovinReason_TargetPrefix>对方</D2N_LovinReason_TargetPrefix>
+  <D2N_LovinReason_PairMissing>缺少参与者</D2N_LovinReason_PairMissing>
+  <D2N_LovinReason_Unknown>不可用</D2N_LovinReason_Unknown>
+  <D2N_LovinReason_SamePawn>是同一个角色</D2N_LovinReason_SamePawn>
+  <D2N_LovinReason_NoCompatibleTypes>不兼容</D2N_LovinReason_NoCompatibleTypes>
+  <D2N_LovinReason_IsMissing>缺席中</D2N_LovinReason_IsMissing>
+  <D2N_LovinReason_IsNotHumanlike>不是类人</D2N_LovinReason_IsNotHumanlike>
+  <D2N_LovinReason_IsDrafted>已被征召</D2N_LovinReason_IsDrafted>
+  <D2N_LovinReason_IsLeaving>正在离开</D2N_LovinReason_IsLeaving>
+  <D2N_LovinReason_IsAggressive>处于攻击状态</D2N_LovinReason_IsAggressive>
+  <D2N_LovinReason_IsBusy>很忙</D2N_LovinReason_IsBusy>
+  <D2N_LovinReason_HadLovinRecently>最近刚做过爱</D2N_LovinReason_HadLovinRecently>
+  <D2N_LovinReason_DoesntWantLovin>不想做爱</D2N_LovinReason_DoesntWantLovin>
+  <D2N_LovinReason_IsUnderage>未成年</D2N_LovinReason_IsUnderage>
+  <D2N_LovinReason_CantStayAwake>无法保持清醒</D2N_LovinReason_CantStayAwake>
+  <D2N_LovinReason_IsBleeding>正在流血</D2N_LovinReason_IsBleeding>
+  <D2N_LovinReason_IsInPain>处于疼痛中</D2N_LovinReason_IsInPain>
+  <D2N_LovinReason_IsDead>已死亡</D2N_LovinReason_IsDead>
+  <D2N_LovinReason_IsStarving>正在挨饿</D2N_LovinReason_IsStarving>
+  <D2N_LovinReason_YourOpinionTooLow>你对对方的好感太低</D2N_LovinReason_YourOpinionTooLow>
+  <D2N_LovinReason_TheirOpinionTooLow>对方对你的好感太低</D2N_LovinReason_TheirOpinionTooLow>
+  <D2N_LovinReason_YourCompatibilityTooLow>你这边的相容性太低</D2N_LovinReason_YourCompatibilityTooLow>
+  <D2N_LovinReason_TheirCompatibilityTooLow>对方那边的相容性太低</D2N_LovinReason_TheirCompatibilityTooLow>
+  <D2N_LovinReason_OrientationMismatch>性取向不匹配</D2N_LovinReason_OrientationMismatch>
+  <D2N_LovinReason_IdeologyForbids>意识形态禁止此行为</D2N_LovinReason_IdeologyForbids>
+  <D2N_LovinReason_IntimacyInstalled>已安装 Intimacy</D2N_LovinReason_IntimacyInstalled>
+</LanguageData>

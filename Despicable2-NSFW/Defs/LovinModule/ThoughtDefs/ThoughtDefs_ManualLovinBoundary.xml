@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <ThoughtDef>
+    <defName>D2N_Thought_ManualLovinBoundary_Ideology</defName>
+    <workerClass>ThoughtWorker_Memory</workerClass>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>went along with something against beliefs</label>
+        <description>This pawn was directed into an intimate situation that conflicted with their personal beliefs.</description>
+        <baseMoodEffect>-6</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>D2N_Thought_ManualLovinBoundary_Orientation</defName>
+    <workerClass>ThoughtWorker_Memory</workerClass>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>went along with something uncomfortable</label>
+        <description>This pawn was directed into an intimate situation that did not align with their personal preferences.</description>
+        <baseMoodEffect>-5</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>D2N_Thought_ManualLovinBoundary_Relation</defName>
+    <workerClass>ThoughtWorker_Memory</workerClass>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>was intimate with someone they did not want</label>
+        <description>This pawn was directed into an intimate situation with someone they normally would have avoided.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+</Defs>

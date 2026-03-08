@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for ThingDef (D2_Core) -->
+	<!-- D2_UIFrameworkDemoThing (label) -->
+	<D2_UIFrameworkDemoThing.label>ancla de pestaña de demostración del marco de interfaz</D2_UIFrameworkDemoThing.label>
+	<!-- D2_UIFrameworkDemoThing (description) -->
+	<D2_UIFrameworkDemoThing.description>Objeto auxiliar solo para depuración, usado para probar la demostración de la pestaña ITab del marco de interfaz.</D2_UIFrameworkDemoThing.description>
+</LanguageData>

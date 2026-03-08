@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <HK_Hediff_CommunityBuffer.label>社群缓冲</HK_Hediff_CommunityBuffer.label>
+  <HK_Hediff_CommunityBuffer.description>轻微失误会更快被原谅。</HK_Hediff_CommunityBuffer.description>
+  <HK_Hediff_GoodwillFriction.label>善意摩擦</HK_Hediff_GoodwillFriction.label>
+  <HK_Hediff_GoodwillFriction.description>外交需要付出更多努力。</HK_Hediff_GoodwillFriction.description>
+  <HK_Hediff_GoodwillTailwind.label>善意顺风</HK_Hediff_GoodwillTailwind.label>
+  <HK_Hediff_GoodwillTailwind.description>外交结果更偏向你这一边。</HK_Hediff_GoodwillTailwind.description>
+  <HK_Hediff_IntimidatingPresence.label>慑人气场</HK_Hediff_IntimidatingPresence.label>
+  <HK_Hediff_IntimidatingPresence.description>他人面对你时会有所顾忌。</HK_Hediff_IntimidatingPresence.description>
+  <HK_Hediff_MercyMagnet.label>怜悯吸引</HK_Hediff_MercyMagnet.label>
+  <HK_Hediff_MercyMagnet.description>你的善举似乎更容易被人记住。</HK_Hediff_MercyMagnet.description>
+  <HK_Hediff_ReputationTax.label>名声税</HK_Hediff_ReputationTax.label>
+  <HK_Hediff_ReputationTax.description>当你恶名在外时，交易会更贵。</HK_Hediff_ReputationTax.description>
+  <HK_Hediff_SilverTongue.label>三寸不烂之舌</HK_Hediff_SilverTongue.label>
+  <HK_Hediff_SilverTongue.description>说服会更容易。</HK_Hediff_SilverTongue.description>
+  <HK_Hediff_TerrorEffect.label>恐惧效应</HK_Hediff_TerrorEffect.label>
+  <HK_Hediff_TerrorEffect.description>恐惧会迅速扩散。</HK_Hediff_TerrorEffect.description>
+</LanguageData>

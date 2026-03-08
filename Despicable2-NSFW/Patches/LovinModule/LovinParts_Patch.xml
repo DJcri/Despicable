@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="PatchOperationSequence">
+		<success>Always</success>
+		<operations>
+		
+			<!-- Narrow to humanlike anchor defs instead of BasePawn.
+			     This keeps vanilla humans and most HAR / custom humanlikes that inherit Human,
+			     while avoiding animals, mechanoids, and other non-humanlike races. -->
+			<li Class="PatchOperationAdd">
+				<success>Always</success>
+				<xpath>Defs/ThingDef[defName="Human" or defName="CreepJoiner"][not(comps)]</xpath>
+				<value>
+					<comps/>
+				</value>
+			</li>
+			
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/ThingDef[defName="Human" or defName="CreepJoiner"]/comps[not(li[@Class="Despicable.CompProperties_LovinParts"])]</xpath>
+				<value>
+					<li Class="Despicable.CompProperties_LovinParts"/>
+				</value>
+			</li>
+			
+		</operations>
+	</Operation>
+	
+</Patch>

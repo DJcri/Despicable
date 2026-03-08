@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <AnimationDef>
+    <defName>LesbianInitiator_Stage5</defName>
+    <durationTicks>20</durationTicks>
+    <keyframeParts>
+      <li>
+        <key>Root</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>32</angle>
+              <visible>true</visible>
+              <offset>(-0.2418879, -1, 0.259587)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>7</tick>
+              <angle>35</angle>
+              <visible>true</visible>
+              <offset>(-0.2123895, -1, 0.2654868)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>14</tick>
+              <angle>28</angle>
+              <visible>true</visible>
+              <offset>(-0.2418879, -1, 0.2359883)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>20</tick>
+              <angle>32</angle>
+              <visible>true</visible>
+              <offset>(-0.2418879, -1, 0.259587)</offset>
+              <rotation>East</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Head</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>3</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>7</tick>
+              <angle>3</angle>
+              <visible>true</visible>
+              <offset>(-0.06489678, 0, 0.02359915)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>14</tick>
+              <angle>3</angle>
+              <visible>true</visible>
+              <offset>(-0.02949841, 0, -0.02359843)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>20</tick>
+              <angle>3</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+    </keyframeParts>
+  </AnimationDef>
+  <AnimationDef>
+    <defName>LesbianReceiver_Stage5</defName>
+    <durationTicks>20</durationTicks>
+    <keyframeParts>
+      <li>
+        <key>Root</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>121</angle>
+              <visible>true</visible>
+              <offset>(0.5073743, 0, 0.06489658)</offset>
+              <rotation>West</rotation>
+              <sound>Slimy</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>10</tick>
+              <angle>114</angle>
+              <visible>true</visible>
+              <offset>(0.4896755, 0, 0.04129779)</offset>
+              <rotation>West</rotation>
+              <sound>Slimy</sound>
+              <!-- Voice -->
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>20</tick>
+              <angle>121</angle>
+              <visible>true</visible>
+              <offset>(0.5073743, 0, 0.06489658)</offset>
+              <rotation>West</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Head</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>-12</angle>
+              <visible>true</visible>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>10</tick>
+              <angle>-5</angle>
+              <visible>true</visible>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>20</tick>
+              <angle>-12</angle>
+              <visible>true</visible>
+              <rotation>West</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>RenderNodeTag_Hand</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(0.2713863, -0.5, 0.6135693)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>8</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(0.2477879, -0.5, 0.6548674)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>15</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(0.2241894, -0.5, 0.6312683)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>20</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(0.2772866, -0.5, 0.6135693)</offset>
+              <rotation>North</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+    </keyframeParts>
+  </AnimationDef>
+</Defs>

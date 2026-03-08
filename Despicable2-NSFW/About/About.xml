@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<packageId>DCSzar.Despicable2.NSFW</packageId>
+	<name>Despicable 2 (NSFW)</name>
+	<author>DCSzar</author>
+	<description>
+Despicable 2 (NSFW) is the adult-only add-on for Despicable 2 (Core). It adds explicit intimacy content with additional animations, sound, expressions, and extra rendering features. Separated from Core by design. Requires Despicable 2 (Core). 18+ only.
+	</description>
+	<supportedVersions>
+		<li>1.6</li>
+	</supportedVersions>
+	<loadAfter>
+		<li>brrainz.harmony</li>
+		<li>LovelyDovey.Sex.WithEuterpe</li>
+		<li>LovelyDovey.Sex.WithRosaline</li>
+		<li>DCSzar.Despicable2.Core</li>
+	</loadAfter>
+	<modDependencies>
+		<li>
+			<packageId>DCSzar.Despicable2.Core</packageId>
+			<displayName>Despicable 2 (Core)</displayName>
+		</li>
+	</modDependencies>
+</ModMetaData>

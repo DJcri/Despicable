@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2C_CODE_2C24A061>Die Hero-Karma-Zustimmungsauswertung konnte kein Präzept-Label lesen.</D2C_CODE_2C24A061>
+  <D2C_CODE_45DCE70A>{0}: PawnEditor.Dialog_AppearanceEditor wurde nicht gefunden. Der Gesichtsteile-Button wurde nicht eingefügt.</D2C_CODE_45DCE70A>
+  <D2C_CODE_52F3F63E>{0}: Dialog_AppearanceEditor.DoLeftSection(Rect) wurde nicht gefunden. Der Gesichtsteile-Button wurde nicht eingefügt.</D2C_CODE_52F3F63E>
+  <D2C_CODE_97865B7F>Öffnet die Despicable-Gesichtsteilauswahl.</D2C_CODE_97865B7F>
+  <D2C_CODE_AF6C0280>Gesichtsteile sind für diesen Pawntyp ({0}) nicht verfügbar.</D2C_CODE_AF6C0280>
+  <D2C_CODE_D5D334BD>Gesichtsteile</D2C_CODE_D5D334BD>
+</LanguageData>

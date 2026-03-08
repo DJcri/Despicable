@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!--
+    HeroKarma perk passives (Step 4).
+
+    Design goals:
+    - Real, always-on gameplay impact with maximum mod compatibility.
+    - Low risk: no economy-breaking numbers (especially TradePriceImprovement).
+    - Easy to iterate: authoritative offsets now live in Source/Despicable/HeroKarmaModule/Tuning/HKBalanceTuning.cs and are applied to these defs after load.
+
+    Applied/removed by: Source/Despicable/HeroKarma/Perks/HKPerkEffects.cs
+  -->
+
+  <!-- Paragon -->
+  <HediffDef>
+    <defName>HK_Hediff_MercyMagnet</defName>
+    <label>mercy magnet</label>
+    <description>Your good deeds seem to stick.</description>
+    <isBad>false</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <!-- People respond better to this pawn's kindness -->
+          <SocialImpact>0.05</SocialImpact>
+          <!-- Slightly easier ideological outreach (Ideology DLC) -->
+          <InjuryHealingFactor>0.03</InjuryHealingFactor>
+          <!-- Tiny nudge, kept small to avoid economy exploits -->
+          <TradePriceImprovement>0.01</TradePriceImprovement>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>HK_Hediff_GoodwillTailwind</defName>
+    <label>goodwill tailwind</label>
+    <description>Diplomatic outcomes lean in your favor.</description>
+    <isBad>false</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <!-- Better negotiating leverage -->
+          <NegotiationAbility>0.06</NegotiationAbility>
+          <!-- More "weight" in social outcomes -->
+          <SocialImpact>0.03</SocialImpact>
+          <!-- Small to keep trading sane -->
+          <TradePriceImprovement>0.02</TradePriceImprovement>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Trusted -->
+  <HediffDef>
+    <defName>HK_Hediff_SilverTongue</defName>
+    <label>silver tongue</label>
+    <description>Persuasion comes easier.</description>
+    <isBad>false</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <NegotiationAbility>0.10</NegotiationAbility>
+          <SocialImpact>0.06</SocialImpact>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>HK_Hediff_CommunityBuffer</defName>
+    <label>community buffer</label>
+    <description>Minor missteps are forgiven faster.</description>
+    <isBad>false</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <!-- Lower threshold = needs worse mood to break (more resilient) -->
+          <MentalBreakThreshold>-0.02</MentalBreakThreshold>
+          <!-- Slightly steadier social outcomes -->
+          <SocialImpact>0.02</SocialImpact>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Notorious -->
+  <HediffDef>
+    <defName>HK_Hediff_IntimidatingPresence</defName>
+    <label>intimidating presence</label>
+    <description>Others hesitate around you.</description>
+    <isBad>false</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <!-- Less "liked", more "feared" -->
+          <SocialImpact>-0.03</SocialImpact>
+          <!-- Better at forcing compliance -->
+          <ArrestSuccessChance>0.06</ArrestSuccessChance>
+          <MentalBreakThreshold>-0.01</MentalBreakThreshold>
+          <!-- Slight edge in close conflict due to hesitation -->
+          <MeleeHitChance>0.03</MeleeHitChance>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>HK_Hediff_GoodwillFriction</defName>
+    <label>goodwill friction</label>
+    <description>Diplomacy takes more effort.</description>
+    <isBad>true</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <NegotiationAbility>-0.06</NegotiationAbility>
+          <TradePriceImprovement>-0.02</TradePriceImprovement>
+          <SocialImpact>-0.02</SocialImpact>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Dreaded -->
+  <HediffDef>
+    <defName>HK_Hediff_TerrorEffect</defName>
+    <label>terror effect</label>
+    <description>Fear spreads quickly.</description>
+    <isBad>false</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <!-- Fear-based authority -->
+          <MentalBreakThreshold>-0.01</MentalBreakThreshold>
+          <ArrestSuccessChance>0.10</ArrestSuccessChance>
+          <!-- Combat confidence (kept modest) -->
+          <MeleeHitChance>0.03</MeleeHitChance>
+          <MeleeDodgeChance>0.02</MeleeDodgeChance>
+          <!-- People pay attention, even if they hate it -->
+          <SocialImpact>0.03</SocialImpact>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>HK_Hediff_ReputationTax</defName>
+    <label>reputation tax</label>
+    <description>Deals cost more when you are infamous.</description>
+    <isBad>true</isBad>
+    <tendable>false</tendable>
+    <stages>
+      <li>
+        <statOffsets>
+          <TradePriceImprovement>-0.05</TradePriceImprovement>
+          <NegotiationAbility>-0.03</NegotiationAbility>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+</Defs>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <Job_GetBedLovin.reportString>正在与 TargetA 上床。</Job_GetBedLovin.reportString>
+  <Job_GetLovin.reportString>正在接受来自 TargetA 的欢爱。</Job_GetLovin.reportString>
+  <Job_GiveLovin.reportString>正在给予 TargetA 欢爱。</Job_GiveLovin.reportString>
+</LanguageData>

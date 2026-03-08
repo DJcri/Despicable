@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for InteractionDef (D2_NSFW) -->
+	<!-- Interaction_AnalSex (label) -->
+	<Interaction_AnalSex.label>sexe anal</Interaction_AnalSex.label>
+	<!-- Interaction_OralSex (label) -->
+	<Interaction_OralSex.label>sexe oral</Interaction_OralSex.label>
+	<!-- Interaction_VaginalSex (label) -->
+	<Interaction_VaginalSex.label>sexe vaginal</Interaction_VaginalSex.label>
+</LanguageData>

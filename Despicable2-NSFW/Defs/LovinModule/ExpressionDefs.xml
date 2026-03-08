@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Lovin</defName>
+		<texPathEyes>Gendered/eye_halflid</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_smirk</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_LipBite</defName>
+		<texPathEyes>Gendered/eye_squint</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_lipbite</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Gasp</defName>
+		<texPathMouth>FaceParts/Mouths/mouth_gasp</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Moan</defName>
+		<texPathEyes>Gendered/eye_closed</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_open</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Orgasm</defName>
+		<texPathEyes>FaceParts/Eyes/eye_shut</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_gasp</texPathMouth>
+		<texPathDetail>FaceParts/Details/detail_cheekblush</texPathDetail>
+	</Despicable.ExpressionDef>
+</Defs>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!-- Manual interaction menu (Core) -->
+  <InteractionCategory>Взаимодействие: {0}</InteractionCategory>
+  <InteractionOption_SocialFight>Спровоцировать: {0}</InteractionOption_SocialFight>
+  <InteractionOption_Insult>Оскорбить: {0}</InteractionOption_Insult>
+  <InteractionOption_Chat>Поболтать: {0}</InteractionOption_Chat>
+  <InteractionOption_Marriage>Сделать предложение: {0}</InteractionOption_Marriage>
+</LanguageData>

@@ -1,0 +1,513 @@
+param(
+  [Parameter(Mandatory=$true)][string]$ModRoot,
+  [switch]$FixDefInjected = $true,
+  [bool]$PruneOrphanDefInjected = $true,
+  [switch]$FailOnOrphanDefInjected = $true,
+  [switch]$FailOnMissingKeyed = $true,
+  [bool]$PruneUnusedKeyed = $true,
+  [switch]$FailOnUnusedKeyed = $false,
+  [switch]$FailOnUiLiterals = $false,
+  [switch]$VerboseOutput = $false
+)
+
+function Write-Info($msg) { Write-Host "[D2 LocAudit] $msg" }
+function Write-WarnMsg($msg) { Write-Warning "[D2 LocAudit] $msg" }
+function Write-ErrMsg($msg) { Write-Error "[D2 LocAudit] $msg" }
+
+$ErrorActionPreference = 'Stop'
+trap { Write-ErrMsg "Unhandled localization audit error: $($_.Exception.Message) at line $($_.InvocationInfo.ScriptLineNumber)"; exit 1 }
+
+if (-not (Test-Path $ModRoot)) { Write-ErrMsg "ModRoot not found: $ModRoot"; exit 2 }
+
+$sourceDir = Join-Path $ModRoot 'Source'
+$langKeyedDir = Join-Path $ModRoot 'Languages\English\Keyed'
+$langDefInjectedDir = Join-Path $ModRoot 'Languages\English\DefInjected'
+$defsDir = Join-Path $ModRoot 'Defs'
+$keepKeyFile = Join-Path $ModRoot 'Tools\LocalizationKeepKeys.txt'
+$keepDefInjectedFile = Join-Path $ModRoot 'Tools\DefInjectedKeep.txt'
+
+Write-Info "ModRoot: $ModRoot"
+
+# --- Collect Keyed definitions ---
+$keyedDefined = New-Object 'System.Collections.Generic.HashSet[string]'
+$keyedFileList = @()
+if (Test-Path $langKeyedDir) {
+  $keyedFiles = Get-ChildItem -Path $langKeyedDir -Filter *.xml -File -ErrorAction SilentlyContinue
+  foreach ($kf in $keyedFiles) {
+    $keyedFileList += $kf
+    try {
+      [xml]$xml = Get-Content -LiteralPath $kf.FullName -Raw -Encoding UTF8
+      $ld = $xml.LanguageData
+      if ($null -eq $ld) { continue }
+      foreach ($node in $ld.ChildNodes) {
+        if ($node.NodeType -eq 'Element') { [void]$keyedDefined.Add($node.Name) }
+      }
+    } catch {
+      Write-WarnMsg "Failed to parse keyed XML: $($kf.FullName) ($($_.Exception.Message))"
+    }
+  }
+} else {
+  Write-WarnMsg "Keyed dir not found: $langKeyedDir"
+}
+
+# --- Load keep-list for dynamic translation keys ---
+$keepKeys = New-Object 'System.Collections.Generic.HashSet[string]'
+if (Test-Path $keepKeyFile) {
+  try {
+    $lines = Get-Content -LiteralPath $keepKeyFile -Encoding UTF8 -ErrorAction SilentlyContinue
+    foreach ($l in $lines) {
+      $s = ($l + '').Trim()
+      if ([string]::IsNullOrWhiteSpace($s)) { continue }
+      if ($s.StartsWith('#') -or $s.StartsWith('//')) { continue }
+      [void]$keepKeys.Add($s)
+    }
+  } catch {
+    Write-WarnMsg "Failed to read keep-key file: $keepKeyFile ($($_.Exception.Message))"
+  }
+}
+
+
+# --- Translation text guardrails (prevents RimWorld "Translation data ... has N errors") ---
+# RimWorld's translation loader is sensitive to stray '>' characters in translation strings.
+# Avoid ASCII navigation arrows like "->"; use Unicode arrows (→) or "/" separators.
+
+$forbiddenSubstrings = @('->')
+$forbiddenChars = @('<', '>')
+
+function Validate-BracesAndPlaceholders([string]$value) {
+  if ([string]::IsNullOrEmpty($value)) { return $null }
+
+  $i = 0
+  $placeholders = New-Object System.Collections.Generic.List[string]
+  while ($i -lt $value.Length) {
+    $ch = $value[$i]
+    if ($ch -eq '{') {
+      if (($i + 1 -lt $value.Length) -and ($value[$i + 1] -eq '{')) { $i += 2; continue }
+      $j = $value.IndexOf('}', $i + 1)
+      if ($j -lt 0) { return "unclosed {" }
+      $content = $value.Substring($i + 1, $j - $i - 1)
+      if ([string]::IsNullOrEmpty($content)) { return "empty {} placeholder" }
+      $placeholders.Add($content) | Out-Null
+      $i = $j + 1
+      continue
+    }
+    if ($ch -eq '}') {
+      if (($i + 1 -lt $value.Length) -and ($value[$i + 1] -eq '}')) { $i += 2; continue }
+      return "unopened }"
+    }
+    $i++
+  }
+
+  foreach ($p in $placeholders) {
+    if ($p -notmatch '^\d+([,:].*)?$') { return "non-numeric placeholder {$p}" }
+  }
+  return $null
+}
+
+$translationIssues = New-Object System.Collections.Generic.List[string]
+$seenTranslationKeys = @{} # kind|name -> file
+
+function Scan-LanguageDataXml([string]$kind, [string]$filePath) {
+  try {
+    [xml]$xml = Get-Content -LiteralPath $filePath -Raw -Encoding UTF8
+    $ld = $xml.LanguageData
+    if ($null -eq $ld) { return }
+    foreach ($node in $ld.ChildNodes) {
+      if ($node.NodeType -ne 'Element') { continue }
+      $name = $node.Name
+      $value = $node.InnerText
+
+      $dupKey = "$kind|$name"
+      if ($seenTranslationKeys.ContainsKey($dupKey)) {
+        $translationIssues.Add("Duplicate $kind translation key <$name> found in: $($seenTranslationKeys[$dupKey]) AND $filePath") | Out-Null
+      } else {
+        $seenTranslationKeys[$dupKey] = $filePath
+      }
+
+      foreach ($s in $forbiddenSubstrings) {
+        if ($value.Contains($s)) {
+          $translationIssues.Add("$kind <$name> in $filePath contains forbidden substring '$s'. Use '→' or '/' instead.") | Out-Null
+          break
+        }
+      }
+      foreach ($c in $forbiddenChars) {
+        if ($value.Contains($c)) {
+          $translationIssues.Add("$kind <$name> in $filePath contains forbidden character '$c'. Avoid raw angle brackets in translation strings.") | Out-Null
+          break
+        }
+      }
+
+      $braceIssue = Validate-BracesAndPlaceholders $value
+      if ($braceIssue) {
+        $translationIssues.Add("$kind <$name> in $filePath has invalid placeholder/braces: $braceIssue") | Out-Null
+      }
+    }
+  } catch {
+    Write-WarnMsg "Failed to scan translation XML: $filePath ($($_.Exception.Message))"
+  }
+}
+
+# Scan Keyed and DefInjected for forbidden patterns and duplicates.
+if (Test-Path $langKeyedDir) {
+  Get-ChildItem -Path $langKeyedDir -Filter *.xml -File -ErrorAction SilentlyContinue | ForEach-Object {
+    Scan-LanguageDataXml 'Keyed' $_.FullName
+  }
+}
+if (Test-Path $langDefInjectedDir) {
+  Get-ChildItem -Path $langDefInjectedDir -Recurse -Filter *.xml -File -ErrorAction SilentlyContinue | ForEach-Object {
+    Scan-LanguageDataXml 'DefInjected' $_.FullName
+  }
+}
+
+if ($translationIssues.Count -gt 0) {
+  Write-ErrMsg "Translation text guardrails found $($translationIssues.Count) issue(s). These typically cause RimWorld to warn: 'Translation data ... has N errors'."
+  foreach ($msg in ($translationIssues | Select-Object -First 20)) { Write-Host "  - $msg" }
+  if ($translationIssues.Count -gt 20) { Write-Host "  ... ($($translationIssues.Count - 20) more)" }
+  exit 1
+}
+
+# --- Collect Translate() usages in C# ---
+$usedByKey = @{}  # key -> List[string]
+$usedKeysSet = New-Object 'System.Collections.Generic.HashSet[string]'
+
+if (Test-Path $sourceDir) {
+  $csFiles = Get-ChildItem -Path $sourceDir -Recurse -Filter *.cs -File |
+    Where-Object { $_.FullName -notmatch "\\(bin|obj)\\" }
+
+  # string literal .Translate(
+  $pattern = '"([^"\r\n]+)"\s*\.\s*Translate\s*\('
+  $hits = Select-String -Path $csFiles.FullName -Pattern $pattern -AllMatches -Encoding UTF8
+
+  foreach ($hit in $hits) {
+    foreach ($m in $hit.Matches) {
+      $key = $m.Groups[1].Value
+      if ([string]::IsNullOrWhiteSpace($key)) { continue }
+      [void]$usedKeysSet.Add($key)
+      if (-not $usedByKey.ContainsKey($key)) { $usedByKey[$key] = New-Object System.Collections.Generic.List[string] }
+      $usedByKey[$key].Add("$($hit.Path):$($hit.LineNumber)")
+    }
+  }
+} else {
+  Write-WarnMsg "Source dir not found: $sourceDir"
+}
+
+# --- Report missing keyed entries ---
+$missingKeyed = @()
+foreach ($k in $usedKeysSet) {
+  if (-not $keyedDefined.Contains($k)) { $missingKeyed += $k }
+}
+
+if ($missingKeyed.Count -gt 0) {
+  $missingKeyed = $missingKeyed | Sort-Object
+  Write-ErrMsg "Missing Keyed translations for $($missingKeyed.Count) key(s) referenced by C# .Translate():"
+  foreach ($k in $missingKeyed) {
+    Write-Host "  - $k"
+    if ($usedByKey.ContainsKey($k)) {
+      foreach ($occ in ($usedByKey[$k] | Select-Object -First 6)) {
+        Write-Host "      $occ"
+      }
+      if ($usedByKey[$k].Count -gt 6) { Write-Host "      ... ($($usedByKey[$k].Count - 6) more)" }
+    }
+  }
+  if ($FailOnMissingKeyed) { exit 1 }
+} else {
+  Write-Info "Keyed OK: $($usedKeysSet.Count) key(s) referenced by C# have Keyed entries."
+}
+
+# --- Unused Keyed cleanup ---
+$unusedKeys = @()
+foreach ($k in $keyedDefined) {
+  if (-not $usedKeysSet.Contains($k) -and -not $keepKeys.Contains($k)) { $unusedKeys += $k }
+}
+
+if ($unusedKeys.Count -gt 0) {
+  $unusedKeys = $unusedKeys | Sort-Object
+  if ($PruneUnusedKeyed) {
+    $removed = 0
+    foreach ($kf in $keyedFileList) {
+      try {
+        [xml]$xml = Get-Content -LiteralPath $kf.FullName -Raw -Encoding UTF8
+        $ld = $xml.LanguageData
+        if ($null -eq $ld) { continue }
+
+        $changed = $false
+        $children = @($ld.ChildNodes | Where-Object { $_.NodeType -eq 'Element' })
+        foreach ($node in $children) {
+          if ($unusedKeys -contains $node.Name) {
+            [void]$ld.RemoveChild($node)
+            $removed++
+            $changed = $true
+          }
+        }
+
+        $remaining = @($ld.ChildNodes | Where-Object { $_.NodeType -eq 'Element' })
+        if ($remaining.Count -eq 0) {
+          Remove-Item -LiteralPath $kf.FullName -Force -ErrorAction SilentlyContinue
+        } elseif ($changed) {
+          $xml.Save($kf.FullName)
+        }
+      } catch {
+        Write-WarnMsg "Failed to prune unused keys in: $($kf.FullName) ($($_.Exception.Message))"
+      }
+    }
+    Write-Info "Pruned $removed unused English Keyed key(s). (Keep-list keys: $($keepKeys.Count))"
+  } else {
+    Write-WarnMsg "Found $($unusedKeys.Count) unused English Keyed key(s). Remove them or enable PruneUnusedKeyed. Sample: $([string]::Join(', ', ($unusedKeys | Select-Object -First 12)))"
+    if ($FailOnUnusedKeyed) { exit 1 }
+  }
+}
+
+# --- Heuristic: warn/fail on likely unlocalized UI string literals ---
+# Best-effort guardrail for new English text added directly to player-facing UI calls.
+# Suppress a specific line by adding: // loc-ignore
+# Suppress an internal-only string by adding: // loc-allow-internal
+
+$uiLiteralPatterns = @(
+  '(?:Widgets|D2Widgets)\.\w+\s*\([^;\r\n]*\"[^\"\r\n]+\"',
+  '(?:TooltipHandler|D2Text|D2Section|D2Tabs)\.\w+\s*\([^;\r\n]*\"[^\"\r\n]+\"',
+  'Messages\.Message\s*\(\s*\"[^\"\r\n]+\"',
+  '(?:new\s+)?FloatMenuOption\s*\(\s*\"[^\"\r\n]+\"',
+  'D2ActionBar\.Item(?:Key)?\s*\([^;\r\n]*\"[^\"\r\n]+\"',
+  'Dialog_MessageBox\.\w+\s*\([^;\r\n]*\"[^\"\r\n]+\"',
+  'Dialog_TextEntrySimple\s*\([^;\r\n]*\"[^\"\r\n]+\"',
+  'NextTextBlock\s*\([^;\r\n]*\"[^\"\r\n]+\"'
+)
+
+$uiLiteralHits = @()
+if (Test-Path $sourceDir) {
+  foreach ($pat in $uiLiteralPatterns) {
+    $hits2 = Select-String -Path $csFiles.FullName -Pattern $pat -AllMatches -Encoding UTF8
+    foreach ($h in $hits2) {
+      if ($h.Line -match 'loc-ignore' -or $h.Line -match 'loc-allow-internal') { continue }
+      if ($h.Line -match '\.Translate\s*\(') { continue }
+      $uiLiteralHits += "$($h.Path):$($h.LineNumber)  $($h.Line.Trim())"
+    }
+  }
+}
+
+if ($uiLiteralHits.Count -gt 0) {
+  $uiLiteralHits = $uiLiteralHits | Sort-Object -Unique
+  $headline = "Possible unlocalized UI string literals found ($($uiLiteralHits.Count)). Consider wrapping in .Translate() or add // loc-ignore / // loc-allow-internal."
+  if ($FailOnUiLiterals) { Write-ErrMsg $headline } else { Write-WarnMsg $headline }
+  foreach ($l in ($uiLiteralHits | Select-Object -First 20)) {
+    Write-Host "  $l"
+  }
+  if ($uiLiteralHits.Count -gt 20) { Write-Host "  ... ($($uiLiteralHits.Count - 20) more)" }
+  if ($FailOnUiLiterals) { exit 1 }
+}
+
+# --- DefInjected guardrails (auto-add missing English entries from Defs) ---
+$fieldsToMirror = @('label','labelPlural','description','reportString','helpText','noun')
+$neededDefInjected = @{}  # defType -> list of @{ Name, Text }
+
+$defNamesByType = @{} # defType -> HashSet[string]
+
+function AddNeededDefInjected([string]$defType, [string]$entryName, [string]$text) {
+  if (-not $neededDefInjected.ContainsKey($defType)) { $neededDefInjected[$defType] = New-Object System.Collections.Generic.List[object] }
+  $neededDefInjected[$defType].Add([PSCustomObject]@{ Name=$entryName; Text=$text })
+}
+
+if (Test-Path $defsDir) {
+  $defFiles = Get-ChildItem -Path $defsDir -Recurse -Filter *.xml -File -ErrorAction SilentlyContinue
+  foreach ($df in $defFiles) {
+    try {
+      [xml]$xml = Get-Content -LiteralPath $df.FullName -Raw -Encoding UTF8
+      $defsNode = $xml.Defs
+      if ($null -eq $defsNode) { continue }
+      foreach ($def in $defsNode.ChildNodes) {
+        if ($def.NodeType -ne 'Element') { continue }
+        $defType = $def.Name
+        $defNameNode = $def.SelectSingleNode('defName')
+        if ($null -eq $defNameNode) { continue }
+        $defName = $defNameNode.InnerText.Trim()
+        if ([string]::IsNullOrWhiteSpace($defName)) { continue }
+
+        if (-not $defNamesByType.ContainsKey($defType)) {
+          $defNamesByType[$defType] = New-Object 'System.Collections.Generic.HashSet[string]'
+        }
+        [void]$defNamesByType[$defType].Add($defName)
+
+        foreach ($field in $fieldsToMirror) {
+          $fieldNode = $def.SelectSingleNode($field)
+          if ($null -eq $fieldNode) { continue }
+          $text = $fieldNode.InnerText
+          if ($null -eq $text) { $text = '' }
+          $entry = "$defName.$field"
+          AddNeededDefInjected -defType $defType -entryName $entry -text $text
+        }
+      }
+    } catch {
+      Write-WarnMsg "Failed to parse Defs XML: $($df.FullName) ($($_.Exception.Message))"
+    }
+  }
+}
+
+# collect existing DefInjected entries
+$existingDefInjected = @{} # defType -> HashSet[string]
+if (Test-Path $langDefInjectedDir) {
+  $typeDirs = Get-ChildItem -Path $langDefInjectedDir -Directory -ErrorAction SilentlyContinue
+  foreach ($td in $typeDirs) {
+    $hs = New-Object 'System.Collections.Generic.HashSet[string]'
+    $xmlFiles = Get-ChildItem -Path $td.FullName -Filter *.xml -File -ErrorAction SilentlyContinue
+    foreach ($xf in $xmlFiles) {
+      try {
+        [xml]$x = Get-Content -LiteralPath $xf.FullName -Raw -Encoding UTF8
+        $ld = $x.LanguageData
+        if ($null -eq $ld) { continue }
+        foreach ($node in $ld.ChildNodes) {
+          if ($node.NodeType -eq 'Element') { [void]$hs.Add($node.Name) }
+        }
+      } catch {
+        Write-WarnMsg "Failed to parse DefInjected XML: $($xf.FullName) ($($_.Exception.Message))"
+      }
+    }
+    $existingDefInjected[$td.Name] = $hs
+  }
+}
+
+# --- DefInjected orphan prune (safe: auto-generated file only) ---
+$keepDefInjectedPatterns = @()
+if (Test-Path $keepDefInjectedFile) {
+  $keepDefInjectedPatterns = Get-Content -LiteralPath $keepDefInjectedFile -ErrorAction SilentlyContinue | Where-Object { $_ -and (-not $_.Trim().StartsWith('#')) } | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+}
+
+function IsKeptDefInjected([string]$defType, [string]$nodeName) {
+  if ($keepDefInjectedPatterns.Count -eq 0) { return $false }
+  $full = "$defType/$nodeName"
+  foreach ($pat in $keepDefInjectedPatterns) {
+    if ($pat -like '*/*') {
+      if ($full -like $pat) { return $true }
+    } else {
+      if ($nodeName -like $pat) { return $true }
+    }
+  }
+  return $false
+}
+
+$orphanManual = 0
+$orphanAutoPruned = 0
+
+if ($PruneOrphanDefInjected -and (Test-Path $langDefInjectedDir)) {
+  Write-Info "Checking DefInjected for orphan entries (defName no longer exists)..."
+  $typeDirs2 = Get-ChildItem -Path $langDefInjectedDir -Directory -ErrorAction SilentlyContinue
+  foreach ($td2 in $typeDirs2) {
+    $defType2 = $td2.Name
+    $defSet2 = $null
+    if ($defNamesByType.ContainsKey($defType2)) { $defSet2 = $defNamesByType[$defType2] }
+
+    $xmlFiles2 = Get-ChildItem -Path $td2.FullName -Filter *.xml -File -ErrorAction SilentlyContinue
+    foreach ($xf2 in $xmlFiles2) {
+      $isAuto = ($xf2.Name -eq 'AutoGenerated_DefInjected.xml')
+      [xml]$x2 = $null
+      try { [xml]$x2 = Get-Content -LiteralPath $xf2.FullName -Raw -Encoding UTF8 } catch { continue }
+      $ld2 = $x2.LanguageData
+      if ($null -eq $ld2) { continue }
+
+      $toRemove = @()
+      foreach ($node2 in $ld2.ChildNodes) {
+        if ($node2.NodeType -ne 'Element') { continue }
+        $nodeName2 = $node2.Name
+        if (IsKeptDefInjected -defType $defType2 -nodeName $nodeName2) { continue }
+        $parts = $nodeName2.Split('.', 2)
+        if ($parts.Length -lt 2) { continue }
+        $dn = $parts[0]
+        $existsDef = ($defSet2 -ne $null -and $defSet2.Contains($dn))
+        if (-not $existsDef) {
+          if ($isAuto) {
+            $toRemove += $node2
+          } else {
+            $orphanManual++
+            Write-WarnMsg "Orphan DefInjected entry: $($xf2.FullName) -> <$nodeName2> (defName '$dn' not found for DefType '$defType2')"
+          }
+        }
+      }
+
+      if ($isAuto -and $toRemove.Count -gt 0) {
+        foreach ($n in $toRemove) {
+          [void]$ld2.RemoveChild($n)
+          if ($existingDefInjected.ContainsKey($defType2)) { [void]$existingDefInjected[$defType2].Remove($n.Name) }
+          $orphanAutoPruned++
+        }
+        $x2.Save($xf2.FullName)
+      }
+    }
+  }
+
+  if ($orphanAutoPruned -gt 0) {
+    Write-Info "DefInjected: pruned $orphanAutoPruned orphan auto-generated entry/entries."
+  }
+  if ($orphanManual -gt 0 -and $FailOnOrphanDefInjected) {
+    Write-ErrMsg "DefInjected contains $orphanManual orphan entry/entries in non-auto files. Remove them, move them into AutoGenerated_DefInjected.xml, or add wildcard patterns to Tools\DefInjectedKeep.txt to intentionally keep them."
+    exit 3
+  }
+}
+
+
+$addedCount = 0
+$missingCount = 0
+
+foreach ($defType in $neededDefInjected.Keys) {
+  $needList = $neededDefInjected[$defType]
+  if (-not $existingDefInjected.ContainsKey($defType)) {
+    $existingDefInjected[$defType] = New-Object 'System.Collections.Generic.HashSet[string]'
+  }
+  $exists = $existingDefInjected[$defType]
+
+  # Determine missing entries for this type
+  $missingForType = @()
+  foreach ($e in $needList) {
+    if (-not $exists.Contains($e.Name)) {
+      $missingForType += $e
+      $missingCount++
+    }
+  }
+
+  if ($missingForType.Count -eq 0) { continue }
+
+  if (-not $FixDefInjected) {
+    Write-WarnMsg "DefInjected missing $($missingForType.Count) entry/entries for $defType (FixDefInjected disabled)."
+    continue
+  }
+
+  $typeDir = Join-Path $langDefInjectedDir $defType
+  if (-not (Test-Path $typeDir)) { New-Item -ItemType Directory -Path $typeDir | Out-Null }
+
+  $autoFile = Join-Path $typeDir 'AutoGenerated_DefInjected.xml'
+  [xml]$autoXml = $null
+  if (Test-Path $autoFile) {
+    try { [xml]$autoXml = Get-Content -LiteralPath $autoFile -Raw -Encoding UTF8 } catch { $autoXml = $null }
+  }
+  if ($null -eq $autoXml) {
+    $autoXml = New-Object System.Xml.XmlDocument
+    $decl = $autoXml.CreateXmlDeclaration('1.0','utf-8',$null)
+    [void]$autoXml.AppendChild($decl)
+    $ld = $autoXml.CreateElement('LanguageData')
+    [void]$autoXml.AppendChild($ld)
+    $comment = $autoXml.CreateComment(" Auto-generated DefInjected mirror entries for English. Safe to keep in release. ")
+    [void]$ld.AppendChild($comment)
+  }
+
+  $ldNode = $autoXml.LanguageData
+  foreach ($e in ($missingForType | Sort-Object Name -Unique)) {
+    $node = $autoXml.CreateElement($e.Name)
+    $node.InnerText = $e.Text
+    [void]$ldNode.AppendChild($node)
+    [void]$exists.Add($e.Name)
+    $addedCount++
+  }
+
+  $autoXml.Save($autoFile)
+}
+
+if ($missingCount -gt 0) {
+  if ($FixDefInjected) {
+    Write-Info "DefInjected: added $addedCount missing English entry/entries (auto-generated)."
+  } else {
+    Write-WarnMsg "DefInjected: missing $missingCount entry/entries (auto-fix disabled)."
+  }
+} else {
+  Write-Info "DefInjected OK: English mirror entries present for current Def text fields."
+}
+
+Write-Info "Localization audit complete."
+exit 0

@@ -1,0 +1,64 @@
+<Defs>
+	
+  <InteractionDef>
+    <defName>Interaction_VaginalSex</defName>
+    <label>vaginal sex</label>
+    <workerClass>InteractionWorker</workerClass>
+    <ignoreTimeSinceLastInteraction>True</ignoreTimeSinceLastInteraction>
+    <symbol>UI/Interaction/vaginal</symbol>
+    <initiatorThought>GotSomeLovin</initiatorThought>
+    <recipientThought>GotSomeLovin</recipientThought>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] and [RECIPIENT_nameDef] engaged in [activity].</li>
+
+        <li>activity->reproductive sex</li>
+		<li>activity->baby making</li>
+		
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+  
+  <InteractionDef>
+    <defName>Interaction_OralSex</defName>
+    <label>oral sex</label>
+    <workerClass>InteractionWorker</workerClass>
+    <ignoreTimeSinceLastInteraction>True</ignoreTimeSinceLastInteraction>
+    <symbol>UI/Interaction/oral</symbol>
+    <initiatorThought>GotSomeLovin</initiatorThought>
+    <recipientThought>GotSomeLovin</recipientThought>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] and [RECIPIENT_nameDef] engaged in [activity], using their [bodypart].</li>
+
+        <li>activity->oral sex</li>
+        <li>activity->oral stimulation</li>
+        
+        <li>bodypart->mouth</li>
+        <li>bodypart->tongue</li>
+        <li>bodypart->lips</li>
+		
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+  
+  <InteractionDef>
+    <defName>Interaction_AnalSex</defName>
+    <label>anal sex</label>
+    <workerClass>InteractionWorker</workerClass>
+    <ignoreTimeSinceLastInteraction>True</ignoreTimeSinceLastInteraction>
+    <symbol>UI/Interaction/anal</symbol>
+    <initiatorThought>GotSomeLovin</initiatorThought>
+    <recipientThought>GotSomeLovin</recipientThought>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] engaged in [activity] with [RECIPIENT_nameDef].</li>
+
+        <li>activity->anal sex</li>
+        <li>activity->butt sex</li>
+		
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+	
+</Defs>

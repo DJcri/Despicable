@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2_UIFrameworkDemoThing.label>UI 框架演示标签锚点</D2_UIFrameworkDemoThing.label>
+  <D2_UIFrameworkDemoThing.description>仅供调试的辅助物体，用于测试 UI 框架的 ITab 演示。</D2_UIFrameworkDemoThing.description>
+</LanguageData>

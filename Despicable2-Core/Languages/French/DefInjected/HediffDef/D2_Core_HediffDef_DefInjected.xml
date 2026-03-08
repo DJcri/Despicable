@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for HediffDef (D2_Core) -->
+	<!-- HK_Hediff_CommunityBuffer (label) -->
+	<HK_Hediff_CommunityBuffer.label>calme partagé</HK_Hediff_CommunityBuffer.label>
+	<!-- HK_Hediff_CommunityBuffer (description) -->
+	<HK_Hediff_CommunityBuffer.description>Les petits écarts sont pardonnés plus vite.</HK_Hediff_CommunityBuffer.description>
+	<!-- HK_Hediff_GoodwillFriction (label) -->
+	<HK_Hediff_GoodwillFriction.label>friction diplomatique</HK_Hediff_GoodwillFriction.label>
+	<!-- HK_Hediff_GoodwillFriction (description) -->
+	<HK_Hediff_GoodwillFriction.description>La diplomatie demande davantage d'efforts.</HK_Hediff_GoodwillFriction.description>
+	<!-- HK_Hediff_GoodwillTailwind (label) -->
+	<HK_Hediff_GoodwillTailwind.label>vent favorable</HK_Hediff_GoodwillTailwind.label>
+	<!-- HK_Hediff_GoodwillTailwind (description) -->
+	<HK_Hediff_GoodwillTailwind.description>Les résultats diplomatiques penchent en votre faveur.</HK_Hediff_GoodwillTailwind.description>
+	<!-- HK_Hediff_IntimidatingPresence (label) -->
+	<HK_Hediff_IntimidatingPresence.label>présence intimidante</HK_Hediff_IntimidatingPresence.label>
+	<!-- HK_Hediff_IntimidatingPresence (description) -->
+	<HK_Hediff_IntimidatingPresence.description>Les autres hésitent en votre présence.</HK_Hediff_IntimidatingPresence.description>
+	<!-- HK_Hediff_MercyMagnet (label) -->
+	<HK_Hediff_MercyMagnet.label>clémence rayonnante</HK_Hediff_MercyMagnet.label>
+	<!-- HK_Hediff_MercyMagnet (description) -->
+	<HK_Hediff_MercyMagnet.description>Vos bonnes actions semblent laisser une trace durable.</HK_Hediff_MercyMagnet.description>
+	<!-- HK_Hediff_ReputationTax (label) -->
+	<HK_Hediff_ReputationTax.label>taxe de réputation</HK_Hediff_ReputationTax.label>
+	<!-- HK_Hediff_ReputationTax (description) -->
+	<HK_Hediff_ReputationTax.description>Les accords coûtent plus cher lorsque vous êtes tristement célèbre.</HK_Hediff_ReputationTax.description>
+	<!-- HK_Hediff_SilverTongue (label) -->
+	<HK_Hediff_SilverTongue.label>langue d'argent</HK_Hediff_SilverTongue.label>
+	<!-- HK_Hediff_SilverTongue (description) -->
+	<HK_Hediff_SilverTongue.description>La persuasion vient plus facilement.</HK_Hediff_SilverTongue.description>
+	<!-- HK_Hediff_TerrorEffect (label) -->
+	<HK_Hediff_TerrorEffect.label>effet de terreur</HK_Hediff_TerrorEffect.label>
+	<!-- HK_Hediff_TerrorEffect (description) -->
+	<HK_Hediff_TerrorEffect.description>La peur se répand rapidement.</HK_Hediff_TerrorEffect.description>
+</LanguageData>

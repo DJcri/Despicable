@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2C_CODE_2C24A061>La résolution de l'approbation du Karma héroïque n'a pas pu lire l'étiquette d'un précepte.</D2C_CODE_2C24A061>
+  <D2C_CODE_45DCE70A>{0} : PawnEditor.Dialog_AppearanceEditor est introuvable. Le bouton Traits du visage n'a pas été injecté.</D2C_CODE_45DCE70A>
+  <D2C_CODE_52F3F63E>{0} : Dialog_AppearanceEditor.DoLeftSection(Rect) est introuvable. Le bouton Traits du visage n'a pas été injecté.</D2C_CODE_52F3F63E>
+  <D2C_CODE_97865B7F>Ouvrir la sélection des traits du visage Despicable.</D2C_CODE_97865B7F>
+  <D2C_CODE_AF6C0280>Les traits du visage ne sont pas disponibles pour ce type de pawn ({0}).</D2C_CODE_AF6C0280>
+  <D2C_CODE_D5D334BD>Traits du visage</D2C_CODE_D5D334BD>
+</LanguageData>

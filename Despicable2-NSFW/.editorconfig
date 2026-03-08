@@ -1,0 +1,103 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+[*.{cs,csproj,props,targets}]
+indent_size = 4
+
+[*.cs]
+# Optimize for long-lived code that stays readable under iterative feature work.
+csharp_new_line_before_open_brace = all
+csharp_prefer_braces = true:warning
+csharp_preserve_single_line_blocks = false
+csharp_preserve_single_line_statements = false
+
+# Prefer explicitness over brevity in large mod codebases.
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = false:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
+
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = false:silent
+dotnet_style_prefer_compound_assignment = true:suggestion
+
+dotnet_style_readonly_field = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_collection_expression = false:silent
+
+# Naming guidance. Keep the house style boring and predictable.
+dotnet_naming_rule.private_static_fields_should_be_camel_with_underscore.severity = warning
+dotnet_naming_rule.private_static_fields_should_be_camel_with_underscore.symbols = private_static_fields
+dotnet_naming_rule.private_static_fields_should_be_camel_with_underscore.style = camel_with_underscore_prefix
+
+dotnet_naming_rule.private_instance_fields_should_be_camel_with_underscore.severity = warning
+dotnet_naming_rule.private_instance_fields_should_be_camel_with_underscore.symbols = private_instance_fields
+dotnet_naming_rule.private_instance_fields_should_be_camel_with_underscore.style = camel_with_underscore_prefix
+
+dotnet_naming_rule.private_constants_should_be_pascal.severity = warning
+dotnet_naming_rule.private_constants_should_be_pascal.symbols = private_constants
+dotnet_naming_rule.private_constants_should_be_pascal.style = pascal_case_style
+
+dotnet_naming_rule.static_readonly_fields_should_be_pascal.severity = warning
+dotnet_naming_rule.static_readonly_fields_should_be_pascal.symbols = static_readonly_fields
+dotnet_naming_rule.static_readonly_fields_should_be_pascal.style = pascal_case_style
+
+dotnet_naming_symbols.private_static_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_fields.required_modifiers = static
+
+dotnet_naming_symbols.private_instance_fields.applicable_kinds = field
+dotnet_naming_symbols.private_instance_fields.applicable_accessibilities = private
+
+dotnet_naming_symbols.private_constants.applicable_kinds = field
+dotnet_naming_symbols.private_constants.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants.required_modifiers = const
+
+dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
+
+dotnet_naming_style.camel_with_underscore_prefix.required_prefix = _
+dotnet_naming_style.camel_with_underscore_prefix.capitalization = camel_case
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Analyzer nudges that reduce "vibe-coded debt" before it spreads.
+# Catch broad exception handling so swallowed failures stay visible during cleanup passes.
+dotnet_diagnostic.CA1031.severity = warning
+# Keep unnecessary assigned values visible.
+dotnet_diagnostic.IDE0059.severity = warning
+# Patch methods often need seemingly-unused parameters.
+dotnet_diagnostic.IDE0060.severity = suggestion
+# Prefer readonly fields when possible.
+dotnet_diagnostic.IDE0044.severity = warning
+# Mark local functions static when possible.
+dotnet_diagnostic.IDE0062.severity = warning
+# Surface unused usings before they pile up.
+dotnet_diagnostic.IDE0005.severity = warning
+# Surface unused private members that survive refactors.
+dotnet_diagnostic.IDE0051.severity = warning
+
+# These are editor-time guardrails; only promote them to build blockers after a stable compile/test checkpoint.

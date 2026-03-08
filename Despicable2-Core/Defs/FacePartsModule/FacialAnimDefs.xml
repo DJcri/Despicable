@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<!-- Blink -->
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_Blink</defName>
+		<durationTicks>23</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>5</tick>
+				<expression>FA_Blink_1</expression>
+			</li>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>15</tick>
+				<expression>FacialExpression_EyesClosed</expression>
+			</li>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>20</tick>
+				<expression>FA_Blink_1</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+	<!-- Blink anim expressions -->
+	<Despicable.ExpressionDef>
+		<defName>FA_Blink_1</defName>
+		<texPathEyes>Gendered/eye_halflid</texPathEyes>
+	</Despicable.ExpressionDef>
+	<!--Infant Drool-->
+	<Despicable.FacialAnimDef>
+		<defName>FacialAnim_Drool</defName>
+		<durationTicks>120</durationTicks>
+		<keyframes>
+			<li Class="Despicable.FacialAnimKeyframeDef">
+				<tick>5</tick>
+				<expression>FacialExpression_Drool</expression>
+			</li>
+		</keyframes>
+	</Despicable.FacialAnimDef>
+</Defs>

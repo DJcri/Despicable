@@ -1,0 +1,2 @@
+# One key per line. These keys will be exempt from "unused Keyed" pruning.
+# Use this only for dynamic/reflection-driven translation lookups that the audit regex can't see.

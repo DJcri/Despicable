@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <InteractionCategory>与 {0} 互动</InteractionCategory>
+  <InteractionOption_SocialFight>挑衅 {0}</InteractionOption_SocialFight>
+  <InteractionOption_Insult>侮辱 {0}</InteractionOption_Insult>
+  <InteractionOption_Chat>与 {0} 聊天</InteractionOption_Chat>
+  <InteractionOption_Marriage>向 {0} 求婚</InteractionOption_Marriage>
+</LanguageData>

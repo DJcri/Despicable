@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.LovinTypeDef>
+		<defName>Vaginal</defName>
+		<label>Vaginal</label>
+		<interaction>Interaction_VaginalSex</interaction>
+		<iconPath>UI/Interaction/vaginal</iconPath>
+		<requiresFemale>true</requiresFemale>
+		<requiresMale>true</requiresMale>
+	</Despicable.LovinTypeDef>
+	<Despicable.LovinTypeDef>
+		<defName>Blowjob</defName>
+		<label>Blowjob</label>
+		<interaction>Interaction_OralSex</interaction>
+		<iconPath>UI/Interaction/oral</iconPath>
+		<requiresMale>true</requiresMale>
+	</Despicable.LovinTypeDef>
+	<Despicable.LovinTypeDef>
+		<defName>Cunnilingus</defName>
+		<label>Cunnilingus</label>
+		<interaction>Interaction_OralSex</interaction>
+		<iconPath>UI/Interaction/oral</iconPath>
+		<requiresFemale>true</requiresFemale>
+	</Despicable.LovinTypeDef>
+	<Despicable.LovinTypeDef>
+		<defName>Anal</defName>
+		<label>Anal</label>
+		<interaction>Interaction_AnalSex</interaction>
+		<iconPath>UI/Interaction/anal</iconPath>
+		<requiresMale>true</requiresMale>
+	</Despicable.LovinTypeDef>
+</Defs>

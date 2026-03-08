@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<PawnRenderNodeTagDef>
+		<defName>Cum</defName>
+	</PawnRenderNodeTagDef>
+
+	<Despicable.AnimationPropDef>
+		<defName>AnimProp_Cum</defName>
+		<animPropProperties Class="Despicable.PawnRenderNodeProperties_GraphicVariants">
+			<debugLabel>Cum</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_GraphicVariants</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_GraphicVariants</workerClass>
+			<tagDef>Cum</tagDef>
+			<parentTagDef>Head</parentTagDef>
+			<!-- for height -->
+			<texPath>AnimationProps/Cum/Cum</texPath>
+			<overlayLayer>Head</overlayLayer>
+			<baseLayer>95</baseLayer>
+		</animPropProperties>
+	</Despicable.AnimationPropDef>
+
+	<PawnRenderNodeTagDef>
+		<defName>Cumshot</defName>
+	</PawnRenderNodeTagDef>
+
+	<Despicable.AnimationPropDef>
+		<defName>AnimProp_Cumshot</defName>
+		<animPropProperties Class="Despicable.PawnRenderNodeProperties_GraphicVariants">
+			<debugLabel>Cumshot</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_GraphicVariants</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_GraphicVariants</workerClass>
+			<tagDef>Cumshot</tagDef>
+			<parentTagDef>Root</parentTagDef>
+			<!-- for height -->
+			<texPath>AnimationProps/Saliva/Saliva</texPath>
+			<overlayLayer>Head</overlayLayer>
+			<baseLayer>95</baseLayer>
+		</animPropProperties>
+	</Despicable.AnimationPropDef>
+	
+</Defs>

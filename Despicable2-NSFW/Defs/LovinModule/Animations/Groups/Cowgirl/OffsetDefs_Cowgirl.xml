@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.AnimationOffsetDef>
+		<defName>Offset_Cowgirl_Top</defName>
+		<offsets>
+			<li Class="Despicable.AnimationOffset_BodyType">
+				<races>
+					<li>Human</li>
+				</races>
+				<offsets>
+					<li>
+						<bodyType>Thin</bodyType>
+						<offset>(0, 0, -0.05)</offset>
+					</li>
+					<li>
+						<bodyType>Female</bodyType>
+						<offset>(0, 0, 0)</offset>
+					</li>
+					<li>
+						<bodyType>Hulk</bodyType>
+						<offset>(0, 0, 0.15)</offset>
+					</li>
+				</offsets>
+			</li>
+		</offsets>
+	</Despicable.AnimationOffsetDef>
+	<Despicable.AnimationOffsetDef>
+		<defName>Offset_Cowgirl_Bottom</defName>
+		<offsets>
+			<li Class="Despicable.AnimationOffset_BodyType">
+				<races>
+					<li>Human</li>
+				</races>
+				<offsets>
+					<li>
+						<bodyType>Hulk</bodyType>
+						<offset>(0, 0, -0.17)</offset>
+					</li>
+				</offsets>
+			</li>
+		</offsets>
+	</Despicable.AnimationOffsetDef>
+</Defs>

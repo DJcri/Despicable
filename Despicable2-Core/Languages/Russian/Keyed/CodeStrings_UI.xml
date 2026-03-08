@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2C_CODE_2C24A061>Не удалось прочитать метку прецепта при определении одобрения Кармы героя.</D2C_CODE_2C24A061>
+  <D2C_CODE_45DCE70A>{0}: PawnEditor.Dialog_AppearanceEditor не найден. Кнопка «Части лица» не была внедрена.</D2C_CODE_45DCE70A>
+  <D2C_CODE_52F3F63E>{0}: Dialog_AppearanceEditor.DoLeftSection(Rect) не найден. Кнопка «Части лица» не была внедрена.</D2C_CODE_52F3F63E>
+  <D2C_CODE_97865B7F>Открыть выбор частей лица Despicable.</D2C_CODE_97865B7F>
+  <D2C_CODE_AF6C0280>Для этого типа персонажа части лица недоступны ({0}).</D2C_CODE_AF6C0280>
+  <D2C_CODE_D5D334BD>Части лица</D2C_CODE_D5D334BD>
+</LanguageData>

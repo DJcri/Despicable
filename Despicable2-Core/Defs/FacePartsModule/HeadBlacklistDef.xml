@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<Despicable.HeadBlacklistDef>
+		<defName>Despicable_HeadBlacklist</defName>
+		<blacklistedHeads/>
+	</Despicable.HeadBlacklistDef>
+</Defs>

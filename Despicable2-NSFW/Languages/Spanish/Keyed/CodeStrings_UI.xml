@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- AUTO-GENERATED: player-facing code strings to extract into translations -->
+	<!-- Keys are placeholders until code is patched to use .Translate() -->
+	<!-- LovinModule/Patches/HarmonyPatch_MI_Intimacy.cs:46 -->
+	<D2N_CODE_90731E3E>Tener intimidad</D2N_CODE_90731E3E>
+	<!-- LovinModule/Patches/HarmonyPatch_MI_Intimacy.cs:49 -->
+	<D2N_CODE_C1CB4969>Tener intimidad con {0}</D2N_CODE_C1CB4969>
+
+  <D2N_Lovin_DoWithReason>Tener intimidad con {0} ({1})</D2N_Lovin_DoWithReason>
+  <D2N_LovinReason_YouPrefix>tú:</D2N_LovinReason_YouPrefix>
+  <D2N_LovinReason_TargetPrefix>la otra persona:</D2N_LovinReason_TargetPrefix>
+  <D2N_LovinReason_PairMissing>falta un participante</D2N_LovinReason_PairMissing>
+  <D2N_LovinReason_Unknown>no disponible</D2N_LovinReason_Unknown>
+  <D2N_LovinReason_SamePawn>misma persona</D2N_LovinReason_SamePawn>
+  <D2N_LovinReason_NoCompatibleTypes>no compatibles</D2N_LovinReason_NoCompatibleTypes>
+  <D2N_LovinReason_IsMissing>ausente</D2N_LovinReason_IsMissing>
+  <D2N_LovinReason_IsNotHumanlike>no humanoide</D2N_LovinReason_IsNotHumanlike>
+  <D2N_LovinReason_IsDrafted>movilizado/a</D2N_LovinReason_IsDrafted>
+  <D2N_LovinReason_IsLeaving>marchándose</D2N_LovinReason_IsLeaving>
+  <D2N_LovinReason_IsAggressive>agresivo/a</D2N_LovinReason_IsAggressive>
+  <D2N_LovinReason_IsBusy>ocupado/a</D2N_LovinReason_IsBusy>
+  <D2N_LovinReason_HadLovinRecently>intimidad reciente</D2N_LovinReason_HadLovinRecently>
+  <D2N_LovinReason_DoesntWantLovin>sin ganas</D2N_LovinReason_DoesntWantLovin>
+  <D2N_LovinReason_IsUnderage>menor de edad</D2N_LovinReason_IsUnderage>
+  <D2N_LovinReason_CantStayAwake>demasiado somnoliento/a</D2N_LovinReason_CantStayAwake>
+  <D2N_LovinReason_IsBleeding>sangrando</D2N_LovinReason_IsBleeding>
+  <D2N_LovinReason_IsInPain>con dolor</D2N_LovinReason_IsInPain>
+  <D2N_LovinReason_IsDead>muerto/a</D2N_LovinReason_IsDead>
+  <D2N_LovinReason_IsStarving>hambriento/a</D2N_LovinReason_IsStarving>
+  <D2N_LovinReason_YourOpinionTooLow>opinión demasiado baja</D2N_LovinReason_YourOpinionTooLow>
+  <D2N_LovinReason_TheirOpinionTooLow>opinión demasiado baja</D2N_LovinReason_TheirOpinionTooLow>
+  <D2N_LovinReason_YourCompatibilityTooLow>compatibilidad demasiado baja</D2N_LovinReason_YourCompatibilityTooLow>
+  <D2N_LovinReason_TheirCompatibilityTooLow>compatibilidad demasiado baja</D2N_LovinReason_TheirCompatibilityTooLow>
+  <D2N_LovinReason_OrientationMismatch>orientación incompatible</D2N_LovinReason_OrientationMismatch>
+  <D2N_LovinReason_IdeologyForbids>la ideoligión lo prohíbe</D2N_LovinReason_IdeologyForbids>
+  <D2N_LovinReason_IntimacyInstalled>Intimacy instalado</D2N_LovinReason_IntimacyInstalled>
+</LanguageData>

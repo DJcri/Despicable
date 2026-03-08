@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for ThingDef (D2_Core) -->
+	<!-- D2_UIFrameworkDemoThing (label) -->
+	<D2_UIFrameworkDemoThing.label>UI-Framework-Demo-Tab-Anker</D2_UIFrameworkDemoThing.label>
+	<!-- D2_UIFrameworkDemoThing (description) -->
+	<D2_UIFrameworkDemoThing.description>Nur-Debug-Hilfsobjekt zum Testen der ITab-Demo des UI-Frameworks.</D2_UIFrameworkDemoThing.description>
+</LanguageData>

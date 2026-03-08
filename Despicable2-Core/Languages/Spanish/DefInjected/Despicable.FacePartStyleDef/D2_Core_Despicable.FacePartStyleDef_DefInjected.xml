@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for Despicable.FacePartStyleDef (D2_Core) -->
+	<!-- Eye_Basic (label) -->
+	<Eye_Basic.label>Ojos básicos</Eye_Basic.label>
+	<!-- Eye_Cool (label) -->
+	<Eye_Cool.label>Genial</Eye_Cool.label>
+	<!-- Eye_Jovial (label) -->
+	<Eye_Jovial.label>Alegre</Eye_Jovial.label>
+	<!-- Eye_Serious (label) -->
+	<Eye_Serious.label>Serio</Eye_Serious.label>
+	<!-- Eye_Squint (label) -->
+	<Eye_Squint.label>Entrecerrados</Eye_Squint.label>
+	<!-- Eye_Thoughtful (label) -->
+	<Eye_Thoughtful.label>Pensativo</Eye_Thoughtful.label>
+	<!-- Eye_Tilted (label) -->
+	<Eye_Tilted.label>Inclinados</Eye_Tilted.label>
+	<!-- Mouth_Basic (label) -->
+	<Mouth_Basic.label>Estándar</Mouth_Basic.label>
+	<!-- Mouth_Derp (label) -->
+	<Mouth_Derp.label>Bobalicona</Mouth_Derp.label>
+	<!-- Mouth_Frown (label) -->
+	<Mouth_Frown.label>Ceño fruncido</Mouth_Frown.label>
+	<!-- Mouth_Grin (label) -->
+	<Mouth_Grin.label>Sonrisa</Mouth_Grin.label>
+	<!-- Mouth_Indifferent (label) -->
+	<Mouth_Indifferent.label>Indiferente</Mouth_Indifferent.label>
+	<!-- Mouth_Monster (label) -->
+	<Mouth_Monster.label>Monstruo</Mouth_Monster.label>
+	<!-- Mouth_Overbite (label) -->
+	<Mouth_Overbite.label>Sobremordida</Mouth_Overbite.label>
+	<!-- Mouth_Pretty (label) -->
+	<Mouth_Pretty.label>Bonita</Mouth_Pretty.label>
+	<!-- Mouth_Smirk (label) -->
+	<Mouth_Smirk.label>Sonrisa ladeada</Mouth_Smirk.label>
+	<!-- Mouth_Smug (label) -->
+	<Mouth_Smug.label>Presumida</Mouth_Smug.label>
+</LanguageData>

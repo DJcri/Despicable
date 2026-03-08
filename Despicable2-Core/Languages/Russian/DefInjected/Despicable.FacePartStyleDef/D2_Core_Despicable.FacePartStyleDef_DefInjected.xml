@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for Despicable.FacePartStyleDef (D2_Core) -->
+	<!-- Eye_Basic (label) -->
+	<Eye_Basic.label>Базовые глаза</Eye_Basic.label>
+	<!-- Eye_Cool (label) -->
+	<Eye_Cool.label>Крутые</Eye_Cool.label>
+	<!-- Eye_Jovial (label) -->
+	<Eye_Jovial.label>Весёлые</Eye_Jovial.label>
+	<!-- Eye_Serious (label) -->
+	<Eye_Serious.label>Серьёзные</Eye_Serious.label>
+	<!-- Eye_Squint (label) -->
+	<Eye_Squint.label>Прищур</Eye_Squint.label>
+	<!-- Eye_Thoughtful (label) -->
+	<Eye_Thoughtful.label>Задумчивые</Eye_Thoughtful.label>
+	<!-- Eye_Tilted (label) -->
+	<Eye_Tilted.label>Скошенные</Eye_Tilted.label>
+	<!-- Mouth_Basic (label) -->
+	<Mouth_Basic.label>Стандартный</Mouth_Basic.label>
+	<!-- Mouth_Derp (label) -->
+	<Mouth_Derp.label>Дерп</Mouth_Derp.label>
+	<!-- Mouth_Frown (label) -->
+	<Mouth_Frown.label>Хмурый</Mouth_Frown.label>
+	<!-- Mouth_Grin (label) -->
+	<Mouth_Grin.label>Оскал</Mouth_Grin.label>
+	<!-- Mouth_Indifferent (label) -->
+	<Mouth_Indifferent.label>Безразличный</Mouth_Indifferent.label>
+	<!-- Mouth_Monster (label) -->
+	<Mouth_Monster.label>Монстр</Mouth_Monster.label>
+	<!-- Mouth_Overbite (label) -->
+	<Mouth_Overbite.label>Выступающий прикус</Mouth_Overbite.label>
+	<!-- Mouth_Pretty (label) -->
+	<Mouth_Pretty.label>Милый</Mouth_Pretty.label>
+	<!-- Mouth_Smirk (label) -->
+	<Mouth_Smirk.label>Ухмылка</Mouth_Smirk.label>
+	<!-- Mouth_Smug (label) -->
+	<Mouth_Smug.label>Самодовольный</Mouth_Smug.label>
+</LanguageData>

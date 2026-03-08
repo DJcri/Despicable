@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<packageId>DCSzar.Despicable2.Core</packageId>
+	<name>Despicable 2 (Core)</name>
+	<author>DCSzar</author>
+	<description>
+Despicable 2 (Core) is the necessary foundation of the Despicable suite. It adds face parts, expressions, shared animation systems, Hero Karma, and custom UI tools. Modular and compatible. Standalone, or required for the optional NSFW add-on.
+	</description>
+	<supportedVersions>
+		<li>1.6</li>
+	</supportedVersions>
+	<loadAfter>
+		<li>brrainz.harmony</li>
+		<li>LovelyDovey.Sex.WithEuterpe</li>
+		<li>LovelyDovey.Sex.WithRosaline</li>
+	</loadAfter>
+</ModMetaData>

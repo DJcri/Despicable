@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <AnimationDef>
+    <defName>Blowjob_Initiator6b</defName>
+    <durationTicks>180</durationTicks>
+    <keyframeParts>
+      <li>
+        <key>Root</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>-20</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4778759)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>30</tick>
+              <angle>-17</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4778759)</offset>
+              <rotation>East</rotation>
+              <!-- Voice -->
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>40</tick>
+              <angle>-20</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4778759)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>50</tick>
+              <angle>-17</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4778759)</offset>
+              <rotation>East</rotation>
+              <!-- Voice -->
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>60</tick>
+              <angle>-20</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4778759)</offset>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>80</tick>
+              <angle>-17</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4778759)</offset>
+              <rotation>East</rotation>
+              <sound>Cum</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>85</tick>
+              <angle>-21</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4837757)</offset>
+              <rotation>East</rotation>
+              <!-- Voice -->
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>110</tick>
+              <angle>-16</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4837757)</offset>
+              <rotation>East</rotation>
+              <sound>Cum</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>115</tick>
+              <angle>-19</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4837757)</offset>
+              <rotation>East</rotation>
+              <!-- Voice -->
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>180</tick>
+              <angle>-15</angle>
+              <visible>true</visible>
+              <offset>(-0.5309734, 0, 0.4837757)</offset>
+              <rotation>East</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Head</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>15</tick>
+              <angle>31</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>30</tick>
+              <angle>27</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>40</tick>
+              <angle>33</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>50</tick>
+              <angle>28</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>60</tick>
+              <angle>32</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>180</tick>
+              <angle>23</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Genitals</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>14</angle>
+              <visible>true</visible>
+              <rotation>East</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Cumshot</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>75</tick>
+              <angle>-64</angle>
+              <visible>false</visible>
+              <offset>(0.1769911, 0, -0.2300885)</offset>
+              <scale>(0.333334, 1, 0.7758115)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>80</tick>
+              <angle>-64</angle>
+              <visible>true</visible>
+              <offset>(0.1769911, 0, -0.2300885)</offset>
+              <scale>(0.333334, 1, 0.7758115)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>85</tick>
+              <angle>-64</angle>
+              <visible>false</visible>
+              <offset>(0.1769911, 0, -0.2300885)</offset>
+              <scale>(0.333334, 1, 0.7758115)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>105</tick>
+              <angle>-64</angle>
+              <visible>false</visible>
+              <offset>(0.1769911, 0, -0.2300885)</offset>
+              <scale>(0.333334, 1, 0.7758115)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>110</tick>
+              <angle>-64</angle>
+              <visible>true</visible>
+              <offset>(0.1769911, 0, -0.2300885)</offset>
+              <scale>(0.333334, 1, 0.7758115)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>115</tick>
+              <angle>-64</angle>
+              <visible>false</visible>
+              <offset>(0.1769911, 0, -0.2300885)</offset>
+              <scale>(0.333334, 1, 0.7758115)</scale>
+              <rotation>North</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+    </keyframeParts>
+  </AnimationDef>
+  <AnimationDef>
+    <defName>Blowjob_Receiver6b</defName>
+    <durationTicks>180</durationTicks>
+    <keyframeParts>
+      <li>
+        <key>Root</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>-30</angle>
+              <visible>true</visible>
+              <offset>(0.1238939, 1, 0.1828909)</offset>
+              <rotation>West</rotation>
+              <sound>Suck</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>30</tick>
+              <angle>-15</angle>
+              <visible>true</visible>
+              <offset>(0.3362834, 1, 0.259587)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>70</tick>
+              <angle>-11</angle>
+              <visible>true</visible>
+              <offset>(0.353983, 1, 0.259587)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>110</tick>
+              <angle>-11</angle>
+              <visible>true</visible>
+              <offset>(0.3598826, 1, 0.2654868)</offset>
+              <rotation>West</rotation>
+              <!-- Voice -->
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>180</tick>
+              <angle>-8</angle>
+              <visible>true</visible>
+              <offset>(0.3893807, 1, 0.2654868)</offset>
+              <rotation>West</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Head</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>19</angle>
+              <visible>true</visible>
+              <offset>(-0.05899716, 0, -0.01769918)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>30</tick>
+              <angle>4</angle>
+              <visible>true</visible>
+              <offset>(-0.05899716, 0, -0.01769918)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>80</tick>
+              <angle>4</angle>
+              <visible>true</visible>
+              <offset>(-0.05899716, 0, -0.01769918)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>83</tick>
+              <angle>4</angle>
+              <visible>true</visible>
+              <offset>(-0.03539836, 0, -0.005899787)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>110</tick>
+              <angle>4</angle>
+              <visible>true</visible>
+              <offset>(-0.05899716, 0, -0.01769918)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>113</tick>
+              <angle>4</angle>
+              <visible>true</visible>
+              <offset>(-0.03539836, 0, -0.005899787)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>150</tick>
+              <angle>1</angle>
+              <visible>true</visible>
+              <offset>(-0.05899716, 0, -0.01769918)</offset>
+              <rotation>West</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>180</tick>
+              <angle>19</angle>
+              <visible>true</visible>
+              <offset>(-0.05899716, 0, -0.01769918)</offset>
+              <rotation>West</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>RenderNodeTag_Hand</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(0.466077, 1, -0.04129779)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>30</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.1651916, 1, 0.1828909)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>40</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.2477875, 1, 0.1474925)</offset>
+              <rotation>North</rotation>
+              <sound>Slimy</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>50</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.159292, 1, 0.1946901)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>60</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.2477875, 1, 0.1415931)</offset>
+              <rotation>North</rotation>
+              <sound>Slimy</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>70</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.1828908, 1, 0.1769911)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>80</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.2772863, 1, 0.117994)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>90</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.1474927, 1, 0.2123895)</offset>
+              <rotation>North</rotation>
+              <sound>Slimy</sound>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>100</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.2536871, 1, 0.1356933)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>110</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.1710915, 1, 0.2005899)</offset>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>180</tick>
+              <angle>0</angle>
+              <visible>true</visible>
+              <offset>(-0.2418879, 1, 0.1356933)</offset>
+              <rotation>North</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+      <li>
+        <key>Cum</key>
+        <value>
+          <workerType>Despicable.AnimationWorker_ExtendedKeyframes</workerType>
+          <keyframes>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>0</tick>
+              <angle>12</angle>
+              <visible>false</visible>
+              <offset>(-0.1120944, 1, -0.2241889)</offset>
+              <scale>(0.3392327, 1, 0.3569321)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>110</tick>
+              <angle>12</angle>
+              <visible>true</visible>
+              <offset>(-0.1120944, 1, -0.2241889)</offset>
+              <scale>(0.3392327, 1, 0.3569321)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>150</tick>
+              <angle>12</angle>
+              <visible>true</visible>
+              <offset>(-0.1120944, 1, -0.2241889)</offset>
+              <scale>(0.3392327, 1, 0.3569321)</scale>
+              <rotation>North</rotation>
+            </li>
+            <li Class="Despicable.ExtendedKeyframe">
+              <tick>180</tick>
+              <angle>-5</angle>
+              <visible>true</visible>
+              <offset>(-0.1120944, 1, -0.2241889)</offset>
+              <scale>(0.3392327, 1, 0.3569321)</scale>
+              <rotation>North</rotation>
+            </li>
+          </keyframes>
+        </value>
+      </li>
+    </keyframeParts>
+  </AnimationDef>
+</Defs>

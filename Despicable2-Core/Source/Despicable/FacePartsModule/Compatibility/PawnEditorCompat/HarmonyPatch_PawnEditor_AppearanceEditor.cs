@@ -1,0 +1,156 @@
+using System;
+using System.Reflection;
+using HarmonyLib;
+using UnityEngine;
+using Verse;
+using Despicable.FacePartsModule.UI;
+
+namespace Despicable.FacePartsModule.Compatibility.PawnEditorCompat;
+internal static class HarmonyPatch_PawnEditor_AppearanceEditor
+{
+    private const string LogPrefix = "Pawn Editor compat";
+    // Guardrail-Allow-Static: Cached reflected PawnEditor field handle, resolved once per compat patch application.
+    private static FieldInfo pawnFieldInfo;
+
+    public static void ResetRuntimeState()
+    {
+        // The Harmony postfix remains installed across save/load boundaries.
+        // Keep the cached reflected field available when possible. If the dialog
+        // shape changes, the postfix will lazily re-resolve it from the live instance.
+    }
+
+    public static void Apply(Harmony harmony)
+    {
+        ResetRuntimeState();
+
+        if (harmony == null)
+            return;
+
+        var dialogType = AccessTools.TypeByName("PawnEditor.Dialog_AppearanceEditor");
+        if (dialogType == null)
+        {
+            Despicable.Core.DebugLogger.Warn("D2C_CODE_45DCE70A".Translate(LogPrefix));
+            return;
+        }
+
+        pawnFieldInfo = ResolvePawnField(dialogType);
+        if (pawnFieldInfo == null)
+        {
+            Despicable.Core.DebugLogger.Warn($"{LogPrefix}: no Pawn field was found on {dialogType.FullName}. Face Parts button was not injected.");
+            return;
+        }
+
+        var target = AccessTools.Method(dialogType, "DoLeftSection", new[] { typeof(Rect) });
+        if (target == null)
+        {
+            Despicable.Core.DebugLogger.Warn("D2C_CODE_52F3F63E".Translate(LogPrefix));
+            return;
+        }
+
+        var postfix = new HarmonyMethod(AccessTools.Method(typeof(HarmonyPatch_PawnEditor_AppearanceEditor), nameof(Postfix)));
+        harmony.Patch(target, postfix: postfix);
+        Despicable.Core.DebugLogger.Debug($"{LogPrefix}: patched {target.DeclaringType?.FullName}.{target.Name} for Face Parts button injection.");
+    }
+
+    private static FieldInfo ResolvePawnField(Type dialogType)
+    {
+        if (dialogType == null)
+            return null;
+
+        var exact = AccessTools.Field(dialogType, "pawn");
+        if (exact != null && typeof(Pawn).IsAssignableFrom(exact.FieldType))
+            return exact;
+
+        var fields = dialogType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        for (int i = 0; i < fields.Length; i++)
+        {
+            var field = fields[i];
+            if (field != null && !field.IsStatic && typeof(Pawn).IsAssignableFrom(field.FieldType))
+                return field;
+        }
+
+        return null;
+    }
+
+    private static FieldInfo GetOrResolvePawnField(object instance)
+    {
+        if (instance == null)
+            return pawnFieldInfo;
+
+        var instanceType = instance.GetType();
+        if (pawnFieldInfo != null && pawnFieldInfo.DeclaringType != null && pawnFieldInfo.DeclaringType.IsAssignableFrom(instanceType))
+            return pawnFieldInfo;
+
+        pawnFieldInfo = ResolvePawnField(instanceType);
+        return pawnFieldInfo;
+    }
+
+    private static void Postfix(object __instance, Rect inRect)
+    {
+        if (__instance == null)
+            return;
+
+        var activePawnField = GetOrResolvePawnField(__instance);
+        if (activePawnField == null)
+            return;
+
+        Pawn pawn;
+        try
+        {
+            pawn = activePawnField.GetValue(__instance) as Pawn;
+        }
+        catch (Exception ex)
+        {
+            Despicable.Core.DebugLogger.WarnExceptionOnce("PawnEditorCompat/GetPawn", "Pawn Editor compat: failed to resolve the current pawn.", ex);
+            return;
+        }
+
+        if (pawn == null || pawn.RaceProps == null || !pawn.RaceProps.Humanlike)
+            return;
+
+        Rect buttonRect = BuildFacePartsButtonRect(inRect);
+        if (buttonRect.width <= 0f || buttonRect.height <= 0f)
+            return;
+
+        CompFaceParts comp = pawn.TryGetComp<CompFaceParts>();
+        if (comp == null)
+        {
+            TooltipHandler.TipRegion(buttonRect, "D2C_CODE_AF6C0280".Translate(pawn.def?.defName ?? "Unknown"));
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = false;
+            Widgets.ButtonText(buttonRect, "D2C_CODE_D5D334BD".Translate());
+            GUI.enabled = wasEnabled;
+            return;
+        }
+
+        TooltipHandler.TipRegion(buttonRect, "D2C_CODE_97865B7F".Translate());
+        if (Widgets.ButtonText(buttonRect, "D2C_CODE_D5D334BD".Translate()))
+            Find.WindowStack.Add(new Dialog_D2FacePartsCustomizer(pawn));
+    }
+
+    private static Rect BuildFacePartsButtonRect(Rect inRect)
+    {
+        // In a Harmony postfix, the Rect parameter reflects the dialog method's
+        // final mutated value after its layout helpers have already carved out
+        // the top and bottom sections. At this point, inRect is the remaining
+        // middle gap. Center the button inside that live gap instead of
+        // reconstructing the original layout with hardcoded offsets.
+        const float buttonHorizontalPadding = 3f;
+        const float buttonVerticalPadding = 3f;
+        const float preferredButtonHeight = 28f;
+        const float minimumButtonHeight = 20f;
+
+        float availableHeight = Mathf.Max(0f, inRect.height);
+        float buttonWidth = Mathf.Max(0f, inRect.width - (buttonHorizontalPadding * 2f));
+        if (buttonWidth <= 0f || availableHeight <= 0f)
+            return Rect.zero;
+
+        float usableHeight = Mathf.Max(0f, availableHeight - (buttonVerticalPadding * 2f));
+        float buttonHeight = Mathf.Min(preferredButtonHeight, usableHeight);
+        if (buttonHeight < minimumButtonHeight)
+            return Rect.zero;
+
+        float buttonY = inRect.y + ((availableHeight - buttonHeight) * 0.5f);
+        return new Rect(inRect.x + buttonHorizontalPadding, buttonY, buttonWidth, buttonHeight);
+    }
+}

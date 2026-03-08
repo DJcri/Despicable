@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2HK_UI_HeroKarma>Karma héroïque</D2HK_UI_HeroKarma>
+  <D2HK_UI_OpenHeroKarmaDesc>Ouvrir l'écran du Karma héroïque.</D2HK_UI_OpenHeroKarmaDesc>
+  <D2HK_UI_AssignHero>Définir le héros</D2HK_UI_AssignHero>
+  <D2HK_UI_AssignHeroDesc>Fait de ce colon le héros actif. Le karma, le standing et les effets héroïques suivent le héros actif.</D2HK_UI_AssignHeroDesc>
+  <D2HK_UI_AssignHeroBody>Choisissez qui porte le Karma héroïque. La progression est conservée. Les effets actifs sont transférés au nouveau héros.</D2HK_UI_AssignHeroBody>
+  <D2HK_UI_AssignHeroAlready>Ce colon est déjà le héros.</D2HK_UI_AssignHeroAlready>
+  <D2HK_UI_HeroAssigned>Le héros est désormais {0}.</D2HK_UI_HeroAssigned>
+  <D2HK_UI_HeaderHero>Héros : {0}</D2HK_UI_HeaderHero>
+  <D2HK_UI_NoneAssigned>Aucun</D2HK_UI_NoneAssigned>
+  <D2HK_UI_NoneAssignedOverview>Aucun héros n'est assigné. Utilisez Définir le héros sur un colon pour commencer à suivre le Karma héroïque.</D2HK_UI_NoneAssignedOverview>
+  <D2HK_UI_Overview>Aperçu</D2HK_UI_Overview>
+  <D2HK_UI_Reputation>Réputation</D2HK_UI_Reputation>
+  <D2HK_UI_Status>Statut</D2HK_UI_Status>
+  <D2HK_UI_CurrentHero>Héros actuel</D2HK_UI_CurrentHero>
+  <D2HK_UI_NewHero>Nouveau héros</D2HK_UI_NewHero>
+  <D2HK_UI_Karma>Karma</D2HK_UI_Karma>
+  <D2HK_UI_Standing>Prestige</D2HK_UI_Standing>
+  <D2HK_UI_KarmaTooltip>Le karma reflète la manière dont on se souvient du héros. Il détermine quels effets héroïques sont actifs.</D2HK_UI_KarmaTooltip>
+  <D2HK_UI_StandingTooltip>Le prestige reflète la façon dont l'idéologie de la colonie juge la conduite du héros. Il affecte la certitude du héros et l'opinion des pions partageant son idéologie.</D2HK_UI_StandingTooltip>
+  <D2HK_UI_CurrentStandingEffects>Effets actuels du standing</D2HK_UI_CurrentStandingEffects>
+  <D2HK_UI_StandingEffectsDisabled>Les effets de prestige sont désactivés.</D2HK_UI_StandingEffectsDisabled>
+  <D2HK_UI_CertaintyGains>Gains de certitude</D2HK_UI_CertaintyGains>
+  <D2HK_UI_CertaintyLosses>Pertes de certitude</D2HK_UI_CertaintyLosses>
+  <D2HK_UI_SameIdeologyOpinion>Opinion de la même idéologie</D2HK_UI_SameIdeologyOpinion>
+  <D2HK_UI_ActiveEffects>Effets actifs</D2HK_UI_ActiveEffects>
+  <D2HK_UI_NoActiveEffects>Aucun effet actif.</D2HK_UI_NoActiveEffects>
+  <D2HK_UI_RecentDeeds>Actes récents</D2HK_UI_RecentDeeds>
+  <D2HK_UI_NoRecentDeeds>Aucun acte récent pour le moment.</D2HK_UI_NoRecentDeeds>
+  <D2HK_UI_Search>Rechercher</D2HK_UI_Search>
+  <D2HK_UI_All>Tous</D2HK_UI_All>
+  <D2HK_UI_People>Personnes</D2HK_UI_People>
+  <D2HK_UI_Factions>Factions</D2HK_UI_Factions>
+  <D2HK_UI_ReputationNone>Aucune réputation notable pour le moment.</D2HK_UI_ReputationNone>
+  <D2HK_UI_ReputationNoMatches>Aucun résultat.</D2HK_UI_ReputationNoMatches>
+  <D2HK_UI_SelectReputationTarget>Sélectionnez une personne ou une faction pour examiner la réputation.</D2HK_UI_SelectReputationTarget>
+  <D2HK_UI_Summary>Résumé</D2HK_UI_Summary>
+  <D2HK_UI_DirectReputation>Réputation directe</D2HK_UI_DirectReputation>
+  <D2HK_UI_FactionEffect>Effet de faction</D2HK_UI_FactionEffect>
+  <D2HK_UI_SettlementEffect>Effet d'établissement</D2HK_UI_SettlementEffect>
+  <D2HK_UI_CurrentEffects>Effets actuels</D2HK_UI_CurrentEffects>
+  <D2HK_UI_LastChange>Dernier changement</D2HK_UI_LastChange>
+  <D2HK_UI_Event>Événement</D2HK_UI_Event>
+  <D2HK_UI_ReputationChange>Changement de réputation</D2HK_UI_ReputationChange>
+  <D2HK_UI_BaseChange>Changement de base</D2HK_UI_BaseChange>
+  <D2HK_UI_AffectedBy>Modifié par</D2HK_UI_AffectedBy>
+  <D2HK_UI_Reason>Raison</D2HK_UI_Reason>
+  <D2HK_UI_NoDirectEffect>Aucun effet direct pour le moment.</D2HK_UI_NoDirectEffect>
+  <D2HK_UI_ReputationTooltip>La réputation reflète la manière dont cette cible considère le héros. Elle peut affecter le commerce, la bonne volonté, les arrestations, le recrutement et la conversion.</D2HK_UI_ReputationTooltip>
+  <D2HK_UI_ReputationChangeTooltip>Le résultat final de réputation après tous les modificateurs.</D2HK_UI_ReputationChangeTooltip>
+  <D2HK_UI_BaseChangeTooltip>Le changement de réputation avant l'application de l'influence idéologique.</D2HK_UI_BaseChangeTooltip>
+  <D2HK_UI_AffectedByTooltip>Une règle idéologique ou un mème a modifié le résultat de réputation de base.</D2HK_UI_AffectedByTooltip>
+  <D2HK_UI_TradeBlockedByTax>L'amélioration des prix commerciaux est bloquée par la Taxe de réputation.</D2HK_UI_TradeBlockedByTax>
+  <D2HK_UI_Cancel>Annuler</D2HK_UI_Cancel>
+  <D2HK_UI_Assign>Assigner</D2HK_UI_Assign>
+
+  <D2HK_UI_TradePriceImprovement>Amélioration des prix commerciaux</D2HK_UI_TradePriceImprovement>
+  <D2HK_UI_GoodwillGains>Gains de bonne volonté</D2HK_UI_GoodwillGains>
+  <D2HK_UI_GoodwillLosses>Pertes de bonne volonté</D2HK_UI_GoodwillLosses>
+  <D2HK_UI_NegotiationAbility>Capacité de négociation</D2HK_UI_NegotiationAbility>
+  <D2HK_UI_SocialImpact>Impact social</D2HK_UI_SocialImpact>
+  <D2HK_UI_InjuryHealingFactor>Facteur de guérison des blessures</D2HK_UI_InjuryHealingFactor>
+  <D2HK_UI_RecruitResistance>Résistance au recrutement</D2HK_UI_RecruitResistance>
+  <D2HK_UI_ConvertCertainty>Certitude de conversion</D2HK_UI_ConvertCertainty>
+  <D2HK_UI_MentalBreakThreshold>Seuil de crise mentale</D2HK_UI_MentalBreakThreshold>
+  <D2HK_UI_ArrestSuccessChance>Chances de réussite d'arrestation</D2HK_UI_ArrestSuccessChance>
+  <D2HK_UI_MeleeHitChance>Chances de toucher en mêlée</D2HK_UI_MeleeHitChance>
+  <D2HK_UI_MeleeDodgeChance>Chances d'esquive en mêlée</D2HK_UI_MeleeDodgeChance>
+  <D2HK_UI_ArrestCompliance>Obéissance à l'arrestation</D2HK_UI_ArrestCompliance>
+  <D2HK_UI_ArrestComplianceFear>Obéissance à l'arrestation par peur</D2HK_UI_ArrestComplianceFear>
+
+  <D2HK_UI_PerkDesc_MercyMagnet>La bonté laisse des traces.</D2HK_UI_PerkDesc_MercyMagnet>
+  <D2HK_UI_PerkDesc_GoodwillTailwind>Les bonnes actions portent plus loin.</D2HK_UI_PerkDesc_GoodwillTailwind>
+  <D2HK_UI_PerkDesc_SilverTongue>La persuasion vient plus facilement.</D2HK_UI_PerkDesc_SilverTongue>
+  <D2HK_UI_PerkDesc_CommunityBuffer>L'ambiance reste plus calme autour du héros.</D2HK_UI_PerkDesc_CommunityBuffer>
+  <D2HK_UI_PerkDesc_IntimidatingPresence>L'obéissance s'accompagne d'un frisson.</D2HK_UI_PerkDesc_IntimidatingPresence>
+  <D2HK_UI_PerkDesc_GoodwillFriction>La colonie laisse une impression plus rude.</D2HK_UI_PerkDesc_GoodwillFriction>
+  <D2HK_UI_PerkDesc_TerrorEffect>La peur aiguise chaque interaction.</D2HK_UI_PerkDesc_TerrorEffect>
+  <D2HK_UI_PerkDesc_ReputationTax>La peur prend sa part.</D2HK_UI_PerkDesc_ReputationTax>
+
+  <D2HK_UI_PerkNote_MercyMagnet>Aider des étrangers accorde un bonus de bonne volonté.</D2HK_UI_PerkNote_MercyMagnet>
+  <D2HK_UI_PerkNote_CommunityBuffer>Les alliés proches récupèrent 1,5 % d'humeur après des insultes ou des vexations.</D2HK_UI_PerkNote_CommunityBuffer>
+  <D2HK_UI_PerkNote_IntimidatingPresence>Les arrestations ratées peuvent se transformer en obéissance ({0}).</D2HK_UI_PerkNote_IntimidatingPresence>
+  <D2HK_UI_PerkNote_TerrorEffect>Seuil de crise mentale {0}. Les arrestations ratées peuvent se transformer en obéissance ({1}).</D2HK_UI_PerkNote_TerrorEffect>
+</LanguageData>

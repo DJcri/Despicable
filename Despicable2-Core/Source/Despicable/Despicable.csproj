@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{96DCD036-DD10-459E-9D2B-E6BEDE3925A0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Despicable</RootNamespace>
+    <AssemblyName>Despicable</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\1.6\Assemblies\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\1.6\Assemblies\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\..\workshop\content\294100\3463505750\1.6\Assemblies\0Harmony.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Krafs.Rimworld.Ref">
+      <Version>1.6.4543</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AnimModule\AnimGroupStudio\AgsCompile.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Export\AgsExport.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Export\AgsExportUtil.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Export\AgsExportValidation.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Export\AgsExportWriter.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Model\AgsModel.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Model\AgsModel.Project.Helpers.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Model\AgsModel.Types.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Persistence\AgsRepository.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewBinding.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPawnPool.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPlayback.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPlayback.Rendering.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewSession.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewSession.Playback.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewSession.Viewport.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsAuthorPreviewRuntimeState.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsCommands.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsCommands.Import.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsCommands.Selection.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawInspector.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawInspector.Panels.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanel.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanelSections.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanelSections.Source.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanelSections.Stages.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawPreviewPanel.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawPreviewPanel.Legacy.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawPreviewPanel.Transport.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsEditorSessionState.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsLayout.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsState.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsState.Helpers.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsValidation.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\Dialog_AnimGroupStudio.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\Dialog_AnimGroupStudio.Preview.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\AnimGroupDef.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\AnimRoleDef.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\AnimationOffsetDef.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\AnimationOffset_AgeRange.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\AnimationOffset_BodyType.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\AnimationOffset_BodyTypeGendered.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\AnimationOffset_Single.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\BaseAnimationOffset.cs" />
+    <Compile Include="AnimModule\AnimParts\AnimGroups\Offsets\BodyTypeOffset.cs" />
+    <Compile Include="AnimModule\AnimParts\ExtendedKeyframe\AnimationWorker_ExtendedKeyframes.cs" />
+    <Compile Include="AnimModule\AnimParts\ExtendedKeyframe\ExtendedKeyframe.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\AnimationPropDef.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\BodyType\PawnRenderNodeProperties_GraphicBodyTypeVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\BodyType\PawnRenderNode_GraphicBodyTypeVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\HediffSeverity\PawnRenderNodeProperties_GraphicHediffSeverityVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\HediffSeverity\PawnRenderNode_GraphicHediffSeverityVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\Hediff\PawnRenderNodeProperties_GraphicHediffVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\Hediff\PawnRenderNode_GraphicHediffVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\PawnRenderNodeProperties_GraphicVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\PawnRenderNodeWorker_GraphicVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\GraphicVariants\PawnRenderNode_GraphicVariants.cs" />
+    <Compile Include="AnimModule\AnimParts\PropRenderNodes\TexPathVariantsDef.cs" />
+    <Compile Include="AnimModule\AnimParts\RenderSubworkers\PawnRenderSubWorker_ChangeOffset.cs" />
+    <Compile Include="AnimModule\AnimParts\RenderSubworkers\PawnRenderSubWorker_HideWhenAnimating.cs" />
+    <Compile Include="AnimModule\AnimUtil.cs" />
+    <Compile Include="AnimModule\Comp\CompExtendedAnimator.cs" />
+    <Compile Include="AnimModule\Comp\ExtendedAnimatorRuntimeState.cs" />
+    <Compile Include="AnimModule\Comp\ExtendedAnimatorRenderBridge.cs" />
+    <Compile Include="AnimModule\Comp\ExtendedAnimatorEffectController.cs" />
+    <Compile Include="AnimModule\Comp\ExtendedAnimatorPropNodeBuilder.cs" />
+    <Compile Include="AnimModule\Comp\ExtendedAnimatorPlaybackController.cs" />
+    <Compile Include="AnimModule\Comp\CompProperties_ExtendedAnimator.cs" />
+    <Compile Include="AnimModule\ContextUtil.cs" />
+    <Compile Include="AnimModule\Graphics\GraphicStateResolver.cs" />
+    <Compile Include="AnimModule\Patches\HarmonyPatch_DrawTracker.cs" />
+    <Compile Include="AnimModule\Patches\HarmonyPatch_PawnRenderer.cs" />
+    <Compile Include="AnimModule\Patches\HarmonyPatch_PawnRenderNode.cs" />
+    <Compile Include="AnimModule\Patches\HarmonyPatch_PawnRenderTree.cs" />
+    <Compile Include="AnimModule\Patches\HarmonyPatch_PawnRenderTree.Helpers.cs" />
+    <Compile Include="AnimModule\Patches\HarmonyPatch_PawnRenderTree_AnimationTick.cs" />
+    <Compile Include="AnimModule\Runtime\DrawTrackerSuppressionScope.cs" />
+    <Compile Include="AnimModule\Runtime\GameComponent_ExtendedAnimatorRuntime.cs" />
+    <Compile Include="AnimModule\UI\Dialog_TextEntrySimple.cs" />
+    <Compile Include="AnimModule\UI\PreviewPawnFactory.cs" />
+    <Compile Include="AnimModule\UI\PreviewPawnIdAllocator.cs" />
+    <Compile Include="AnimModule\UI\WorkshopAnimation.cs" />
+    <Compile Include="AnimModule\UI\WorkshopAnimationImporter.cs" />
+    <Compile Include="AnimModule\UI\WorkshopPreviewRenderer.cs" />
+    <Compile Include="AnimModule\UI\WorkshopRenderContext.cs" />
+    <Compile Include="Core\Bootstrap\BootstrapUtil.cs" />
+    <Compile Include="Core\Compatibility\IModCompat.cs" />
+    <Compile Include="Core\Compatibility\ModCompatRegistry.cs" />
+    <Compile Include="Core\Compatibility\NLFacialAnimationCompat.cs" />
+    <Compile Include="Core\Constants\Channels.cs" />
+    <Compile Include="Core\Constants\Commands.cs" />
+    <Compile Include="Core\ContentAvailability.cs" />
+    <Compile Include="Core\DebugLogger.cs" />
+    <Compile Include="Core\Hooks\Hooks.cs" />
+    <Compile Include="Core\Hooks\IPostResolveHook.cs" />
+    <Compile Include="Core\Hooks\IPreResolveHook.cs" />
+    <Compile Include="Core\Idempotence\OutcomeHistory.cs" />
+    <Compile Include="Core\Idempotence\OutcomeStamp.cs" />
+    <Compile Include="Core\Identity\InteractionKey.cs" />
+    <Compile Include="Core\Identity\InteractionRegistry.cs" />
+    <Compile Include="Core\InteractionEntry.cs" />
+    <Compile Include="Core\InteractionInstanceStore.cs" />
+    <Compile Include="Core\Model\AnimationPlan.cs" />
+    <Compile Include="Core\Model\InteractionContext.cs" />
+    <Compile Include="Core\Model\InteractionRequest.cs" />
+    <Compile Include="Core\Model\InteractionResolution.cs" />
+    <Compile Include="Core\Model\OutcomeDelta.cs" />
+    <Compile Include="Core\Resolver.cs" />
+    <Compile Include="Core\Pawns\PawnAffiliation.cs" />
+    <Compile Include="Core\Pawns\PawnBedQuery.cs" />
+    <Compile Include="Core\Pawns\PawnContext.cs" />
+    <Compile Include="Core\Pawns\PawnHealthQuery.cs" />
+    <Compile Include="Core\Pawns\PawnHealthSnapshot.cs" />
+    <Compile Include="Core\Pawns\PawnPairQuery.cs" />
+    <Compile Include="Core\Pawns\PawnQuery.cs" />
+    <Compile Include="Core\Pawns\PawnResolver.cs" />
+    <Compile Include="Core\Runtime\DespicableRuntimeState.cs" />
+    <Compile Include="Core\Runtime\DespicableRuntimeConfig.cs" />
+    <Compile Include="Core\Runtime\CommonUtil.Settings.cs" />
+    <Compile Include="Core\Debug\CommonUtil.Debug.cs" />
+    <Compile Include="Core\Rendering\CommonUtil.RenderNodes.cs" />
+    <Compile Include="Core\Model\PawnStateUtil.cs" />
+    <Compile Include="Core\UI\TexIcons.cs" />
+    <Compile Include="Core\UI\UIUtil.cs" />
+    <Compile Include="Core\Runtime\ReentryGuard.cs" />
+    <Compile Include="Core\Runtime\SingleFrameDialogGate.cs" />
+    <Compile Include="Core\Runtime\GameComponent_DespicableRuntimeReset.cs" />
+    <Compile Include="Core\Staging\BasicStagePawnTags.cs" />
+    <Compile Include="Core\Staging\IStagePawnTagProvider.cs" />
+    <Compile Include="Core\Staging\IStagePlanHook.cs" />
+    <Compile Include="Core\Staging\IStagePlaybackBackend.cs" />
+    <Compile Include="Core\Staging\StageClipDef.cs" />
+    <Compile Include="Core\Staging\StageClipTimelineBackend.cs" />
+    <Compile Include="Core\Staging\StageEnums.cs" />
+    <Compile Include="Core\Staging\StageOffset.cs" />
+    <Compile Include="Core\Staging\StagePlan.cs" />
+    <Compile Include="Core\Staging\StagePlanContext.cs" />
+    <Compile Include="Core\Staging\StagePlanHooks.cs" />
+    <Compile Include="Core\Staging\StagePlanner.cs" />
+    <Compile Include="Core\Staging\StagePlaybackBackend.cs" />
+    <Compile Include="Core\Staging\StagePlaybackBackends.cs" />
+    <Compile Include="Core\Staging\StageRequest.cs" />
+    <Compile Include="Core\Staging\StageSlotDef.cs" />
+    <Compile Include="Core\Staging\StageTagContext.cs" />
+    <Compile Include="Core\Staging\StageTagProviders.cs" />
+    <Compile Include="Core\Staging\StageTimelineDefs.cs" />
+    <Compile Include="Core\VisualActivityTracker.cs" />
+    <Compile Include="DespicableBootstrap.cs" />
+    <Compile Include="FacePartsModule\Compatibility\PawnEditorCompat\HarmonyPatch_PawnEditor_AppearanceEditor.cs" />
+    <Compile Include="FacePartsModule\Compatibility\PawnEditorCompat\PawnEditorCompatBootstrap.cs" />
+    <Compile Include="FacePartsModule\Compatibility\PawnEditorCompat\PawnEditorCompatModule.cs" />
+    <Compile Include="FacePartsModule\Comp\CompFaceParts.cs" />
+    <Compile Include="FacePartsModule\Comp\CompFaceParts.Refresh.cs" />
+    <Compile Include="FacePartsModule\Comp\CompFaceParts.Render.cs" />
+    <Compile Include="FacePartsModule\Comp\CompProperties_FaceParts.cs" />
+    <Compile Include="FacePartsModule\Data\HeadBlacklistData.cs" />
+    <Compile Include="FacePartsModule\DefOf\FacePartsModule_ExpressionDefOf.cs" />
+    <Compile Include="FacePartsModule\DefOf\FacePartsModule_FacialAnimDefOf.cs" />
+    <Compile Include="FacePartsModule\FacePartsUtil.cs" />
+    <Compile Include="FacePartsModule\FacePartsUtil.Blacklist.cs" />
+    <Compile Include="FacePartsModule\FaceParts\ExpressionDef.cs" />
+    <Compile Include="FacePartsModule\FaceParts\FacePartDef.cs" />
+    <Compile Include="FacePartsModule\FaceParts\FacePartStyleDef.cs" />
+    <Compile Include="FacePartsModule\FaceParts\FacialAnimDef.cs" />
+    <Compile Include="FacePartsModule\FaceParts\FacialAnimKeyframeDef.cs" />
+    <Compile Include="FacePartsModule\Runtime\FacePartsEventRuntime.cs" />
+    <Compile Include="FacePartsModule\Patches\HarmonyPatch_FaceParts_Events.cs" />
+    <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchModels.cs" />
+    <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchEligibility.cs" />
+    <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchAnalyzer.cs" />
+    <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchGenerator.cs" />
+    <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchDiagnostics.cs" />
+    <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchRuntime.cs" />
+    <Compile Include="FacePartsModule\UI\Dialog_D2FacePartsCustomizer.cs" />
+    <Compile Include="FacePartsModule\UI\Dialog_D2HeadtypeBlacklist.cs" />
+    <Compile Include="FacePartsModule\UI\FacePreviewCache.cs" />
+    <Compile Include="FacePartsModule\Misc\HeadBlacklistDef.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\Eyes\PawnRenderNodeWorker_EyeAddon.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\Eyes\PawnRenderNodeWorker_AutoEyePatch.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\Eyes\PawnRenderNode_EyeAddon.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\Mouth\PawnRenderNodeWorker_Mouth.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\Mouth\PawnRenderNode_Mouth.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\PawnRenderNodeWorker_FacePart.cs" />
+    <Compile Include="HeroKarmaModule\Bridge\HeroKarmaBridge.cs" />
+    <Compile Include="HeroKarmaModule\Core\GameComponent_HeroKarma.cs" />
+    <Compile Include="HeroKarmaModule\Core\GameComponent_HeroKarma.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Core\HKLedgerEntry.cs" />
+    <Compile Include="HeroKarmaModule\Dev\HKDevSelfTest.cs" />
+    <Compile Include="HeroKarmaModule\Dev\HKDiagnostics.cs" />
+    <Compile Include="HeroKarmaModule\Runtime\HKPruneTickTracker.cs" />
+    <Compile Include="HeroKarmaModule\Tuning\HKBalanceTuning.cs" />
+    <Compile Include="HeroKarmaModule\Dev\HKSettingsUtil.cs" />
+    <Compile Include="HeroKarmaModule\LocalReputation\HKLocalReputationComponent.cs" />
+    <Compile Include="HeroKarmaModule\LocalReputation\LocalRepChangeEntry.cs" />
+    <Compile Include="HeroKarmaModule\LocalReputation\LocalReputationUtility.cs" />
+    <Compile Include="HeroKarmaModule\LocalReputation\LocalRepTuning.cs" />
+    <Compile Include="HeroKarmaModule\LocalReputation\RepRecord.cs" />
+    <Compile Include="HeroKarmaModule\IdeologyRep\HKRepIdeology.cs" />
+    <Compile Include="HeroKarmaModule\IdeologyRep\HKIdeologyEvaluationTrace.cs" />
+    <Compile Include="HeroKarmaModule\IdeologyRep\HKIdeologyCompat.cs" />
+    <Compile Include="HeroKarmaModule\IdeologyRep\HKIdeologyExactPrecepts.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AddHeroKarmaGizmos.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AttackNeutral.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AttackNeutral.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ArrestNeutral.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_RescueOutsider.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_FreeSlave.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_DonateToBeggars.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_SellCaptive.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_EnslaveAttempt.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ExecutePrisoner.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ExecutePrisoner.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_FactionGiftUtility_Gifts.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_FactionGiftUtility_Gifts.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Faction_TryAffectGoodwillWith.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_OrganHarvest.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Faction_TryAffectGoodwillWith.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_OrganHarvest.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ReleasePrisoner.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_TendOutsider.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Certainty.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Opinion.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_TradePrice_LocalRep.cs" />
+        <Compile Include="HeroKarmaModule\Patches\HKPatchGuard.cs" />
+<Compile Include="HeroKarmaModule\Patches\HKGoodwillContext.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKHookUtil.cs" />
+    <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.cs" />
+    <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.Hediffs.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\HKEventDebouncer.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\HKKarmaProcessor.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\HKKarmaProcessor.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\HKTokenApplier.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\HKToken_LocalReputation.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\IHKEffectToken.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\KarmaEvent.cs" />
+    <Compile Include="HeroKarmaModule\Services\ApprovalResolver.cs" />
+    <Compile Include="HeroKarmaModule\Services\ApprovalResolver.Ideology.cs" />
+    <Compile Include="HeroKarmaModule\Services\EventDisplayCatalog.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKPerkCatalog.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKPerkCatalog.Data.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKPerkDef.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKResolve.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKRuntime.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKServices.cs" />
+    <Compile Include="HeroKarmaModule\Services\IHKBackendBridge.cs" />
+    <Compile Include="HeroKarmaModule\Services\ILocalReputationService.cs" />
+    <Compile Include="HeroKarmaModule\Services\LocalReputationService.cs" />
+    <Compile Include="HeroKarmaModule\UI\Command_OpenHeroKarma.cs" />
+    <Compile Include="HeroKarmaModule\UI\Command_SetHeroKarma.cs" />
+    <Compile Include="HeroKarmaModule\UI\Dialog_HeroKarma.cs" />
+    <Compile Include="HeroKarmaModule\UI\Dialog_AssignHeroKarma.cs" />
+    <Compile Include="HeroKarmaModule\UI\HKUIData.cs" />
+    <Compile Include="HeroKarmaModule\UI\HKUIConstants.cs" />
+    <Compile Include="ManualInteraction\InteractionMenu.cs" />
+    <Compile Include="ManualInteraction\ManualMenuBuilder.cs" />
+    <Compile Include="ManualInteraction\ManualMenuHost.cs" />
+    <Compile Include="ManualInteraction\ManualMenuLegacyAdapter.cs" />
+    <Compile Include="ManualInteraction\ManualMenuOptionSpec.cs" />
+    <Compile Include="ManualInteraction\ManualMenuRequest.cs" />
+    <Compile Include="ManualInteraction\InteractionTargetingCache.cs" />
+    <Compile Include="ManualInteraction\Interactions.cs" />
+    <Compile Include="ModMain.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="UIFramework\Blueprints\D2FloatMenuBlueprint.cs" />
+    <Compile Include="UIFramework\Blueprints\D2GizmoBlueprint.cs" />
+    <Compile Include="UIFramework\Blueprints\D2ITabBlueprint.cs" />
+    <Compile Include="UIFramework\Blueprints\D2WindowBlueprint.cs" />
+    <Compile Include="UIFramework\Blueprints\Dialog_D2SearchableFloatMenu.cs" />
+    <Compile Include="UIFramework\Controls\D2ActionBar.cs" />
+    <Compile Include="UIFramework\Controls\D2CatalogBrowser.cs" />
+    <Compile Include="UIFramework\Controls\D2CommandBar.cs" />
+    <Compile Include="UIFramework\Controls\D2Fields.cs" />
+    <Compile Include="UIFramework\Controls\D2Filters.cs" />
+    <Compile Include="UIFramework\Controls\D2IconTextRow.cs" />
+    <Compile Include="UIFramework\Controls\D2IconTile.cs" />
+    <Compile Include="UIFramework\Controls\D2ListingDialog.cs" />
+    <Compile Include="UIFramework\Controls\D2MeterRow.cs" />
+    <Compile Include="UIFramework\Controls\D2BandRuler.cs" />
+    <Compile Include="UIFramework\Controls\D2BandRulerRow.cs" />
+    <Compile Include="UIFramework\Controls\D2PreviewSurface.cs" />
+    <Compile Include="UIFramework\Controls\D2TabHost.cs" />
+    <Compile Include="UIFramework\Controls\D2TabHost.Helpers.cs" />
+    <Compile Include="UIFramework\Controls\D2Table.cs" />
+    <Compile Include="UIFramework\Controls\D2TextPairRow.cs" />
+    <Compile Include="UIFramework\Controls\D2Tabs.cs" />
+    <Compile Include="UIFramework\Controls\D2ToolbarRow.cs" />
+    <Compile Include="UIFramework\Controls\D2WidgetHost.cs" />
+    <Compile Include="UIFramework\D2Selectors.cs" />
+    <Compile Include="UIFramework\D2Text.cs" />
+    <Compile Include="UIFramework\D2UIStyle.cs" />
+    <Compile Include="UIFramework\D2VanillaTex.cs" />
+    <Compile Include="UIFramework\D2Widgets.cs" />
+    <Compile Include="UIFramework\D2Widgets.Icon.cs" />
+    <Compile Include="UIFramework\D2Widgets.Input.cs" />
+    <Compile Include="UIFramework\Demo\Dialog_UIFrameworkDemo.cs" />
+    <Compile Include="UIFramework\Demo\Dialog_UIFrameworkDemo.Controls.cs" />
+    <Compile Include="UIFramework\Demo\Dialog_UIFrameworkDemo.Preview.cs" />
+    <Compile Include="UIFramework\Demo\Dialog_UIFrameworkDemo.Data.cs" />
+    <Compile Include="UIFramework\Demo\ITab_UIFrameworkDemo.cs" />
+    <Compile Include="UIFramework\GUIStateScopes.cs" />
+    <Compile Include="UIFramework\Layout\D2AdaptiveForm.cs" />
+    <Compile Include="UIFramework\Layout\D2ControlRail.cs" />
+    <Compile Include="UIFramework\Layout\D2EditorShell.cs" />
+    <Compile Include="UIFramework\Layout\D2Grid.cs" />
+    <Compile Include="UIFramework\Layout\D2LayoutHelpers.cs" />
+    <Compile Include="UIFramework\Layout\D2LayoutPolicy.cs" />
+    <Compile Include="UIFramework\Layout\D2ListView.cs" />
+    <Compile Include="UIFramework\Layout\D2PaneLayout.cs" />
+    <Compile Include="UIFramework\Layout\D2PaneLayout.Allocation.cs" />
+    <Compile Include="UIFramework\Layout\D2ScrollView.cs" />
+    <Compile Include="UIFramework\Layout\D2Section.cs" />
+    <Compile Include="UIFramework\Layout\RectTake.cs" />
+    <Compile Include="UIFramework\Layout\D2WorkbenchLayout.cs" />
+    <Compile Include="UIFramework\Layout\HFlow.cs" />
+    <Compile Include="UIFramework\Layout\HRow.cs" />
+    <Compile Include="UIFramework\Layout\RectSplit.cs" />
+    <Compile Include="UIFramework\Layout\VStack.cs" />
+    <Compile Include="UIFramework\Settings\D2ModSettingsRenderer.cs" />
+    <Compile Include="UIFramework\UIContext.cs" />
+    <Compile Include="UIFramework\UIContext.Layout.cs" />
+    <Compile Include="UIFramework\UIRectRegistry.cs" />
+    <Compile Include="UIFramework\UIRectRegistry.Validation.cs" />
+    <Compile Include="UIFramework\UITags.cs" />
+  </ItemGroup>
+<PropertyGroup>
+    <!-- Set to true to skip the localization audit (not recommended). -->
+    <D2SkipLocalizationAudit Condition="'$(D2SkipLocalizationAudit)'==''">false</D2SkipLocalizationAudit>
+  </PropertyGroup>
+
+
+  <PropertyGroup>
+    <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
+    <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
+  </PropertyGroup>
+  <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
+  </Target>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

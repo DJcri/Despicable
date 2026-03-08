@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for HediffDef (D2_Core) -->
+	<!-- HK_Hediff_CommunityBuffer (label) -->
+	<HK_Hediff_CommunityBuffer.label>sozialer Puffer</HK_Hediff_CommunityBuffer.label>
+	<!-- HK_Hediff_CommunityBuffer (description) -->
+	<HK_Hediff_CommunityBuffer.description>Kleine Fehltritte werden schneller verziehen.</HK_Hediff_CommunityBuffer.description>
+	<!-- HK_Hediff_GoodwillFriction (label) -->
+	<HK_Hediff_GoodwillFriction.label>Wohlwollen-Reibung</HK_Hediff_GoodwillFriction.label>
+	<!-- HK_Hediff_GoodwillFriction (description) -->
+	<HK_Hediff_GoodwillFriction.description>Diplomatie erfordert mehr Aufwand.</HK_Hediff_GoodwillFriction.description>
+	<!-- HK_Hediff_GoodwillTailwind (label) -->
+	<HK_Hediff_GoodwillTailwind.label>Wohlwollen-Rückenwind</HK_Hediff_GoodwillTailwind.label>
+	<!-- HK_Hediff_GoodwillTailwind (description) -->
+	<HK_Hediff_GoodwillTailwind.description>Diplomatische Ergebnisse fallen eher zu deinen Gunsten aus.</HK_Hediff_GoodwillTailwind.description>
+	<!-- HK_Hediff_IntimidatingPresence (label) -->
+	<HK_Hediff_IntimidatingPresence.label>einschüchternde Präsenz</HK_Hediff_IntimidatingPresence.label>
+	<!-- HK_Hediff_IntimidatingPresence (description) -->
+	<HK_Hediff_IntimidatingPresence.description>Andere zögern in deiner Nähe.</HK_Hediff_IntimidatingPresence.description>
+	<!-- HK_Hediff_MercyMagnet (label) -->
+	<HK_Hediff_MercyMagnet.label>Gnadenmagnet</HK_Hediff_MercyMagnet.label>
+	<!-- HK_Hediff_MercyMagnet (description) -->
+	<HK_Hediff_MercyMagnet.description>Deine guten Taten bleiben offenbar haften.</HK_Hediff_MercyMagnet.description>
+	<!-- HK_Hediff_ReputationTax (label) -->
+	<HK_Hediff_ReputationTax.label>Reputationssteuer</HK_Hediff_ReputationTax.label>
+	<!-- HK_Hediff_ReputationTax (description) -->
+	<HK_Hediff_ReputationTax.description>Geschäfte kosten mehr, wenn du berüchtigt bist.</HK_Hediff_ReputationTax.description>
+	<!-- HK_Hediff_SilverTongue (label) -->
+	<HK_Hediff_SilverTongue.label>Silberzunge</HK_Hediff_SilverTongue.label>
+	<!-- HK_Hediff_SilverTongue (description) -->
+	<HK_Hediff_SilverTongue.description>Überzeugen fällt leichter.</HK_Hediff_SilverTongue.description>
+	<!-- HK_Hediff_TerrorEffect (label) -->
+	<HK_Hediff_TerrorEffect.label>Terrorwirkung</HK_Hediff_TerrorEffect.label>
+	<!-- HK_Hediff_TerrorEffect (description) -->
+	<HK_Hediff_TerrorEffect.description>Angst breitet sich schnell aus.</HK_Hediff_TerrorEffect.description>
+</LanguageData>

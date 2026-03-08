@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.AnimationOffsetDef>
+		<defName>Offset_Blowjob_Receiver</defName>
+		<offsets>
+			<li Class="Despicable.AnimationOffset_BodyType">
+				<races>
+					<li>Human</li>
+				</races>
+				<offsets>
+				</offsets>
+			</li>
+		</offsets>
+	</Despicable.AnimationOffsetDef>
+	<Despicable.AnimationOffsetDef>
+		<defName>Offset_Blowjob_Initiator</defName>
+		<offsets>
+			<li Class="Despicable.AnimationOffset_BodyType">
+				<races>
+					<li>Human</li>
+				</races>
+				<offsets>
+					<li>
+						<bodyType>Hulk</bodyType>
+						<offset>(0, 0, 0.223)</offset>
+					</li>
+					<li>
+						<bodyType>Fat</bodyType>
+						<offset>(-0.2, 0, 0.124)</offset>
+					</li>
+				</offsets>
+			</li>
+			<!-- An example of age-ranged offsets
+			<li Class="Despicable.AnimationOffset_AgeRange" MayRequire="Mod.ID.Here">
+				<races>
+					<li>Moosesian</li>
+				</races>
+				<offsetsFemale>
+					<li><bodyType>Female</bodyType><ageRange>18~24</ageRange><offset>(0, 0, 0.223)</offset></li>
+					<li><bodyType>Female</bodyType><ageRange>25~100</ageRange><offset>(0, 0, 0.4)</offset></li>
+				</offsetsFemale>
+			</li>
+			-->
+		</offsets>
+	</Despicable.AnimationOffsetDef>
+</Defs>

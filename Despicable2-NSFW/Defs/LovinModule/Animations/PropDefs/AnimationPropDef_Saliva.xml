@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<PawnRenderNodeTagDef>
+		<defName>Saliva</defName>
+	</PawnRenderNodeTagDef>
+
+	<Despicable.AnimationPropDef>
+		<defName>AnimProp_Saliva</defName>
+		<animPropProperties Class="Despicable.PawnRenderNodeProperties_GraphicVariants">
+			<debugLabel>Saliva</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_GraphicVariants</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_GraphicVariants</workerClass>
+			<tagDef>Saliva</tagDef>
+			<parentTagDef>Head</parentTagDef>
+			<!-- for height -->
+			<texPath>AnimationProps/Saliva/Saliva</texPath>
+			<overlayLayer>Head</overlayLayer>
+			<baseLayer>95</baseLayer>
+		</animPropProperties>
+	</Despicable.AnimationPropDef>
+	
+</Defs>

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.AnimationOffsetDef>
+		<defName>Offset_Cunnilingus_Initiator</defName>
+		<offsets>
+			<li Class="Despicable.AnimationOffset_BodyType">
+				<races>
+					<li>Human</li>
+				</races>
+				<offsets>
+					<li>
+						<bodyType>Thin</bodyType>
+						<offset>(0, 0, 0)</offset>
+					</li>
+				</offsets>
+			</li>
+		</offsets>
+	</Despicable.AnimationOffsetDef>
+	<Despicable.AnimationOffsetDef>
+		<defName>Offset_Cunnilingus_Receiver</defName>
+		<offsets>
+			<li Class="Despicable.AnimationOffset_BodyType">
+				<races>
+					<li>Human</li>
+				</races>
+				<offsets>
+					<li>
+						<bodyType>Thin</bodyType>
+						<offset>(-0.049, 0, 0.057)</offset>
+					</li>
+				</offsets>
+			</li>
+		</offsets>
+	</Despicable.AnimationOffsetDef>
+</Defs>

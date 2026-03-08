@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7F6E4EFD-CE0B-4EFB-A60A-49615B158EC7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DespicableNSFW</RootNamespace>
+    <AssemblyName>DespicableNSFW</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <LangVersion>10.0</LangVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\1.6\Assemblies\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>5</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\1.6\Assemblies\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\workshop\content\294100\3463505750\1.6\Assemblies\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Despicable">
+      <HintPath>..\..\Despicable2-Core\1.6\Assemblies\Despicable.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DespicableNSFWBootstrap.cs" />
+    <Compile Include="HookBootstraps.cs" />
+    <Compile Include="Integrations\Common\IntegrationGuards.cs" />
+    <Compile Include="Integrations\Common\LovinContextBridge.cs" />
+    <Compile Include="Integrations\Common\LovinContextRuntimeState.cs" />
+    <Compile Include="Integrations\Common\NsfwCompatBootstrap.cs" />
+    <Compile Include="Integrations\Common\NsfwCompatRuntimeState.cs" />
+    <Compile Include="Integrations\Common\ReproCompatibilityUtil.cs" />
+    <Compile Include="Integrations\GenderWorks\GenderWorksCompatModule.cs" />
+    <Compile Include="Integrations\GenderWorks\GenderWorksUtil.cs" />
+    <Compile Include="Integrations\Intimacy\HarmonyPatch_Intimacy_PregnancyGate.cs" />
+    <Compile Include="Integrations\Intimacy\HarmonyPatch_Intimacy_SexToilAnimation.cs" />
+    <Compile Include="Integrations\Intimacy\HarmonyPatch_Intimacy_SexToilAnimation.Helpers.cs" />
+    <Compile Include="Integrations\Intimacy\IntimacyApplyUtil.cs" />
+    <Compile Include="Integrations\Intimacy\IntimacyCompatModule.cs" />
+    <Compile Include="Integrations\Intimacy\IntimacyReflectionUtil.cs" />
+    <Compile Include="LovinModule\Comp\CompLovinParts.cs" />
+    <Compile Include="LovinModule\Comp\CompProperties_LovinParts.cs" />
+    <Compile Include="LovinModule\Patches\HarmonyPatch_LovinVisualEvents.cs" />
+    <Compile Include="LovinModule\Runtime\LovinVisualRuntime.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_FacialAnimDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_GenitalDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_InteractionDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_JobDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_PawnRenderNodeTagDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_SoundDefOf.cs" />
+    <Compile Include="LovinModule\Genitals\BodyTypeGenitalsOffsetDef.cs" />
+    <Compile Include="LovinModule\Genitals\GenitalDef.cs" />
+    <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNodeWorker_Genitals.cs" />
+    <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNode_Genitals.cs" />
+    <Compile Include="LovinModule\Hooks\LovinResolveHooks.cs" />
+    <Compile Include="LovinModule\Hooks\NSFWHookBootstrap.cs" />
+    <Compile Include="LovinModule\Hooks\NsfwPawnTags.cs" />
+    <Compile Include="LovinModule\LovinInteractions.cs" />
+    <Compile Include="LovinModule\LovinJob\LovinPrivacyCellFinder.cs" />
+    <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinBase.cs" />
+    <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinBase.Toils.cs" />
+    <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinBed.cs" />
+    <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinNoBed.cs" />
+    <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_ReturnLovin.cs" />
+    <Compile Include="LovinModule\LovinJob\Givers\JobGiver_GetBedLovin.cs" />
+    <Compile Include="LovinModule\LovinJob\Givers\JobGiver_GetLovin.cs" />
+    <Compile Include="LovinModule\LovinJob\LovinStagePlayback.cs" />
+    <Compile Include="LovinModule\LovinJob\ModExtension_LovinType.cs" />
+    <Compile Include="LovinModule\LovinTypeDef.cs" />
+    <Compile Include="LovinModule\LovinUtil.cs" />
+    <Compile Include="LovinModule\LovinUtil.Checks.cs" />
+    <Compile Include="LovinModule\MapComponent_LovinCandidateCache.cs" />
+    <Compile Include="LovinModule\Patches\HarmonyPatch_ApparelCanDrawNow.cs" />
+    <Compile Include="LovinModule\Patches\HarmonyPatch_MI_Intimacy.cs" />
+    <Compile Include="LovinModule\Patches\HarmonyPatch_PawnRenderNodeWorkers.cs" />
+    <Compile Include="ModMain.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\DespicableNsfwRuntimeState.cs" />
+    <Compile Include="Runtime\GameComponent_DespicableNsfwRuntimeReset.cs" />
+    <Compile Include="LovinModule\UI\TexIconsNSFW.cs" />
+  </ItemGroup>
+<PropertyGroup>
+    <!-- Set to true to skip the localization audit (not recommended). -->
+    <D2SkipLocalizationAudit Condition="'$(D2SkipLocalizationAudit)'==''">false</D2SkipLocalizationAudit>
+  </PropertyGroup>
+
+
+  <PropertyGroup>
+    <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
+    <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
+  </PropertyGroup>
+  <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
+  </Target>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

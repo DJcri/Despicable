@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="BuildingBase">
+    <defName>D2_UIFrameworkDemoThing</defName>
+    <label>UI framework demo tab anchor</label>
+    <description>Debug-only helper thing used to exercise the UI framework ITab demo.</description>
+    <thingClass>Building</thingClass>
+    <graphicData>
+      <texPath>UI/Karma/HeroGizmo</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1.0,1.0)</drawSize>
+    </graphicData>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <fillPercent>0.05</fillPercent>
+    <selectable>true</selectable>
+    <rotatable>false</rotatable>
+    <size>(1,1)</size>
+    <tickerType>Never</tickerType>
+    <statBases>
+      <MaxHitPoints>100</MaxHitPoints>
+      <WorkToBuild>1</WorkToBuild>
+      <Mass>1</Mass>
+      <Flammability>0</Flammability>
+    </statBases>
+    <building>
+      <isInert>true</isInert>
+    </building>
+    <inspectorTabs>
+      <li>Despicable.UIFramework.Demo.ITab_UIFrameworkDemo</li>
+    </inspectorTabs>
+    <comps />
+  </ThingDef>
+</Defs>

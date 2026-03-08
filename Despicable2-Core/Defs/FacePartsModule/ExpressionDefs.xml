@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Drunk</defName>
+		<texPathEyes>Gendered/eye_drunk</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_drunk</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Tired</defName>
+		<texPathEyes>Gendered/eye_tired</texPathEyes>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_EyesClosed</defName>
+		<texPathEyes>Gendered/eye_closed</texPathEyes>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Smile</defName>
+		<texPathMouth>FaceParts/Mouths/mouth_grin</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Smirk</defName>
+		<texPathEyes>Gendered/eye_halflid</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_smirk</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Drool</defName>
+		<texPathMouth>FaceParts/Mouths/mouth_drool</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Berserk</defName>
+		<texPathEyes>FaceParts/Eyes/eye_berserk</texPathEyes>
+		<texPathMouth>FaceParts/Mouths/mouth_frown</texPathMouth>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Distressed</defName>
+		<texPathEyes>FaceParts/Eyes/eye_distressed</texPathEyes>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Infant</defName>
+		<texPathEyes>Gendered/eye_sparkle</texPathEyes>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_Drafted</defName>
+		<texPathEyes>Gendered/eye_drafted</texPathEyes>
+	</Despicable.ExpressionDef>
+</Defs>

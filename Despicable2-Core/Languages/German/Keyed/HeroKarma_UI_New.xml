@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2HK_UI_HeroKarma>Heldenkarma</D2HK_UI_HeroKarma>
+  <D2HK_UI_OpenHeroKarmaDesc>Öffnet den Heldenkarma-Bildschirm.</D2HK_UI_OpenHeroKarmaDesc>
+  <D2HK_UI_AssignHero>Held zuweisen</D2HK_UI_AssignHero>
+  <D2HK_UI_AssignHeroDesc>Macht diesen Pawn zum aktiven Helden. Karma, Ansehen und Held-Effekte folgen dem aktiven Helden.</D2HK_UI_AssignHeroDesc>
+  <D2HK_UI_AssignHeroBody>Wähle, wer das Heldenkarma trägt. Der Fortschritt bleibt erhalten. Aktive Effekte wechseln zum neuen Helden.</D2HK_UI_AssignHeroBody>
+  <D2HK_UI_AssignHeroAlready>Dieser Pawn ist bereits der Held.</D2HK_UI_AssignHeroAlready>
+  <D2HK_UI_HeroAssigned>{0} ist jetzt der Held.</D2HK_UI_HeroAssigned>
+  <D2HK_UI_HeaderHero>Held: {0}</D2HK_UI_HeaderHero>
+  <D2HK_UI_NoneAssigned>Kein Held zugewiesen</D2HK_UI_NoneAssigned>
+  <D2HK_UI_NoneAssignedOverview>Kein Held ist zugewiesen. Nutze Held zuweisen bei einem Kolonisten, um das Heldenkarma zu verfolgen.</D2HK_UI_NoneAssignedOverview>
+  <D2HK_UI_Overview>Übersicht</D2HK_UI_Overview>
+  <D2HK_UI_Reputation>Ruf</D2HK_UI_Reputation>
+  <D2HK_UI_Status>Status</D2HK_UI_Status>
+  <D2HK_UI_CurrentHero>Aktueller Held</D2HK_UI_CurrentHero>
+  <D2HK_UI_NewHero>Neuer Held</D2HK_UI_NewHero>
+  <D2HK_UI_Karma>Karma</D2HK_UI_Karma>
+  <D2HK_UI_Standing>Ansehen</D2HK_UI_Standing>
+  <D2HK_UI_KarmaTooltip>Karma spiegelt wider, wie man sich an den Helden erinnert. Es bestimmt, welche Held-Effekte aktiv sind.</D2HK_UI_KarmaTooltip>
+  <D2HK_UI_StandingTooltip>Ansehen spiegelt wider, wie die Ideologie der Kolonie das Verhalten des Helden beurteilt. Es beeinflusst die Gewissheit des Helden und die Meinung von Pawns, die seine Ideologie teilen.</D2HK_UI_StandingTooltip>
+  <D2HK_UI_CurrentStandingEffects>Aktuelle Ansehenseffekte</D2HK_UI_CurrentStandingEffects>
+  <D2HK_UI_StandingEffectsDisabled>Ansehenseffekte sind deaktiviert.</D2HK_UI_StandingEffectsDisabled>
+  <D2HK_UI_CertaintyGains>Gewissheitsgewinne</D2HK_UI_CertaintyGains>
+  <D2HK_UI_CertaintyLosses>Gewissheitsverluste</D2HK_UI_CertaintyLosses>
+  <D2HK_UI_SameIdeologyOpinion>Meinung derselben Ideologie</D2HK_UI_SameIdeologyOpinion>
+  <D2HK_UI_ActiveEffects>Aktive Effekte</D2HK_UI_ActiveEffects>
+  <D2HK_UI_NoActiveEffects>Keine aktiven Effekte.</D2HK_UI_NoActiveEffects>
+  <D2HK_UI_RecentDeeds>Jüngste Taten</D2HK_UI_RecentDeeds>
+  <D2HK_UI_NoRecentDeeds>Noch keine jüngsten Taten.</D2HK_UI_NoRecentDeeds>
+  <D2HK_UI_Search>Suchen</D2HK_UI_Search>
+  <D2HK_UI_All>Alle</D2HK_UI_All>
+  <D2HK_UI_People>Personen</D2HK_UI_People>
+  <D2HK_UI_Factions>Fraktionen</D2HK_UI_Factions>
+  <D2HK_UI_ReputationNone>Noch kein nennenswerter Ruf.</D2HK_UI_ReputationNone>
+  <D2HK_UI_ReputationNoMatches>Keine Treffer.</D2HK_UI_ReputationNoMatches>
+  <D2HK_UI_SelectReputationTarget>Wähle eine Person oder Fraktion, um den Ruf zu prüfen.</D2HK_UI_SelectReputationTarget>
+  <D2HK_UI_Summary>Zusammenfassung</D2HK_UI_Summary>
+  <D2HK_UI_DirectReputation>Direkter Ruf</D2HK_UI_DirectReputation>
+  <D2HK_UI_FactionEffect>Fraktionseffekt</D2HK_UI_FactionEffect>
+  <D2HK_UI_SettlementEffect>Siedlungseffekt</D2HK_UI_SettlementEffect>
+  <D2HK_UI_CurrentEffects>Aktuelle Effekte</D2HK_UI_CurrentEffects>
+  <D2HK_UI_LastChange>Letzte Änderung</D2HK_UI_LastChange>
+  <D2HK_UI_Event>Ereignis</D2HK_UI_Event>
+  <D2HK_UI_ReputationChange>Rufänderung</D2HK_UI_ReputationChange>
+  <D2HK_UI_BaseChange>Basisänderung</D2HK_UI_BaseChange>
+  <D2HK_UI_AffectedBy>Beeinflusst durch</D2HK_UI_AffectedBy>
+  <D2HK_UI_Reason>Grund</D2HK_UI_Reason>
+  <D2HK_UI_NoDirectEffect>Derzeit kein direkter Effekt.</D2HK_UI_NoDirectEffect>
+  <D2HK_UI_ReputationTooltip>Der Ruf spiegelt wider, wie dieses Ziel den Helden sieht. Er kann Handel, Wohlwollen, Verhaftungen, Rekrutierung und Bekehrung beeinflussen.</D2HK_UI_ReputationTooltip>
+  <D2HK_UI_ReputationChangeTooltip>Das endgültige Ruffergebnis nach allen Modifikatoren.</D2HK_UI_ReputationChangeTooltip>
+  <D2HK_UI_BaseChangeTooltip>Die Rufänderung, bevor der Ideologieeinfluss angewendet wurde.</D2HK_UI_BaseChangeTooltip>
+  <D2HK_UI_AffectedByTooltip>Eine Ideologieregel oder ein Meme hat das Basis-Ruffergebnis verändert.</D2HK_UI_AffectedByTooltip>
+  <D2HK_UI_TradeBlockedByTax>Handelspreisverbesserung durch Reputationssteuer blockiert.</D2HK_UI_TradeBlockedByTax>
+  <D2HK_UI_Cancel>Abbrechen</D2HK_UI_Cancel>
+  <D2HK_UI_Assign>Zuweisen</D2HK_UI_Assign>
+
+  <D2HK_UI_TradePriceImprovement>Handelspreisverbesserung</D2HK_UI_TradePriceImprovement>
+  <D2HK_UI_GoodwillGains>Wohlwollensgewinne</D2HK_UI_GoodwillGains>
+  <D2HK_UI_GoodwillLosses>Wohlwollensverluste</D2HK_UI_GoodwillLosses>
+  <D2HK_UI_NegotiationAbility>Verhandlungsfähigkeit</D2HK_UI_NegotiationAbility>
+  <D2HK_UI_SocialImpact>Sozialwirkung</D2HK_UI_SocialImpact>
+  <D2HK_UI_InjuryHealingFactor>Verletzungsheilungsfaktor</D2HK_UI_InjuryHealingFactor>
+  <D2HK_UI_RecruitResistance>Rekrutierungswiderstand</D2HK_UI_RecruitResistance>
+  <D2HK_UI_ConvertCertainty>Gewissheit bei Bekehrung</D2HK_UI_ConvertCertainty>
+  <D2HK_UI_MentalBreakThreshold>Schwelle für mentalen Zusammenbruch</D2HK_UI_MentalBreakThreshold>
+  <D2HK_UI_ArrestSuccessChance>Verhaftungserfolgschance</D2HK_UI_ArrestSuccessChance>
+  <D2HK_UI_MeleeHitChance>Nahkampftrefferchance</D2HK_UI_MeleeHitChance>
+  <D2HK_UI_MeleeDodgeChance>Nahkampf-Ausweichchance</D2HK_UI_MeleeDodgeChance>
+  <D2HK_UI_ArrestCompliance>Kooperation bei Verhaftung</D2HK_UI_ArrestCompliance>
+  <D2HK_UI_ArrestComplianceFear>Kooperation bei Verhaftung aus Angst</D2HK_UI_ArrestComplianceFear>
+
+  <D2HK_UI_PerkDesc_MercyMagnet>Güte hinterlässt Spuren.</D2HK_UI_PerkDesc_MercyMagnet>
+  <D2HK_UI_PerkDesc_GoodwillTailwind>Gute Taten wirken weiter.</D2HK_UI_PerkDesc_GoodwillTailwind>
+  <D2HK_UI_PerkDesc_SilverTongue>Überzeugen fällt leichter.</D2HK_UI_PerkDesc_SilverTongue>
+  <D2HK_UI_PerkDesc_CommunityBuffer>In der Nähe des Helden bleibt alles ruhiger.</D2HK_UI_PerkDesc_CommunityBuffer>
+  <D2HK_UI_PerkDesc_IntimidatingPresence>Gehorsam kommt mit einem Frösteln.</D2HK_UI_PerkDesc_IntimidatingPresence>
+  <D2HK_UI_PerkDesc_GoodwillFriction>Die Kolonie hinterlässt einen raueren Eindruck.</D2HK_UI_PerkDesc_GoodwillFriction>
+  <D2HK_UI_PerkDesc_TerrorEffect>Angst schärft jede Interaktion.</D2HK_UI_PerkDesc_TerrorEffect>
+  <D2HK_UI_PerkDesc_ReputationTax>Angst fordert ihren Tribut.</D2HK_UI_PerkDesc_ReputationTax>
+
+  <D2HK_UI_PerkNote_MercyMagnet>Das Helfen von Außenstehenden gewährt zusätzliches Wohlwollen.</D2HK_UI_PerkNote_MercyMagnet>
+  <D2HK_UI_PerkNote_CommunityBuffer>Verbündete in der Nähe erhalten nach Beleidigungen oder Kränkungen 1,5 % Stimmung zurück.</D2HK_UI_PerkNote_CommunityBuffer>
+  <D2HK_UI_PerkNote_IntimidatingPresence>Fehlgeschlagene Verhaftungen können in Kooperation umschlagen ({0}).</D2HK_UI_PerkNote_IntimidatingPresence>
+  <D2HK_UI_PerkNote_TerrorEffect>Schwelle für mentalen Zusammenbruch {0}. Fehlgeschlagene Verhaftungen können in Kooperation umschlagen ({1}).</D2HK_UI_PerkNote_TerrorEffect>
+</LanguageData>

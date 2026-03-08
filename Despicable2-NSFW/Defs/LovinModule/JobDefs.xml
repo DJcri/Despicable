@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<JobDef>
+		<defName>Job_GetLovin</defName>
+		<driverClass>Despicable.JobDriver_LovinNoBed</driverClass>
+		<reportString>getting lovin' from TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+		<suspendable>false</suspendable>
+		<modExtensions>
+			<li Class="Despicable.ModExtension_LovinType">
+				<!-- Set in code -->
+				<lovinType/>
+			</li>
+		</modExtensions>
+	</JobDef>
+	<JobDef>
+		<defName>Job_GetBedLovin</defName>
+		<driverClass>Despicable.JobDriver_LovinBed</driverClass>
+		<reportString>bedding with TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+		<suspendable>false</suspendable>
+		<modExtensions>
+			<li Class="Despicable.ModExtension_LovinType">
+				<!-- Set in code -->
+				<lovinType/>
+			</li>
+		</modExtensions>
+	</JobDef>
+	<JobDef>
+		<defName>Job_GiveLovin</defName>
+		<driverClass>Despicable.JobDriver_ReturnLovin</driverClass>
+		<reportString>giving lovin' to TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+		<suspendable>false</suspendable>
+	</JobDef>
+</Defs>

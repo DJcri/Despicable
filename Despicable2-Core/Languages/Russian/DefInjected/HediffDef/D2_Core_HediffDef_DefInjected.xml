@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for HediffDef (D2_Core) -->
+	<!-- HK_Hediff_CommunityBuffer (label) -->
+	<HK_Hediff_CommunityBuffer.label>общественная снисходительность</HK_Hediff_CommunityBuffer.label>
+	<!-- HK_Hediff_CommunityBuffer (description) -->
+	<HK_Hediff_CommunityBuffer.description>Мелкие проступки прощаются быстрее.</HK_Hediff_CommunityBuffer.description>
+	<!-- HK_Hediff_GoodwillFriction (label) -->
+	<HK_Hediff_GoodwillFriction.label>трение доброжелательности</HK_Hediff_GoodwillFriction.label>
+	<!-- HK_Hediff_GoodwillFriction (description) -->
+	<HK_Hediff_GoodwillFriction.description>Дипломатия требует больше усилий.</HK_Hediff_GoodwillFriction.description>
+	<!-- HK_Hediff_GoodwillTailwind (label) -->
+	<HK_Hediff_GoodwillTailwind.label>попутный ветер доброжелательности</HK_Hediff_GoodwillTailwind.label>
+	<!-- HK_Hediff_GoodwillTailwind (description) -->
+	<HK_Hediff_GoodwillTailwind.description>Дипломатические исходы чаще складываются в вашу пользу.</HK_Hediff_GoodwillTailwind.description>
+	<!-- HK_Hediff_IntimidatingPresence (label) -->
+	<HK_Hediff_IntimidatingPresence.label>пугающее присутствие</HK_Hediff_IntimidatingPresence.label>
+	<!-- HK_Hediff_IntimidatingPresence (description) -->
+	<HK_Hediff_IntimidatingPresence.description>Рядом с вами другие становятся осторожнее.</HK_Hediff_IntimidatingPresence.description>
+	<!-- HK_Hediff_MercyMagnet (label) -->
+	<HK_Hediff_MercyMagnet.label>магнит милосердия</HK_Hediff_MercyMagnet.label>
+	<!-- HK_Hediff_MercyMagnet (description) -->
+	<HK_Hediff_MercyMagnet.description>Ваши добрые дела надолго запоминаются.</HK_Hediff_MercyMagnet.description>
+	<!-- HK_Hediff_ReputationTax (label) -->
+	<HK_Hediff_ReputationTax.label>налог на репутацию</HK_Hediff_ReputationTax.label>
+	<!-- HK_Hediff_ReputationTax (description) -->
+	<HK_Hediff_ReputationTax.description>Сделки обходятся дороже, когда за вами тянется дурная слава.</HK_Hediff_ReputationTax.description>
+	<!-- HK_Hediff_SilverTongue (label) -->
+	<HK_Hediff_SilverTongue.label>подвешенный язык</HK_Hediff_SilverTongue.label>
+	<!-- HK_Hediff_SilverTongue (description) -->
+	<HK_Hediff_SilverTongue.description>Убеждать становится легче.</HK_Hediff_SilverTongue.description>
+	<!-- HK_Hediff_TerrorEffect (label) -->
+	<HK_Hediff_TerrorEffect.label>эффект ужаса</HK_Hediff_TerrorEffect.label>
+	<!-- HK_Hediff_TerrorEffect (description) -->
+	<HK_Hediff_TerrorEffect.description>Страх распространяется быстро.</HK_Hediff_TerrorEffect.description>
+</LanguageData>

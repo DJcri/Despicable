@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2C_CODE_2C24A061>英雄业力认可度解析时读取戒律标签失败。</D2C_CODE_2C24A061>
+  <D2C_CODE_45DCE70A>{0}：未找到 PawnEditor.Dialog_AppearanceEditor。未注入面部部件按钮。</D2C_CODE_45DCE70A>
+  <D2C_CODE_52F3F63E>{0}：未找到 Dialog_AppearanceEditor.DoLeftSection(Rect)。未注入面部部件按钮。</D2C_CODE_52F3F63E>
+  <D2C_CODE_97865B7F>打开 Despicable 面部部件选择界面。</D2C_CODE_97865B7F>
+  <D2C_CODE_AF6C0280>此类型角色（{0}）无法使用面部部件。</D2C_CODE_AF6C0280>
+  <D2C_CODE_D5D334BD>面部部件</D2C_CODE_D5D334BD>
+</LanguageData>

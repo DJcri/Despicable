@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<PawnRenderNodeTagDef>
+		<defName>RenderNodeTag_Cowgirl_Xray</defName>
+	</PawnRenderNodeTagDef>
+
+	<Despicable.AnimationPropDef>
+		<defName>AnimProp_Cowgirl_Xray</defName>
+		<animPropProperties Class="Despicable.PawnRenderNodeProperties_GraphicVariants">
+			<debugLabel>Cowgirl Xray</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_GraphicVariants</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_GraphicVariants</workerClass>
+			<tagDef>RenderNodeTag_Cowgirl_Xray</tagDef>
+			<absoluteTransform>True</absoluteTransform>
+			<parentTagDef>Body</parentTagDef>
+			<!-- for height -->
+			<texPath>AnimationProps/CowgirlXray/XRay2-1</texPath>
+			<overlayLayer>Head</overlayLayer>
+			<baseLayer>95</baseLayer>
+			<texPathVariantsDef>TexPathVariants_Cowgirl_Xray</texPathVariantsDef>
+			
+			<!-- <propOffsetDef>Offset_Cowgirl_Top</propOffsetDef> -->
+		</animPropProperties>
+	</Despicable.AnimationPropDef>
+	
+	<Despicable.TexPathVariantsDef>
+		<defName>TexPathVariants_Cowgirl_Xray</defName>
+		<variants>
+			<li>AnimationProps/CowgirlXray/XRay2-2</li>
+			<li>AnimationProps/CowgirlXray/XRay2-3</li>
+			<li>AnimationProps/CowgirlXray/XRay2-4</li>
+			<li>AnimationProps/CowgirlXray/XRay2-5</li>
+			<li>AnimationProps/CowgirlXray/XRay2-6</li>
+		</variants>
+	</Despicable.TexPathVariantsDef>
+	
+	<Despicable.TexPathVariantsDef>
+		<defName>TexPathVariants_Xray_Inside</defName>
+		<variants>
+			<li>AnimationProps/Cat/Cat1</li>
+			<!-- variant 1 in animation -->
+			<li>AnimationProps/Cat/Cat2</li>
+			<!-- variant 2 in animation -->
+		</variants>
+	</Despicable.TexPathVariantsDef>
+	
+	<Despicable.TexPathVariantsDef>
+		<defName>TexPathVariants_XrayPenis_Human</defName>
+		<variants>
+			<li>AnimationProps/Cat/Cat1</li>
+			<!-- variant 1 in animation -->
+			<li>AnimationProps/Cat/Cat2</li>
+			<!-- variant 2 in animation -->
+		</variants>
+	</Despicable.TexPathVariantsDef>
+	
+</Defs>

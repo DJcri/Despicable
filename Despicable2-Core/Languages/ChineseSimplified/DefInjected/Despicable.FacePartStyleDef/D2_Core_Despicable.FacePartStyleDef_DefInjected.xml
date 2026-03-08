@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <Eye_Basic.label>基础眼睛</Eye_Basic.label>
+  <Eye_Cool.label>酷</Eye_Cool.label>
+  <Eye_Jovial.label>开朗</Eye_Jovial.label>
+  <Eye_Serious.label>严肃</Eye_Serious.label>
+  <Eye_Squint.label>眯眼</Eye_Squint.label>
+  <Eye_Thoughtful.label>沉思</Eye_Thoughtful.label>
+  <Eye_Tilted.label>上挑</Eye_Tilted.label>
+  <Mouth_Basic.label>标准</Mouth_Basic.label>
+  <Mouth_Derp.label>呆傻</Mouth_Derp.label>
+  <Mouth_Frown.label>皱眉</Mouth_Frown.label>
+  <Mouth_Grin.label>咧嘴笑</Mouth_Grin.label>
+  <Mouth_Indifferent.label>淡然</Mouth_Indifferent.label>
+  <Mouth_Monster.label>怪物</Mouth_Monster.label>
+  <Mouth_Overbite.label>龅牙</Mouth_Overbite.label>
+  <Mouth_Pretty.label>漂亮</Mouth_Pretty.label>
+  <Mouth_Smirk.label>坏笑</Mouth_Smirk.label>
+  <Mouth_Smug.label>得意</Mouth_Smug.label>
+</LanguageData>

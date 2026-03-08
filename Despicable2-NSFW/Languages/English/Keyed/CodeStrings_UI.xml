@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- AUTO-GENERATED: player-facing code strings to extract into translations -->
+	<!-- Keys are placeholders until code is patched to use .Translate() -->
+	<!-- LovinModule/Patches/HarmonyPatch_MI_Intimacy.cs:46 -->
+	<D2N_CODE_90731E3E>Do lovin'</D2N_CODE_90731E3E>
+	<!-- LovinModule/Patches/HarmonyPatch_MI_Intimacy.cs:49 -->
+	<D2N_CODE_C1CB4969>Do lovin' with {0}</D2N_CODE_C1CB4969>
+
+  <D2N_Lovin_DoWithReason>Do lovin' with {0} ({1})</D2N_Lovin_DoWithReason>
+  <D2N_LovinReason_YouPrefix>ordered pawn</D2N_LovinReason_YouPrefix>
+  <D2N_LovinReason_TargetPrefix>other pawn</D2N_LovinReason_TargetPrefix>
+  <D2N_LovinReason_PairMissing>missing participant</D2N_LovinReason_PairMissing>
+  <D2N_LovinReason_Unknown>unavailable</D2N_LovinReason_Unknown>
+  <D2N_LovinReason_SamePawn>same pawn</D2N_LovinReason_SamePawn>
+  <D2N_LovinReason_NoCompatibleTypes>not compatible</D2N_LovinReason_NoCompatibleTypes>
+  <D2N_LovinReason_IsMissing>are missing</D2N_LovinReason_IsMissing>
+  <D2N_LovinReason_IsNotHumanlike>are not humanlike</D2N_LovinReason_IsNotHumanlike>
+  <D2N_LovinReason_IsDrafted>are drafted</D2N_LovinReason_IsDrafted>
+  <D2N_LovinReason_IsLeaving>are leaving</D2N_LovinReason_IsLeaving>
+  <D2N_LovinReason_IsAggressive>are aggressive</D2N_LovinReason_IsAggressive>
+  <D2N_LovinReason_IsBusy>are busy</D2N_LovinReason_IsBusy>
+  <D2N_LovinReason_HadLovinRecently>recently had lovin'</D2N_LovinReason_HadLovinRecently>
+  <D2N_LovinReason_DoesntWantLovin>don't want lovin'</D2N_LovinReason_DoesntWantLovin>
+  <D2N_LovinReason_IsUnderage>are underage</D2N_LovinReason_IsUnderage>
+  <D2N_LovinReason_CantStayAwake>can't stay awake</D2N_LovinReason_CantStayAwake>
+  <D2N_LovinReason_IsBleeding>are bleeding</D2N_LovinReason_IsBleeding>
+  <D2N_LovinReason_IsInPain>are in pain</D2N_LovinReason_IsInPain>
+  <D2N_LovinReason_IsDead>are dead</D2N_LovinReason_IsDead>
+  <D2N_LovinReason_IsStarving>are starving</D2N_LovinReason_IsStarving>
+  <D2N_LovinReason_YourOpinionTooLow>ordered pawn's opinion is too low</D2N_LovinReason_YourOpinionTooLow>
+  <D2N_LovinReason_TheirOpinionTooLow>other pawn's opinion is too low</D2N_LovinReason_TheirOpinionTooLow>
+  <D2N_LovinReason_YourCompatibilityTooLow>ordered pawn's compatibility is too low</D2N_LovinReason_YourCompatibilityTooLow>
+  <D2N_LovinReason_TheirCompatibilityTooLow>other pawn's compatibility is too low</D2N_LovinReason_TheirCompatibilityTooLow>
+  <D2N_LovinReason_OrientationMismatch>orientation mismatch</D2N_LovinReason_OrientationMismatch>
+  <D2N_LovinReason_IdeologyForbids>ideology forbids it</D2N_LovinReason_IdeologyForbids>
+  <D2N_LovinReason_IntimacyInstalled>Intimacy installed</D2N_LovinReason_IntimacyInstalled>
+</LanguageData>

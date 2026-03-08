@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2C_CODE_2C24A061>Hero Karma approval resolution failed to read a precept label.</D2C_CODE_2C24A061>
+  <D2C_CODE_45DCE70A>{0}: PawnEditor.Dialog_AppearanceEditor was not found. Face Parts button was not injected.</D2C_CODE_45DCE70A>
+  <D2C_CODE_52F3F63E>{0}: Dialog_AppearanceEditor.DoLeftSection(Rect) was not found. Face Parts button was not injected.</D2C_CODE_52F3F63E>
+  <D2C_CODE_97865B7F>Open Despicable face-part selection.</D2C_CODE_97865B7F>
+  <D2C_CODE_AF6C0280>Face Parts are not available for this pawn type ({0}).</D2C_CODE_AF6C0280>
+  <D2C_CODE_D5D334BD>Face Parts</D2C_CODE_D5D334BD>
+</LanguageData>

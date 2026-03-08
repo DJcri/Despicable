@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for JobDef (D2_NSFW) -->
+	<!-- Job_GetBedLovin (reportString) -->
+	<Job_GetBedLovin.reportString>va au lit avec TargetA.</Job_GetBedLovin.reportString>
+	<!-- Job_GetLovin (reportString) -->
+	<Job_GetLovin.reportString>a un moment intime avec TargetA.</Job_GetLovin.reportString>
+	<!-- Job_GiveLovin (reportString) -->
+	<Job_GiveLovin.reportString>fait l'amour avec TargetA.</Job_GiveLovin.reportString>
+</LanguageData>

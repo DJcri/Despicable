@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2C_CODE_2C24A061>La resolución de aprobación de Karma heroico no pudo leer una etiqueta de precepto.</D2C_CODE_2C24A061>
+  <D2C_CODE_45DCE70A>{0}: No se encontró PawnEditor.Dialog_AppearanceEditor. No se inyectó el botón de Partes faciales.</D2C_CODE_45DCE70A>
+  <D2C_CODE_52F3F63E>{0}: No se encontró Dialog_AppearanceEditor.DoLeftSection(Rect). No se inyectó el botón de Partes faciales.</D2C_CODE_52F3F63E>
+  <D2C_CODE_97865B7F>Abrir la selección de partes faciales de Despicable.</D2C_CODE_97865B7F>
+  <D2C_CODE_AF6C0280>Las Partes faciales no están disponibles para este tipo de personaje ({0}).</D2C_CODE_AF6C0280>
+  <D2C_CODE_D5D334BD>Partes faciales</D2C_CODE_D5D334BD>
+</LanguageData>

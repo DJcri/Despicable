@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<!-- DefInjected for ThingDef (D2_Core) -->
+	<!-- D2_UIFrameworkDemoThing (label) -->
+	<D2_UIFrameworkDemoThing.label>якорь демо-вкладки UI-фреймворка</D2_UIFrameworkDemoThing.label>
+	<!-- D2_UIFrameworkDemoThing (description) -->
+	<D2_UIFrameworkDemoThing.description>Отладочный вспомогательный объект для демонстрации ITab UI-фреймворка.</D2_UIFrameworkDemoThing.description>
+</LanguageData>

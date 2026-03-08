@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<!-- add offset rendersubworker to all pawn render tree defs -->
+	<Operation Class="PatchOperationSequence">
+		<success>Always</success>
+		<operations>
+			<li Class="PatchOperationConditional">
+				<xpath>/Defs/PawnRenderTreeDef/root/subworkerClasses</xpath>
+				<success>Always</success>
+				<nomatch Class="PatchOperationAdd">
+					<xpath>/Defs/PawnRenderTreeDef/root</xpath>
+					<value>
+						<subworkerClasses />
+					</value>
+				</nomatch>
+			</li>
+
+			<li Class="PatchOperationAdd">
+				<xpath>/Defs/PawnRenderTreeDef/root/subworkerClasses</xpath>
+				<value>
+					<li>Despicable.PawnRenderSubWorker_ChangeOffset</li>
+				</value>
+			</li>
+		</operations>
+	</Operation>
+
+</Patch>

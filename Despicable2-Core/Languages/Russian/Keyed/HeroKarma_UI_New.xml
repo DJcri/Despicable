@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <D2HK_UI_HeroKarma>Карма героя</D2HK_UI_HeroKarma>
+  <D2HK_UI_OpenHeroKarmaDesc>Открыть окно кармы героя.</D2HK_UI_OpenHeroKarmaDesc>
+  <D2HK_UI_AssignHero>Назначить героя</D2HK_UI_AssignHero>
+  <D2HK_UI_AssignHeroDesc>Сделать этого персонажа активным героем. Карма, одобрение и эффекты героя привязаны к активному герою.</D2HK_UI_AssignHeroDesc>
+  <D2HK_UI_AssignHeroBody>Выберите, кто будет носителем кармы героя. Прогресс сохранится. Активные эффекты перейдут к новому герою.</D2HK_UI_AssignHeroBody>
+  <D2HK_UI_AssignHeroAlready>Этот персонаж уже является героем.</D2HK_UI_AssignHeroAlready>
+  <D2HK_UI_HeroAssigned>Герой назначен: {0}.</D2HK_UI_HeroAssigned>
+  <D2HK_UI_HeaderHero>Герой: {0}</D2HK_UI_HeaderHero>
+  <D2HK_UI_NoneAssigned>Не назначен</D2HK_UI_NoneAssigned>
+  <D2HK_UI_NoneAssignedOverview>Герой не назначен. Используйте «Назначить героя» на колонисте, чтобы начать отслеживать карму героя.</D2HK_UI_NoneAssignedOverview>
+  <D2HK_UI_Overview>Обзор</D2HK_UI_Overview>
+  <D2HK_UI_Reputation>Репутация</D2HK_UI_Reputation>
+  <D2HK_UI_Status>Статус</D2HK_UI_Status>
+  <D2HK_UI_CurrentHero>Текущий герой</D2HK_UI_CurrentHero>
+  <D2HK_UI_NewHero>Новый герой</D2HK_UI_NewHero>
+  <D2HK_UI_Karma>Карма</D2HK_UI_Karma>
+  <D2HK_UI_Standing>Одобрение</D2HK_UI_Standing>
+  <D2HK_UI_KarmaTooltip>Карма отражает, каким героя запомнят. Она определяет, какие эффекты героя активны.</D2HK_UI_KarmaTooltip>
+  <D2HK_UI_StandingTooltip>Одобрение отражает, как идеология колонии оценивает поступки героя. Оно влияет на убеждённость героя и мнение персонажей, разделяющих его идеологию.</D2HK_UI_StandingTooltip>
+  <D2HK_UI_CurrentStandingEffects>Текущие эффекты одобрения</D2HK_UI_CurrentStandingEffects>
+  <D2HK_UI_StandingEffectsDisabled>Эффекты одобрения отключены.</D2HK_UI_StandingEffectsDisabled>
+  <D2HK_UI_CertaintyGains>Прирост убеждённости</D2HK_UI_CertaintyGains>
+  <D2HK_UI_CertaintyLosses>Потеря убеждённости</D2HK_UI_CertaintyLosses>
+  <D2HK_UI_SameIdeologyOpinion>Мнение той же идеологии</D2HK_UI_SameIdeologyOpinion>
+  <D2HK_UI_ActiveEffects>Активные эффекты</D2HK_UI_ActiveEffects>
+  <D2HK_UI_NoActiveEffects>Активных эффектов нет.</D2HK_UI_NoActiveEffects>
+  <D2HK_UI_RecentDeeds>Недавние деяния</D2HK_UI_RecentDeeds>
+  <D2HK_UI_NoRecentDeeds>Недавних деяний пока нет.</D2HK_UI_NoRecentDeeds>
+  <D2HK_UI_Search>Поиск</D2HK_UI_Search>
+  <D2HK_UI_All>Все</D2HK_UI_All>
+  <D2HK_UI_People>Персонажи</D2HK_UI_People>
+  <D2HK_UI_Factions>Фракции</D2HK_UI_Factions>
+  <D2HK_UI_ReputationNone>Заметной репутации пока нет.</D2HK_UI_ReputationNone>
+  <D2HK_UI_ReputationNoMatches>Совпадений нет.</D2HK_UI_ReputationNoMatches>
+  <D2HK_UI_SelectReputationTarget>Выберите персонажа или фракцию, чтобы просмотреть репутацию.</D2HK_UI_SelectReputationTarget>
+  <D2HK_UI_Summary>Сводка</D2HK_UI_Summary>
+  <D2HK_UI_DirectReputation>Прямая репутация</D2HK_UI_DirectReputation>
+  <D2HK_UI_FactionEffect>Эффект фракции</D2HK_UI_FactionEffect>
+  <D2HK_UI_SettlementEffect>Эффект поселения</D2HK_UI_SettlementEffect>
+  <D2HK_UI_CurrentEffects>Текущие эффекты</D2HK_UI_CurrentEffects>
+  <D2HK_UI_LastChange>Последнее изменение</D2HK_UI_LastChange>
+  <D2HK_UI_Event>Событие</D2HK_UI_Event>
+  <D2HK_UI_ReputationChange>Изменение репутации</D2HK_UI_ReputationChange>
+  <D2HK_UI_BaseChange>Базовое изменение</D2HK_UI_BaseChange>
+  <D2HK_UI_AffectedBy>Под влиянием</D2HK_UI_AffectedBy>
+  <D2HK_UI_Reason>Причина</D2HK_UI_Reason>
+  <D2HK_UI_NoDirectEffect>Прямого эффекта сейчас нет.</D2HK_UI_NoDirectEffect>
+  <D2HK_UI_ReputationTooltip>Репутация отражает, как эта цель относится к герою. Она может влиять на торговлю, доброжелательность, аресты, вербовку и обращение.</D2HK_UI_ReputationTooltip>
+  <D2HK_UI_ReputationChangeTooltip>Итоговое значение репутации после всех модификаторов.</D2HK_UI_ReputationChangeTooltip>
+  <D2HK_UI_BaseChangeTooltip>Изменение репутации до применения влияния идеологии.</D2HK_UI_BaseChangeTooltip>
+  <D2HK_UI_AffectedByTooltip>Правило идеологии или мем изменили базовый результат репутации.</D2HK_UI_AffectedByTooltip>
+  <D2HK_UI_TradeBlockedByTax>Улучшение торговых цен заблокировано «Налогом на репутацию».</D2HK_UI_TradeBlockedByTax>
+  <D2HK_UI_Cancel>Отмена</D2HK_UI_Cancel>
+  <D2HK_UI_Assign>Назначить</D2HK_UI_Assign>
+
+  <D2HK_UI_TradePriceImprovement>Улучшение торговых цен</D2HK_UI_TradePriceImprovement>
+  <D2HK_UI_GoodwillGains>Рост доброжелательности</D2HK_UI_GoodwillGains>
+  <D2HK_UI_GoodwillLosses>Потери доброжелательности</D2HK_UI_GoodwillLosses>
+  <D2HK_UI_NegotiationAbility>Способность к переговорам</D2HK_UI_NegotiationAbility>
+  <D2HK_UI_SocialImpact>Социальное влияние</D2HK_UI_SocialImpact>
+  <D2HK_UI_InjuryHealingFactor>Коэффициент заживления ран</D2HK_UI_InjuryHealingFactor>
+  <D2HK_UI_RecruitResistance>Сопротивление вербовке</D2HK_UI_RecruitResistance>
+  <D2HK_UI_ConvertCertainty>Убеждённость при обращении</D2HK_UI_ConvertCertainty>
+  <D2HK_UI_MentalBreakThreshold>Порог психического срыва</D2HK_UI_MentalBreakThreshold>
+  <D2HK_UI_ArrestSuccessChance>Шанс успешного ареста</D2HK_UI_ArrestSuccessChance>
+  <D2HK_UI_MeleeHitChance>Шанс попадания в ближнем бою</D2HK_UI_MeleeHitChance>
+  <D2HK_UI_MeleeDodgeChance>Шанс уклонения в ближнем бою</D2HK_UI_MeleeDodgeChance>
+  <D2HK_UI_ArrestCompliance>Подчинение при аресте</D2HK_UI_ArrestCompliance>
+  <D2HK_UI_ArrestComplianceFear>Подчинение при аресте из-за страха</D2HK_UI_ArrestComplianceFear>
+
+  <D2HK_UI_PerkDesc_MercyMagnet>Доброта оставляет след.</D2HK_UI_PerkDesc_MercyMagnet>
+  <D2HK_UI_PerkDesc_GoodwillTailwind>Добрые дела расходятся дальше.</D2HK_UI_PerkDesc_GoodwillTailwind>
+  <D2HK_UI_PerkDesc_SilverTongue>Убеждать становится легче.</D2HK_UI_PerkDesc_SilverTongue>
+  <D2HK_UI_PerkDesc_CommunityBuffer>Рядом с героем обстановка остаётся спокойнее.</D2HK_UI_PerkDesc_CommunityBuffer>
+  <D2HK_UI_PerkDesc_IntimidatingPresence>Подчинение приходит вместе с холодком.</D2HK_UI_PerkDesc_IntimidatingPresence>
+  <D2HK_UI_PerkDesc_GoodwillFriction>Колония производит более суровое впечатление.</D2HK_UI_PerkDesc_GoodwillFriction>
+  <D2HK_UI_PerkDesc_TerrorEffect>Страх обостряет каждое взаимодействие.</D2HK_UI_PerkDesc_TerrorEffect>
+  <D2HK_UI_PerkDesc_ReputationTax>Страх берёт свою долю.</D2HK_UI_PerkDesc_ReputationTax>
+
+  <D2HK_UI_PerkNote_MercyMagnet>Помощь чужакам даёт дополнительную доброжелательность.</D2HK_UI_PerkNote_MercyMagnet>
+  <D2HK_UI_PerkNote_CommunityBuffer>Ближайшие союзники восстанавливают 1,5% настроения после оскорблений или выпадов.</D2HK_UI_PerkNote_CommunityBuffer>
+  <D2HK_UI_PerkNote_IntimidatingPresence>Проваленные аресты могут обернуться подчинением ({0}).</D2HK_UI_PerkNote_IntimidatingPresence>
+  <D2HK_UI_PerkNote_TerrorEffect>Порог психического срыва {0}. Проваленные аресты могут обернуться подчинением ({1}).</D2HK_UI_PerkNote_TerrorEffect>
+</LanguageData>
