@@ -161,15 +161,6 @@ Expressive pawns, modular systems, and a little frontier grandeur gone rotten.
 
 `rimworld` `rimworld-mod` `rimworld-1-6` `harmony` `csharp` `modding` `animation-system` `ui-framework` `localization` `character-customization`
 
-## Licensing
-
-This repository uses a split-license model.
-
-- **Code, XML defs, patches, config, and documentation** are licensed under the **MIT License**. See [`LICENSE`](LICENSE).
-- **Visual, audio, and branding assets** are licensed separately under **CC BY-NC-ND 4.0**. See [`LICENSE.assets`](LICENSE.assets).
-
-If a file or directory is marked with a different license notice, that notice takes precedence for the covered content.
-
 ## Disclaimer
 
 RimWorld is © Ludeon Studios. This project is an unofficial fan-made mod suite and is not affiliated with or endorsed by Ludeon Studios.
