@@ -39,7 +39,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -47,7 +47,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -280,8 +280,8 @@
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Certainty.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Opinion.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_TradePrice_LocalRep.cs" />
-        <Compile Include="HeroKarmaModule\Patches\HKPatchGuard.cs" />
-<Compile Include="HeroKarmaModule\Patches\HKGoodwillContext.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKPatchGuard.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKGoodwillContext.cs" />
     <Compile Include="HeroKarmaModule\Patches\HKHookUtil.cs" />
     <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.cs" />
     <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.Hediffs.cs" />
@@ -382,12 +382,10 @@
     <Compile Include="UIFramework\UIRectRegistry.Validation.cs" />
     <Compile Include="UIFramework\UITags.cs" />
   </ItemGroup>
-<PropertyGroup>
+  <PropertyGroup>
     <!-- Set to true to skip the localization audit (not recommended). -->
     <D2SkipLocalizationAudit Condition="'$(D2SkipLocalizationAudit)'==''">false</D2SkipLocalizationAudit>
   </PropertyGroup>
-
-
   <PropertyGroup>
     <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
     <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
@@ -395,6 +393,5 @@
   <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
     <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
   </Target>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

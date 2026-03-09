@@ -3,7 +3,6 @@
 
   <ThoughtDef>
     <defName>D2N_Thought_ManualLovinBoundary_Ideology</defName>
-    <workerClass>ThoughtWorker_Memory</workerClass>
     <thoughtClass>Thought_Memory</thoughtClass>
     <durationDays>1</durationDays>
     <stackLimit>1</stackLimit>
@@ -18,7 +17,6 @@
 
   <ThoughtDef>
     <defName>D2N_Thought_ManualLovinBoundary_Orientation</defName>
-    <workerClass>ThoughtWorker_Memory</workerClass>
     <thoughtClass>Thought_Memory</thoughtClass>
     <durationDays>1</durationDays>
     <stackLimit>1</stackLimit>
@@ -33,7 +31,6 @@
 
   <ThoughtDef>
     <defName>D2N_Thought_ManualLovinBoundary_Relation</defName>
-    <workerClass>ThoughtWorker_Memory</workerClass>
     <thoughtClass>Thought_Memory</thoughtClass>
     <durationDays>1</durationDays>
     <stackLimit>1</stackLimit>

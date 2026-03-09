@@ -34,11 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\workshop\content\294100\3463505750\1.6\Assemblies\0Harmony.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\Despicable2-Core\1.6\Assemblies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Despicable">
@@ -54,8 +53,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -116,12 +114,10 @@
     <Compile Include="Runtime\GameComponent_DespicableNsfwRuntimeReset.cs" />
     <Compile Include="LovinModule\UI\TexIconsNSFW.cs" />
   </ItemGroup>
-<PropertyGroup>
+  <PropertyGroup>
     <!-- Set to true to skip the localization audit (not recommended). -->
     <D2SkipLocalizationAudit Condition="'$(D2SkipLocalizationAudit)'==''">false</D2SkipLocalizationAudit>
   </PropertyGroup>
-
-
   <PropertyGroup>
     <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
     <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
@@ -129,6 +125,5 @@
   <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
     <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
   </Target>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
