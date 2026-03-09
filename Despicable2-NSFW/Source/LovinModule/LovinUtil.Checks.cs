@@ -4,6 +4,7 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Despicable.NSFW.Integrations;
+using Despicable.NSFW.Integrations.Intimacy;
 
 namespace Despicable;
 public static partial class LovinUtil
@@ -449,6 +450,9 @@ public static partial class LovinUtil
 
     public static bool PassesManualLovinCheck(Pawn orderedPawn, Pawn otherPawn, out string reason)
     {
+        if (IntegrationGuards.ShouldUseIntimacyForLovinValidation())
+            return IntimacyValidationBridge.PassesManualLovinCheck(orderedPawn, otherPawn, out reason);
+
         return !TryGetManualLovinDisabledReason(orderedPawn, otherPawn, out reason);
     }
 
@@ -460,6 +464,9 @@ public static partial class LovinUtil
     /// </summary>
     public static bool TryGetManualLovinDisabledReason(Pawn orderedPawn, Pawn otherPawn, out string reason)
     {
+        if (IntegrationGuards.ShouldUseIntimacyForLovinValidation())
+            return IntimacyValidationBridge.TryGetManualLovinDisabledReason(orderedPawn, otherPawn, out reason);
+
         reason = GetPairHardFailureReason(orderedPawn, otherPawn);
         if (!reason.NullOrEmpty())
             return true;

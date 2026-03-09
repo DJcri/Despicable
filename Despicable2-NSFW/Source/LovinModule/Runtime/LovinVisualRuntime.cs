@@ -27,14 +27,25 @@ internal static class LovinVisualRuntime
 
     internal static bool IsLovinVisualActiveForRender(Pawn pawn)
     {
-        if (!CanShowLovinNudity(pawn))
+        return CanShowLovinNudity(pawn)
+            && VisualActivityTracker.IsLovinVisualActive(pawn);
+    }
+
+    internal static bool SetLovinVisualActive(Pawn pawn, bool active, bool refreshVisuals = true)
+    {
+        if (!HasLovinPartsComp(pawn))
             return false;
 
-        if (VisualActivityTracker.IsLovinVisualActive(pawn))
-            return true;
+        bool shouldBeActive = active && CanShowLovinNudity(pawn);
+        bool wasActive = VisualActivityTracker.IsLovinVisualActive(pawn);
+        if (wasActive == shouldBeActive)
+            return false;
 
-        JobDef currentJobDef = pawn?.jobs?.curJob?.def ?? pawn?.CurJobDef;
-        return IsLovinJob(currentJobDef);
+        VisualActivityTracker.SetLovinVisualActive(pawn, shouldBeActive);
+        if (refreshVisuals)
+            RefreshPawnVisuals(pawn);
+
+        return true;
     }
 
     internal static bool SyncPawn(Pawn pawn, bool force = false, bool refreshVisuals = true)
@@ -42,9 +53,8 @@ internal static class LovinVisualRuntime
         if (!HasLovinPartsComp(pawn))
             return false;
 
-        JobDef currentJobDef = pawn?.jobs?.curJob?.def ?? pawn?.CurJobDef;
-        bool shouldBeActive = CanShowLovinNudity(pawn) && IsLovinJob(currentJobDef);
         bool wasActive = VisualActivityTracker.IsLovinVisualActive(pawn);
+        bool shouldBeActive = wasActive && CanShowLovinNudity(pawn);
         if (!force && wasActive == shouldBeActive)
             return false;
 
@@ -57,14 +67,7 @@ internal static class LovinVisualRuntime
 
     internal static bool ClearPawn(Pawn pawn, bool refreshVisuals = true)
     {
-        if (!HasLovinPartsComp(pawn) || !VisualActivityTracker.IsLovinVisualActive(pawn))
-            return false;
-
-        VisualActivityTracker.SetLovinVisualActive(pawn, false);
-        if (refreshVisuals)
-            RefreshPawnVisuals(pawn);
-
-        return true;
+        return SetLovinVisualActive(pawn, false, refreshVisuals);
     }
 
     internal static void NotifyPotentialRenderStateChanged(Pawn pawn)

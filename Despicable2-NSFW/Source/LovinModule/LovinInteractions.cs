@@ -7,6 +7,7 @@ using UnityEngine;
 using Verse;
 using Despicable.Core;
 using Despicable.NSFW.Integrations;
+using Despicable.NSFW.Integrations.Intimacy;
 
 namespace Despicable;
 public class LovinInteractions
@@ -31,6 +32,13 @@ public class LovinInteractions
 
             Action action = delegate ()
             {
+                if (IntegrationGuards.ShouldUseIntimacyForLovinValidation()
+                    && !IntimacyValidationBridge.PassesManualLovinCheck(pawn, targetPawn, out string blockedReason))
+                {
+                    Messages.Message(blockedReason ?? "D2N_LovinReason_Unknown".Translate(), targetPawn, MessageTypeDefOf.RejectInput, historical: false);
+                    return;
+                }
+
                 if (!InteractionEntry.TryPrepareManual(
                     pawn,
                     targetPawn,

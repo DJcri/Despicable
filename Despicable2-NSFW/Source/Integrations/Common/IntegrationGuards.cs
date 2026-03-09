@@ -48,6 +48,13 @@ internal static class IntegrationGuards
     internal static bool ShouldDeferLovinToIntimacy()
         => IsIntimacyLoaded();
 
+    /// <summary>
+    /// When Intimacy is installed, Despicable keeps its own ordered manual lovin flow
+    /// but borrows Intimacy's validation rules instead of using Despicable-only consent checks.
+    /// </summary>
+    internal static bool ShouldUseIntimacyForLovinValidation()
+        => IsIntimacyLoaded();
+
     internal static bool ShouldHideManualLovinOptionWithIntimacy()
     {
         if (!IsIntimacyLoaded()) return false;

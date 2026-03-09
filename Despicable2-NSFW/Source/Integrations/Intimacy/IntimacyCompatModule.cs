@@ -21,6 +21,7 @@ internal sealed class IntimacyCompatModule : IModCompat
     {
         IntimacyReflectionUtil.PrimeCache();
         IntimacyApplyUtil.PrimeCache();
+        IntimacyValidationBridge.PrimeCache();
     }
 
     public string ReportStatus()

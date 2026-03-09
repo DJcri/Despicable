@@ -113,6 +113,8 @@ internal static partial class HarmonyPatch_Intimacy_SexToilAnimation
                         participants.Clear();
                         participants.Add(pawn);
                         participants.Add(partner);
+                        LovinVisualRuntime.SetLovinVisualActive(pawn, true);
+                        LovinVisualRuntime.SetLovinVisualActive(partner, true);
                         int durationTicks;
 
                         // First attempt: with our chosen stage tag.
@@ -155,7 +157,12 @@ internal static partial class HarmonyPatch_Intimacy_SexToilAnimation
                     try
                     {
                         if (participants != null && participants.Count > 0)
+                        {
+                            for (int participantIndex = 0; participantIndex < participants.Count; participantIndex++)
+                                LovinVisualRuntime.SetLovinVisualActive(participants[participantIndex], false);
+
                             AnimUtil.ResetAnimatorsForGroup(participants);
+                        }
 
                         // Clear any forced stage tag for this job so it doesn't leak to other interactions.
                         try

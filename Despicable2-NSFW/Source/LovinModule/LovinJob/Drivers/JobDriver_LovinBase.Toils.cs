@@ -18,6 +18,8 @@ public partial class JobDriver_LovinBase
         {
             try
             {
+                LovinVisualRuntime.SetLovinVisualActive(pawn, true);
+                LovinVisualRuntime.SetLovinVisualActive(Partner, true);
                 TryStartLovinAnimation();
             }
             catch (Exception e)
@@ -58,6 +60,8 @@ public partial class JobDriver_LovinBase
         });
         lovinToil.AddFinishAction(delegate
         {
+            LovinVisualRuntime.SetLovinVisualActive(pawn, false);
+            LovinVisualRuntime.SetLovinVisualActive(Partner, false);
             ResumePartnerAndResetAnimators();
         });
         lovinToil.FailOn(() => !PartnerPresent(Partner));
@@ -205,6 +209,9 @@ public partial class JobDriver_LovinBase
 
     private void TryApplyManualBoundaryThoughtAtLovinStart()
     {
+        if (Despicable.NSFW.Integrations.IntegrationGuards.ShouldUseIntimacyForLovinValidation())
+            return;
+
         Map map = pawn.Map;
         if (map == null || Partner == null)
             return;

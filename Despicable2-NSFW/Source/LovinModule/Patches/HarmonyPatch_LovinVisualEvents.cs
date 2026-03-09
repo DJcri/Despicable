@@ -126,7 +126,8 @@ internal static class HarmonyPatch_LovinVisual_JobEvents
         if (pawn == null || pawn.RaceProps?.Humanlike != true)
             return;
 
-        LovinVisualRuntime.SyncPawn(pawn);
+        LovinVisualRuntime.SyncPawn(pawn, force: true, refreshVisuals: false);
+        LovinVisualRuntime.NotifyPotentialRenderStateChanged(pawn);
     }
 }
 

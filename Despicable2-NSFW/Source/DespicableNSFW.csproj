@@ -71,6 +71,7 @@
     <Compile Include="Integrations\Intimacy\HarmonyPatch_Intimacy_SexToilAnimation.cs" />
     <Compile Include="Integrations\Intimacy\HarmonyPatch_Intimacy_SexToilAnimation.Helpers.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyApplyUtil.cs" />
+    <Compile Include="Integrations\Intimacy\IntimacyValidationBridge.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyCompatModule.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyReflectionUtil.cs" />
     <Compile Include="LovinModule\Comp\CompLovinParts.cs" />
