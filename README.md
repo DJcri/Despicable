@@ -83,30 +83,6 @@ The repository currently includes language folders for:
 - Russian
 - Spanish
 
-## Repository layout
-
-```text
-Despicable2-Core/
-  About/
-  Config/
-  Defs/
-  Docs/
-  Languages/
-  Patches/
-  Source/
-  Textures/
-  Tools/
-
-Despicable2-NSFW/
-  About/
-  Defs/
-  Languages/
-  Patches/
-  Sounds/
-  Source/
-  Textures/
-```
-
 ## Development notes
 
 This repository is strongly oriented toward **modular growth, additive changes, and documented guardrails**.
@@ -134,23 +110,3 @@ Relevant docs in `Despicable2-Core/Docs/` include:
 Despicable 2 is not just a content drop. It is also a **systems repo**.
 
 It combines gameplay mechanics, presentation layers, render extensions, UI tooling, and compatibility infrastructure in a way that makes it useful both as a playable mod suite and as a long-term technical foundation for future expansion.
-
-## Suggested GitHub About text
-
-**A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, and shared animation systems.**
-
-## Suggested tagline
-
-**Expressive pawns, modular systems, and a little frontier grandeur gone rotten.**
-
-## Suggested topics
-
-`rimworld` `rimworld-mod` `rimworld-1-6` `harmony` `csharp` `modding` `animation-system` `ui-framework` `localization` `character-customization`
-
-## License
-
-Add your preferred license here.
-
-## Disclaimer
-
-RimWorld is © Ludeon Studios. This project is an unofficial fan-made mod suite.
