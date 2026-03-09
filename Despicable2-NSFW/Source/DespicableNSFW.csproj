@@ -38,7 +38,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Despicable">
@@ -116,12 +116,10 @@
     <Compile Include="Runtime\GameComponent_DespicableNsfwRuntimeReset.cs" />
     <Compile Include="LovinModule\UI\TexIconsNSFW.cs" />
   </ItemGroup>
-<PropertyGroup>
+  <PropertyGroup>
     <!-- Set to true to skip the localization audit (not recommended). -->
     <D2SkipLocalizationAudit Condition="'$(D2SkipLocalizationAudit)'==''">false</D2SkipLocalizationAudit>
   </PropertyGroup>
-
-
   <PropertyGroup>
     <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
     <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
@@ -129,6 +127,5 @@
   <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
     <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
   </Target>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
