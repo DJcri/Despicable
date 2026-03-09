@@ -1,50 +1,63 @@
 # Despicable 2
 
+![Despicable 2 preview](Despicable2-Core/About/preview.png)
+
 A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, and shared animation systems.
 
 ## Overview
 
-**Despicable 2** is a modular suite for **RimWorld 1.6** built around expressive pawns, stronger presentation, and reusable systems.
+**Despicable 2** is a modular RimWorld suite built around expressive pawn presentation, reusable systems, and a stronger interface layer.
 
-The repository is centered on **Despicable 2 (Core)**, which works as a standalone mod and as the required foundation for optional add-ons. Core adds face parts, facial expressions, shared animation systems, Hero Karma, custom UI tools, and supporting frameworks designed for compatibility and long-term maintainability.
+The repository is centered on **Despicable 2 (Core)**, which works as a standalone mod and as the required foundation for optional add-ons. Core adds face parts, facial expressions, shared animation systems, Hero Karma, custom UI tools, and supporting infrastructure designed for compatibility and long-term maintainability.
 
-An optional **Despicable 2 (NSFW)** add-on extends Core with adult-only intimacy content, additional animation hooks, extra rendering features, sound, and expression support. It is intentionally separated from Core by design.
+An optional **Despicable 2 (NSFW)** add-on extends Core with adult-only intimacy content, extra animation hooks, additional rendering features, sound, and expression support. It is intentionally separated from Core by design.
 
-## Features
+## Modules
 
 ### Despicable 2 (Core)
-- **Face parts and facial expression systems** for more expressive pawn presentation.
-- **Facial animation support** with reusable animation definitions and render nodes.
-- **Hero Karma** gameplay systems with faction standing, reputation effects, perks, and dedicated UI.
-- **Custom UI framework** used to build consistent windows, tabs, panels, rulers, tables, forms, and debug-friendly layouts.
-- **Shared animation infrastructure** for playback, offsets, visual events, and authoring workflows.
-- **Manual interaction menu systems** for cleaner interaction-driven UX.
-- **Compatibility-first architecture** with guarded integrations, runtime detection, and soft-fail behavior where possible.
-- **Localization support** with structured English source strings and translated language folders.
 
-### Optional NSFW Add-on
-- Adult-only intimacy content built on top of Core.
-- Extra animations, sounds, expressions, and render features.
-- Separate package and dependency boundary to keep Core clean and modular.
+The Core package is the backbone of the suite.
 
-## Modules at a glance
+It includes:
+- face parts and facial expression systems for more expressive pawns
+- facial animation support with reusable animation definitions and render nodes
+- Hero Karma systems with faction standing, reputation effects, perks, and dedicated UI
+- a custom UI framework for windows, tabs, tables, rulers, forms, search, and debug-friendly layouts
+- shared animation infrastructure for playback, offsets, visual events, and authoring workflows
+- manual interaction menu systems for cleaner interaction-driven UX
+- localization support with English source strings and translated language folders
+- compatibility-first architecture with runtime guards, isolated integrations, and soft-fail behavior where possible
 
-### Core
-The Core package is the backbone of the suite. Based on the repository structure, it includes several major subsystems:
+### Despicable 2 (NSFW)
 
-- **FacePartsModule** for facial styles, expressions, customizers, and rendering.
-- **HeroKarmaModule** for karma events, faction standing, local reputation, perks, diagnostics, and UI.
-- **AnimModule** for shared animation logic, playback, render support, and editor tooling.
-- **UIFramework** for reusable layout helpers, widgets, blueprints, shells, tables, search, and debug overlays.
-- **ManualInteraction** for structured manual interaction menus and request handling.
+The NSFW package is an optional adult-only add-on that depends on Core.
 
-### NSFW
-The NSFW package is an optional add-on that depends on Core and includes:
-
-- lovin/intimacy job drivers and playback hooks
-- additional render logic and visual events
+It includes:
+- explicit intimacy content and related job logic
+- additional animations, sounds, expressions, and render features
 - compatibility bridges for supported adult-content integrations
-- its own runtime state and hook bootstrap layer
+- a separate dependency boundary so Core remains modular and clean
+
+## Feature summary
+
+### Core highlights
+- **FacePartsModule** for face styles, customizers, expressions, and rendering
+- **HeroKarmaModule** for karma events, faction standing, local reputation, perks, diagnostics, and UI
+- **AnimModule** for shared animation logic, playback, render support, and tooling
+- **UIFramework** for reusable layout helpers, widgets, shells, tables, search, and overlays
+- **ManualInteraction** for structured manual interaction flows and request handling
+
+### Design goals
+- modular growth without turning the codebase into a knot
+- reusable systems instead of one-off hacks
+- compatibility-minded integrations
+- cleaner custom UI and better presentation
+- room for optional content without bloating Core
+
+## Requirements
+
+- **RimWorld 1.6**
+- **Harmony**
 
 ## Installation
 
@@ -57,7 +70,7 @@ The NSFW package is an optional add-on that depends on Core and includes:
 1. Install **Harmony**.
 2. Enable **Despicable 2 (Core)**.
 3. Enable **Despicable 2 (NSFW)** below Core.
-4. Keep RimWorld's dependency/load-order warnings satisfied.
+4. Keep RimWorld's dependency and load-order warnings satisfied.
 
 ## Compatibility
 
@@ -65,17 +78,13 @@ This suite is built with a compatibility-first approach.
 
 - **Core is standalone** and can be used by itself.
 - **NSFW requires Core**.
-- The repository includes explicit `loadAfter` metadata for **Harmony** and certain optional compatibility targets.
-- The codebase uses runtime guards and isolated integration code to reduce hard failures when optional mods are absent.
-
-## Supported RimWorld version
-
-- **RimWorld 1.6**
+- The mod metadata includes explicit `loadAfter` hints for **Harmony** and selected optional targets.
+- Optional integrations are kept isolated where possible to reduce hard failures when other mods are absent.
+- The codebase favors guarded integrations and stable seams over brittle hard assumptions.
 
 ## Languages
 
-The repository currently includes language folders for:
-
+The repository currently includes language support for:
 - English
 - Chinese Simplified
 - French
@@ -83,30 +92,84 @@ The repository currently includes language folders for:
 - Russian
 - Spanish
 
+## Repository layout
+
+```text
+Despicable2-Core/
+  1.6/
+  About/
+  Config/
+  Defs/
+  Docs/
+  Languages/
+  Patches/
+  Source/
+  Textures/
+  Tools/
+
+Despicable2-NSFW/
+  1.6/
+  About/
+  Defs/
+  Languages/
+  Patches/
+  Sounds/
+  Source/
+  Textures/
+```
+
 ## Development notes
 
-This repository is strongly oriented toward **modular growth, additive changes, and documented guardrails**.
+This repository is strongly oriented toward modular growth, additive changes, and documented guardrails.
 
-Highlights from the included docs and source layout:
+Some of the included development docs in `Despicable2-Core/Docs/` cover:
+- architecture and extension rules
+- consistency and maintenance guardrails
+- UI framework guidance and layout rules
+- localization workflow and validation guardrails
+- smoke test expectations
 
-- UI work is built around a reusable **UIFramework** rather than page-specific hardcoded layouts.
-- Localization is treated as a first-class pipeline with audit rules and English source mirrors.
-- Runtime state ownership is carefully separated to reduce hidden globals and brittle cross-system behavior.
-- Optional integrations are isolated behind compatibility modules and reflection/Harmony guardrails.
-- The codebase favors extending stable seams over broad rewrites.
+The project generally prefers:
+- framework-driven UI layout instead of brittle hardcoded positioning
+- isolated optional integrations
+- localization as a first-class pipeline
+- extending stable systems rather than rewriting broad surfaces at random
 
-Relevant docs in `Despicable2-Core/Docs/` include:
+## Release channels
 
-- `Architecture_Rules.md`
-- `Consistency-Charter.md`
-- `UIFramework_RulesOfTheRoad.md`
-- `UIFramework_Cookbook.md`
-- `Localization_Guardrails.md`
-- `Localization_Guide.md`
-- `Smoke_Test_Policy.md`
+To keep releases simple, this project uses three release types:
+- **alpha** for rough or experimental public testing
+- **beta** for wider testing before normal release
+- **stable** for standard public releases
 
-## Why this repo stands out
+Example tags:
+- `v0.8.0-alpha.1`
+- `v0.8.0-beta.1`
+- `v0.8.0`
 
-Despicable 2 is not just a content drop. It is also a **systems repo**.
+## GitHub About
 
-It combines gameplay mechanics, presentation layers, render extensions, UI tooling, and compatibility infrastructure in a way that makes it useful both as a playable mod suite and as a long-term technical foundation for future expansion.
+**Description**
+
+A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, and shared animation systems.
+
+**Tagline**
+
+Expressive pawns, modular systems, and a little frontier grandeur gone rotten.
+
+**Suggested topics**
+
+`rimworld` `rimworld-mod` `rimworld-1-6` `harmony` `csharp` `modding` `animation-system` `ui-framework` `localization` `character-customization`
+
+## Licensing
+
+This repository uses a split-license model.
+
+- **Code, XML defs, patches, config, and documentation** are licensed under the **MIT License**. See [`LICENSE`](LICENSE).
+- **Visual, audio, and branding assets** are licensed separately under **CC BY-NC-ND 4.0**. See [`LICENSE.assets`](LICENSE.assets).
+
+If a file or directory is marked with a different license notice, that notice takes precedence for the covered content.
+
+## Disclaimer
+
+RimWorld is © Ludeon Studios. This project is an unofficial fan-made mod suite and is not affiliated with or endorsed by Ludeon Studios.
