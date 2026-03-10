@@ -29,4 +29,12 @@
 		<iconPath>UI/Interaction/anal</iconPath>
 		<requiresMale>true</requiresMale>
 	</Despicable.LovinTypeDef>
+
+	<Despicable.LovinTypeDef>
+		<defName>Self</defName>
+		<label>Self</label>
+		<interaction>Interaction_SelfLovin</interaction>
+		<iconPath>UI/Interaction/self</iconPath>
+		<isSolo>true</isSolo>
+	</Despicable.LovinTypeDef>
 </Defs>

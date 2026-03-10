@@ -482,7 +482,7 @@ public static class ManualMenuBuilder
         if (spec == null)
             return null;
 
-        return spec.Tooltip;
+        return !spec.Tooltip.NullOrEmpty() ? spec.Tooltip : spec.DisabledReason;
     }
 
     private static Action WrapAction(Action action)

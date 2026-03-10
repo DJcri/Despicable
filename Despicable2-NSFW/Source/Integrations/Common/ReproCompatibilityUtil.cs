@@ -123,4 +123,57 @@ internal static class ReproCompatibilityUtil
         // Unknown anatomy system: don't block.
         return true;
     }
+
+
+    /// <summary>
+    /// Returns true if a single pawn appears to satisfy the sex requirements of a solo LovinTypeDef.
+    /// This mirrors the pair helper's best-effort philosophy and avoids hard-blocking unknown alien frameworks.
+    /// </summary>
+    internal static bool PawnSatisfiesSoloLovinTypeRequirements(Pawn pawn, LovinTypeDef lovinType)
+    {
+        if (lovinType == null) return true;
+        return PawnSatisfiesSexRequirements(pawn, lovinType.requiresMale, lovinType.requiresFemale);
+    }
+
+    internal static bool PawnSatisfiesSexRequirements(Pawn pawn, bool requiresMale, bool requiresFemale)
+    {
+        if (pawn == null) return false;
+
+        if (!requiresMale && !requiresFemale) return true;
+
+        if (pawn.RaceProps == null || !pawn.RaceProps.Humanlike) return false;
+
+        bool malePresent = false;
+        bool femalePresent = false;
+
+        if (IntegrationGuards.IsGenderWorksLoaded())
+        {
+            bool pawnMale = GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(pawn);
+            bool pawnFemale = GenderWorks.GenderWorksUtil.HasFemaleReproductiveOrganTag(pawn);
+
+            if (pawnMale || pawnFemale)
+            {
+                malePresent = pawnMale;
+                femalePresent = pawnFemale;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else if (pawn.def == ThingDefOf.Human)
+        {
+            malePresent = pawn.gender == Gender.Male;
+            femalePresent = pawn.gender == Gender.Female;
+        }
+        else
+        {
+            return true;
+        }
+
+        if (requiresMale && !malePresent) return false;
+        if (requiresFemale && !femalePresent) return false;
+        return true;
+    }
+
 }

@@ -178,11 +178,7 @@ public partial class Dialog_AnimGroupStudio
                 authorKeyIndex = authorKeyIndexLocal;
 
                 if (authorKeyIndex != prevKeyIndex && authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count)
-                {
-                    authorPreviewTick = Mathf.Clamp(tr.keys[authorKeyIndex].tick, 0, stage.durationTicks);
-                    preview.SelectedStageIndex = authorStageIndex;
-                    preview.ShowSelectedStageAtTick(authorPreviewTick);
-                }
+                    InspectSelectedAuthorKeyframe(tr, stage);
 
                 var footerH = new HRow(ctx, parts.Footer);
                 if (DrawIconButton(
@@ -192,13 +188,19 @@ public partial class Dialog_AnimGroupStudio
                     "Add keyframe",
                     "KeyframeList/Add"))
                 {
-                    int newTick = 0;
+                    AgsModel.Keyframe seed = null;
                     if (authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count)
-                        newTick = Mathf.Clamp(tr.keys[authorKeyIndex].tick + 5, 0, stage.durationTicks);
-                    var nk = new AgsModel.Keyframe { tick = newTick, rotation = Rot4.South, visible = true };
+                        seed = tr.keys[authorKeyIndex];
+                    else if (!tr.keys.NullOrEmpty())
+                        seed = tr.keys[tr.keys.Count - 1];
+
+                    int newTick = ResolveNewKeyframeTick(tr, stage, seed);
+                    var nk = CloneKeyframe(seed) ?? CreateDefaultKeyframe(newTick);
+                    nk.tick = newTick;
                     tr.keys.Add(nk);
                     SortClampKeys(tr, stage.durationTicks);
                     authorKeyIndex = tr.keys.IndexOf(nk);
+                    InspectSelectedAuthorKeyframe(tr, stage);
                     TrySaveProjects();
                 }
 
@@ -218,6 +220,16 @@ public partial class Dialog_AnimGroupStudio
                     DrawIconButton(ctx, removeRect, D2VanillaTex.Delete, "Remove keyframe", "KeyframeList/RemoveDisabled", enabled: false, disabledReason: "A track needs at least two keyframes.");
                 }
             }
+            private void InspectSelectedAuthorKeyframe(AgsModel.Track tr, AgsModel.StageSpec stage)
+            {
+                if (tr?.keys == null || stage == null || authorKeyIndex < 0 || authorKeyIndex >= tr.keys.Count)
+                    return;
+
+                authorPreviewTick = Mathf.Clamp(tr.keys[authorKeyIndex].tick, 0, Mathf.Max(1, stage.durationTicks));
+                preview.SelectedStageIndex = authorStageIndex;
+                preview.ShowSelectedStageAtTick(authorPreviewTick);
+            }
+
             private void DrawKeyframeInspector(Rect rect, AgsModel.StageSpec stage)
             {
                 var ctx = frameworkCtx;
@@ -226,17 +238,78 @@ public partial class Dialog_AnimGroupStudio
                     rect,
                     new D2Section.Spec(
                         "KeyframeInspector",
-                        headerHeight: SubsectionHeaderHeight,
+                        headerHeight: SectionHeaderHeight,
+                        toolbarHeight: ctx.Style.RowHeight,
                         soft: true,
                         pad: true,
                         drawBackground: true,
                         padOverride: ctx.Style.Pad));
-                D2Section.DrawCaptionStrip(ctx, parts.Header, "Inspector", "KeyframeInspector/Header", GameFont.Small);
+                D2Section.DrawCaptionStrip(ctx, parts.Header, "Inspector", "KeyframeInspector/Header", GameFont.Medium);
 
                 var tr = GetSelectedTrack(stage, authorRoleKey);
-                if (tr == null || tr.keys.NullOrEmpty() || authorKeyIndex < 0 || authorKeyIndex >= tr.keys.Count)
+                bool hasSelection = tr != null && !tr.keys.NullOrEmpty() && authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count;
+                AgsModel.Keyframe previousKey = hasSelection ? GetPreviousKeyframe(tr, authorKeyIndex) : null;
+                bool canCopy = hasSelection;
+                bool canPaste = hasSelection && authorKeyClipboard != null;
+                bool canReset = hasSelection;
+
+                var toolbarH = new HRow(ctx, parts.Toolbar);
+                float resetWidth = Mathf.Clamp(parts.Toolbar.width * 0.36f, 92f, 128f);
+                Rect resetRect = toolbarH.NextFixed(resetWidth, UIRectTag.Button, "KeyframeInspector/ToolbarReset");
+                if (canReset)
                 {
-                    D2Widgets.Label(ctx, parts.Body, "Select a keyframe.", "KeyframeInspector/Empty");
+                    if (D2Widgets.ButtonText(ctx, resetRect, "Reset", "KeyframeInspector/ToolbarReset"))
+                    {
+                        ResetKeyframeFromPreviousOrDefault(tr, authorKeyIndex);
+                        TrySaveProjects();
+                    }
+                    TooltipHandler.TipRegion(resetRect, previousKey != null
+                        ? "Reset this keyframe to the previous keyframe's values."
+                        : "Reset this keyframe to the default values used for the first keyframe on a track.");
+                }
+                else
+                {
+                    ctx.Record(resetRect, UIRectTag.Button, "KeyframeInspector/ToolbarResetDisabled");
+                    if (ctx.Pass == UIPass.Draw)
+                    {
+                        using (new GUIEnabledScope(false)) Widgets.ButtonText(resetRect, "Reset");
+                    }
+                    TooltipHandler.TipRegion(resetRect, "Select a keyframe to reset it.");
+                }
+
+                Rect copyRect = toolbarH.NextFixed(ctx.Style.RowHeight, UIRectTag.Button, "KeyframeInspector/ToolbarCopy");
+                if (canCopy)
+                {
+                    if (DrawIconButton(ctx, copyRect, D2VanillaTex.Copy, "Copy keyframe values", "KeyframeInspector/ToolbarCopy"))
+                        authorKeyClipboard = CloneKeyframe(tr.keys[authorKeyIndex]);
+                }
+                else
+                {
+                    DrawIconButton(ctx, copyRect, D2VanillaTex.Copy, "Copy keyframe values", "KeyframeInspector/ToolbarCopyDisabled", enabled: false, disabledReason: "Select a keyframe to copy it.");
+                }
+
+                Rect pasteRect = toolbarH.NextFixed(ctx.Style.RowHeight, UIRectTag.Button, "KeyframeInspector/ToolbarPaste");
+                if (canPaste)
+                {
+                    if (DrawIconButton(ctx, pasteRect, D2VanillaTex.Paste, "Paste copied keyframe values", "KeyframeInspector/ToolbarPaste"))
+                    {
+                        int keepTick = tr.keys[authorKeyIndex].tick;
+                        CopyKeyframeData(authorKeyClipboard, tr.keys[authorKeyIndex], includeTick: false);
+                        tr.keys[authorKeyIndex].tick = keepTick;
+                        TrySaveProjects();
+                    }
+                }
+                else
+                {
+                    string disabledReason = hasSelection
+                        ? "Copy a keyframe first."
+                        : "Select a keyframe to paste onto it.";
+                    DrawIconButton(ctx, pasteRect, D2VanillaTex.Paste, "Paste copied keyframe values", "KeyframeInspector/ToolbarPasteDisabled", enabled: false, disabledReason: disabledReason);
+                }
+
+                if (!hasSelection)
+                {
+                    D2Widgets.Label(ctx, parts.Body, tr == null ? "Select a track." : "Select a keyframe.", "KeyframeInspector/Empty");
                     return;
                 }
 
@@ -259,10 +332,15 @@ public partial class Dialog_AnimGroupStudio
                         Widgets.TextFieldNumeric(tickRect, ref tVal, ref tStr, 0, stage.durationTicks);
                     if (tVal != k.tick)
                     {
-                        k.tick = Mathf.Clamp(tVal, 0, stage.durationTicks);
-                        SortClampKeys(tr, stage.durationTicks);
-                        authorKeyIndex = tr.keys.IndexOf(k);
-                        TrySaveProjects();
+                        if (TrySetUniqueKeyframeTick(tr, k, tVal, stage.durationTicks, out var tickError))
+                        {
+                            authorKeyIndex = tr.keys.IndexOf(k);
+                            TrySaveProjects();
+                        }
+                        else if (!tickError.NullOrEmpty())
+                        {
+                            Messages.Message(tickError, MessageTypeDefOf.RejectInput, false);
+                        }
                     }
                     if (!authorPreviewPlaying && authorPreviewTick != k.tick)
                     {

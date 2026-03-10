@@ -48,6 +48,13 @@ internal static class AgsExportUtil
         return cleaned;
     }
 
+    public static bool IsExactDefName(string s)
+    {
+        if (s.NullOrEmpty()) return false;
+        if (s != s.Trim()) return false;
+        return MakeSafeDefName(s) == s;
+    }
+
     public static string MakeSafeFileName(string s)
     {
         if (s.NullOrEmpty()) s = "AGS_Export";
@@ -56,6 +63,62 @@ internal static class AgsExportUtil
         s = s.Replace(' ', '_');
         if (s.Length == 0) s = "AGS_Export";
         return s;
+    }
+
+    public static string MakeExportProjectKey(string baseDefName)
+    {
+        return MakeSafeFileName(MakeSafeDefName(baseDefName));
+    }
+
+    public static string MakeGroupPackageFileName(string projectKey) => $"GroupAnimation_{MakeExportProjectKey(projectKey)}.xml";
+
+    public static string MakeOffsetPackageFileName(string projectKey) => $"OffsetDefs_{MakeExportProjectKey(projectKey)}.xml";
+
+    public static string MakeVariantCode(string variantId)
+    {
+        if (variantId.NullOrEmpty() || variantId == "Base")
+            return "";
+        return NormalizeTag(variantId);
+    }
+
+    public static string MakeGroupDefName(string projectKey, string variantId)
+    {
+        string code = MakeVariantCode(variantId);
+        if (code == "") return MakeSafeDefName(projectKey);
+        return MakeSafeDefName($"{projectKey}_{code}");
+    }
+
+    public static string MakeRoleDefName(string projectKey, string variantId, string roleKey)
+    {
+        string safeProject = MakeSafeDefName(projectKey);
+        string safeRole = MakeSafeDefName(roleKey);
+        string code = MakeVariantCode(variantId);
+        if (code == "")
+            return $"Role_{safeProject}_{safeRole}";
+        return $"Role_{safeProject}_{code}_{safeRole}";
+    }
+
+    public static string MakeOffsetDefName(string projectKey, string roleKey)
+    {
+        return $"Offset_{MakeSafeDefName(projectKey)}_{MakeSafeDefName(roleKey)}";
+    }
+
+    public static string MakeStageToken(int stageIndex, string variantId)
+    {
+        string stageToken = $"Stage{Math.Max(1, stageIndex + 1)}";
+        string code = MakeVariantCode(variantId);
+        if (code == "") return stageToken;
+        return $"{stageToken}_{code}";
+    }
+
+    public static string MakeStageFileName(string projectKey, int stageIndex, string variantId)
+    {
+        return $"{MakeExportProjectKey(projectKey)}_{MakeStageToken(stageIndex, variantId)}.xml";
+    }
+
+    public static string MakeAnimationDefName(string projectKey, string roleKey, int stageIndex, string variantId)
+    {
+        return MakeSafeDefName($"{projectKey}_{MakeSafeDefName(roleKey)}_{MakeStageToken(stageIndex, variantId)}");
     }
 
     public static bool IsFinite(float f) => !float.IsNaN(f) && !float.IsInfinity(f);

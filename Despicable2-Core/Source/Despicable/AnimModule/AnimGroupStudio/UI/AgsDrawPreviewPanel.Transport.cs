@@ -41,7 +41,6 @@ public partial class Dialog_AnimGroupStudio
                 authorPlayMode = AuthorPlayMode.Group;
                 break;
             case "Play":
-                StopAuthorPreview(resetTick: true);
                 if (preview.IsPlaying)
                 {
                     preview.Pause();
@@ -68,6 +67,9 @@ public partial class Dialog_AnimGroupStudio
                 break;
             case "Stop":
                 preview.Stop();
+                preview.SelectedStageIndex = Mathf.Clamp(selectedStageIndex, 0, Mathf.Max(0, preview.StageCount - 1));
+                if (selectedGroup != null && preview.StageCount > 0)
+                    preview.ShowSelectedStageAtTick(0);
                 break;
             case "Speed":
                 Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>

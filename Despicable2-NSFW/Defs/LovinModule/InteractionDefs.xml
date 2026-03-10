@@ -61,4 +61,21 @@
     </logRulesInitiator>
   </InteractionDef>
 	
+
+  <InteractionDef>
+    <defName>Interaction_SelfLovin</defName>
+    <label>self lovin'</label>
+    <workerClass>InteractionWorker</workerClass>
+    <ignoreTimeSinceLastInteraction>True</ignoreTimeSinceLastInteraction>
+    <symbol>UI/Interaction/self</symbol>
+    <initiatorThought>D2N_Thought_SelfLovin</initiatorThought>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] enjoyed some private [activity].</li>
+        <li>activity->self lovin'</li>
+        <li>activity->solo pleasure</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
 </Defs>

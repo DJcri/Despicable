@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -84,11 +84,13 @@
     <Compile Include="LovinModule\DefOf\LovinModule_JobDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_PawnRenderNodeTagDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_SoundDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_ThoughtDefOf.cs" />
     <Compile Include="LovinModule\Genitals\BodyTypeGenitalsOffsetDef.cs" />
     <Compile Include="LovinModule\Genitals\GenitalDef.cs" />
     <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNodeWorker_Genitals.cs" />
     <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNode_Genitals.cs" />
     <Compile Include="LovinModule\Hooks\LovinResolveHooks.cs" />
+    <Compile Include="LovinModule\Patches\HarmonyPatch_InteractionMenu_SelfLovin.cs" />
     <Compile Include="LovinModule\Hooks\NSFWHookBootstrap.cs" />
     <Compile Include="LovinModule\Hooks\NsfwPawnTags.cs" />
     <Compile Include="LovinModule\LovinInteractions.cs" />
@@ -97,10 +99,16 @@
     <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinBase.Toils.cs" />
     <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinBed.cs" />
     <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_LovinNoBed.cs" />
+    <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_SelfLovin.cs" />
     <Compile Include="LovinModule\LovinJob\Drivers\JobDriver_ReturnLovin.cs" />
     <Compile Include="LovinModule\LovinJob\Givers\JobGiver_GetBedLovin.cs" />
     <Compile Include="LovinModule\LovinJob\Givers\JobGiver_GetLovin.cs" />
+    <Compile Include="LovinModule\LovinJob\Givers\ThinkNode_Priority_GetLovin.cs" />
+    <Compile Include="LovinModule\LovinJob\Givers\JoyGiver_SelfLovin.cs" />
     <Compile Include="LovinModule\LovinJob\LovinStagePlayback.cs" />
+    <Compile Include="LovinModule\LovinJob\SelfLovinSpotFinder.cs" />
+    <Compile Include="LovinModule\LovinJob\LovinJobStageUtil.cs" />
+    <Compile Include="LovinModule\LovinJob\SelfLovinStagePlayback.cs" />
     <Compile Include="LovinModule\LovinJob\ModExtension_LovinType.cs" />
     <Compile Include="LovinModule\LovinTypeDef.cs" />
     <Compile Include="LovinModule\LovinUtil.cs" />

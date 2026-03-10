@@ -82,6 +82,7 @@ public sealed partial class AgsPreviewSession : IDisposable
     public bool IsPlaying => isPlaying;
     public bool CanResume => !isPlaying && hasPlayback;
     public int CurrentTick => Mathf.Max(0, WorkshopRenderContext.Tick);
+    public int CurrentStageIndex => Mathf.Clamp(currentStage, 0, Mathf.Max(0, stageCount - 1));
 
     public AnimGroupDef CurrentGroup => currentGroup;
     public int StageCount => stageCount;

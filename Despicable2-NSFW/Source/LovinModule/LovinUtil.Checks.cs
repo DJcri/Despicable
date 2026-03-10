@@ -486,7 +486,134 @@ public static partial class LovinUtil
         reason = null;
         return false;
     }
-public static bool InSameBed(Pawn pawn, Pawn partner)
+
+    public static bool PassesSelfLovinCheck(Pawn pawn, LovinTypeDef lovinType, out string reason)
+    {
+        reason = null;
+        return !TryGetSelfLovinDisabledReason(pawn, lovinType, out reason);
+    }
+
+    public static bool TryGetSelfLovinDisabledReason(Pawn pawn, LovinTypeDef lovinType, out string reason)
+    {
+        if (IntegrationGuards.ShouldUseIntimacyForLovinValidation()
+            && IntimacyValidationBridge.TryGetSelfLovinDisabledReason(pawn, out reason))
+        {
+            return true;
+        }
+
+        if (!IntegrationGuards.ShouldUseIntimacyForLovinValidation())
+        {
+            reason = GetOrderedPawnManualFailureReason(pawn);
+            if (!reason.NullOrEmpty())
+                return true;
+
+            if (pawn == null)
+            {
+                reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+                return true;
+            }
+
+            if (pawn.RaceProps?.Humanlike != true)
+            {
+                reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsNotHumanlike".Translate());
+                return true;
+            }
+
+            if (IsLovin(pawn))
+            {
+                reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+                return true;
+            }
+        }
+
+        if (!Despicable.NSFW.Integrations.ReproCompatibilityUtil.PawnSatisfiesSoloLovinTypeRequirements(pawn, lovinType))
+        {
+            reason = "D2N_LovinReason_NoCompatibleTypes".Translate();
+            return true;
+        }
+
+        reason = null;
+        return false;
+    }
+
+
+
+    public static bool PassesAutonomousSelfLovinCheck(Pawn pawn, LovinTypeDef lovinType, out string reason)
+    {
+        reason = null;
+        return !TryGetAutonomousSelfLovinDisabledReason(pawn, lovinType, out reason);
+    }
+
+    public static bool TryGetAutonomousSelfLovinDisabledReason(Pawn pawn, LovinTypeDef lovinType, out string reason)
+    {
+        reason = GetCouldUseSomeLovinFailureReason(pawn, orderedLovin: false);
+        if (!reason.NullOrEmpty())
+            return true;
+
+        reason = GetHealthCheckFailureReason(pawn);
+        if (!reason.NullOrEmpty())
+            return true;
+
+        if (pawn == null)
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+            return true;
+        }
+
+        if (pawn.RaceProps?.Humanlike != true)
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsNotHumanlike".Translate());
+            return true;
+        }
+
+        if (!pawn.Spawned)
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+            return true;
+        }
+
+        if (pawn.Dead)
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsDead".Translate());
+            return true;
+        }
+
+        if (pawn.Downed)
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+            return true;
+        }
+
+        if (!pawn.Awake())
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_CantStayAwake".Translate());
+            return true;
+        }
+
+        if (pawn.mindState?.canLovinTick > Find.TickManager.TicksGame)
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_HadLovinRecently".Translate());
+            return true;
+        }
+
+        if (IsLovin(pawn))
+        {
+            reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+            return true;
+        }
+
+        if (!Despicable.NSFW.Integrations.ReproCompatibilityUtil.PawnSatisfiesSoloLovinTypeRequirements(pawn, lovinType))
+        {
+            reason = "D2N_LovinReason_NoCompatibleTypes".Translate();
+            return true;
+        }
+
+        reason = null;
+        return false;
+    }
+
+
+    public static bool InSameBed(Pawn pawn, Pawn partner)
     {
         if (pawn == null)
         {
@@ -516,6 +643,7 @@ public static bool InSameBed(Pawn pawn, Pawn partner)
         return pawn.CurJobDef == JobDefOf.Lovin ||
                pawn.CurJobDef == LovinModule_JobDefOf.Job_GiveLovin ||
                pawn.CurJobDef == LovinModule_JobDefOf.Job_GetLovin ||
-               pawn.CurJobDef == LovinModule_JobDefOf.Job_GetBedLovin;
+               pawn.CurJobDef == LovinModule_JobDefOf.Job_GetBedLovin ||
+               pawn.CurJobDef == LovinModule_JobDefOf.Job_SelfLovin;
     }
 }

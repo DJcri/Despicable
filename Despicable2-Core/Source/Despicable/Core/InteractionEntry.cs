@@ -53,6 +53,49 @@ public static class InteractionEntry
         return true;
     }
 
+
+    public static bool TryPrepareManualSelf(
+        Pawn initiator,
+        string channel,
+        Action<InteractionRequest> configureRequest,
+        out InteractionRequest req,
+        out InteractionContext ctx)
+    {
+        req = null;
+        ctx = null;
+
+        if (initiator == null)
+            return false;
+
+        req = new InteractionRequest(
+            initiator,
+            initiator,
+            requestedInteractionId: null,
+            isManual: true
+        );
+
+        req.Channel = channel;
+        configureRequest?.Invoke(req);
+
+        bool initiatorInBed = global::Despicable.PawnBedQuery.IsInBed(initiator);
+
+        ctx = new InteractionContext
+        {
+            Map = initiator.Map,
+            Tick = Find.TickManager.TicksGame,
+
+            InitiatorDrafted = initiator.Drafted,
+            RecipientDrafted = initiator.Drafted,
+
+            InitiatorInBed = initiatorInBed,
+            RecipientInBed = initiatorInBed,
+
+            InitiatorHostileToRecipient = false
+        };
+
+        return true;
+    }
+
     public static InteractionResolution ResolveManual(
         Pawn initiator,
         Pawn recipient,
@@ -64,4 +107,16 @@ public static class InteractionEntry
 
         return Resolver.Resolve(req, ctx);
     }
+
+    public static InteractionResolution ResolveManualSelf(
+        Pawn initiator,
+        string channel,
+        Action<InteractionRequest> configureRequest)
+    {
+        if (!TryPrepareManualSelf(initiator, channel, configureRequest, out var req, out var ctx))
+            return new InteractionResolution { Allowed = false, Reason = "NullPawn" };
+
+        return Resolver.Resolve(req, ctx);
+    }
+
 }

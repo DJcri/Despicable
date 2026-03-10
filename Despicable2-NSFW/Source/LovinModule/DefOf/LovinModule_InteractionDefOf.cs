@@ -12,6 +12,7 @@ public class LovinModule_InteractionDefOf
     public static InteractionDef Interaction_VaginalSex;
     public static InteractionDef Interaction_OralSex;
     public static InteractionDef Interaction_AnalSex;
+    public static InteractionDef Interaction_SelfLovin;
 
     static LovinModule_InteractionDefOf()
     {

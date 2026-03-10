@@ -13,11 +13,30 @@ public sealed class LovinPreResolveHook : IPreResolveHook
     {
         outReason = null;
 
-        if (!IsLovinRequest(req))
+        if (!TryGetRequestedLovinType(req, out LovinTypeDef lovinType))
             return true;
 
+        bool selfLovin = IsSelfLovinRequest(req, lovinType);
         var a = req?.Initiator;
         var b = req?.Recipient;
+
+        if (selfLovin)
+        {
+            if (a == null)
+            {
+                outReason = "D2N_LovinReason_IsMissing".Translate();
+                return false;
+            }
+
+            if (!LovinUtil.PassesSelfLovinCheck(a, lovinType, out string selfReason))
+            {
+                outReason = selfReason ?? "D2N_LovinReason_Unknown".Translate();
+                return false;
+            }
+
+            return true;
+        }
+
         if (a == null || b == null)
         {
             outReason = "Missing participants.";
@@ -46,31 +65,32 @@ public sealed class LovinPreResolveHook : IPreResolveHook
             return false;
         }
 
-        if (!req.RequestedStageId.NullOrEmpty())
+        if (lovinType != null && !lovinType.isSolo && !ReproCompatibilityUtil.PairSatisfiesLovinTypeRequirements(a, b, lovinType))
         {
-            var lovinType = DefDatabase<LovinTypeDef>.GetNamedSilentFail(req.RequestedStageId);
-            if (lovinType != null && !ReproCompatibilityUtil.PairSatisfiesLovinTypeRequirements(a, b, lovinType))
-            {
-                outReason = "Selected lovin type anatomy requirements are not met.";
-                return false;
-            }
+            outReason = "Selected lovin type anatomy requirements are not met.";
+            return false;
         }
 
         return true;
     }
 
-    private static bool IsLovinRequest(InteractionRequest req)
+    private static bool TryGetRequestedLovinType(InteractionRequest req, out LovinTypeDef lovinType)
     {
-        if (req == null) return false;
+        lovinType = null;
+        if (req == null)
+            return false;
 
-        if (req.Channel == Channels.ManualLovin)
-            return true;
-
-        // If a stage id matches a LovinTypeDef, treat it as NSFW-lovin.
         if (!req.RequestedStageId.NullOrEmpty())
-            return DefDatabase<LovinTypeDef>.GetNamedSilentFail(req.RequestedStageId) != null;
+            lovinType = DefDatabase<LovinTypeDef>.GetNamedSilentFail(req.RequestedStageId);
 
-        return false;
+        return req.Channel == Channels.ManualLovin
+            || req.Channel == Channels.ManualSelfLovin
+            || lovinType != null;
+    }
+
+    private static bool IsSelfLovinRequest(InteractionRequest req, LovinTypeDef lovinType)
+    {
+        return req?.Channel == Channels.ManualSelfLovin || lovinType?.isSolo == true;
     }
 }
 
@@ -84,49 +104,55 @@ public sealed class LovinPostResolveHook : IPostResolveHook
         if (req == null || ctx == null || res == null)
             return;
 
-        if (!IsLovinRequest(req))
+        if (!TryGetRequestedLovinType(req, out LovinTypeDef lovinType))
             return;
 
-        // If Core already blocked it, do not override.
         if (!res.Allowed)
             return;
 
-        // Stage id is an opaque key in Core; for NSFW it's the LovinTypeDef.defName.
         if (!req.RequestedStageId.NullOrEmpty())
             res.ChosenStageId = req.RequestedStageId;
 
-        LovinTypeDef lovinType = null;
-        if (!res.ChosenStageId.NullOrEmpty())
+        if (lovinType == null && !res.ChosenStageId.NullOrEmpty())
             lovinType = DefDatabase<LovinTypeDef>.GetNamedSilentFail(res.ChosenStageId);
 
-        // Ensure an interaction is chosen when the lovin type carries one.
         if (res.ChosenInteractionDef == null && lovinType?.interaction != null)
             res.ChosenInteractionDef = lovinType.interaction;
 
         if (res.ChosenInteractionId.NullOrEmpty())
             res.ChosenInteractionId = res.ChosenInteractionDef?.defName ?? req.RequestedInteractionId;
 
-        // Choose the initiator job (partner will be assigned Job_GiveLovin by the driver).
-        if (res.ChosenJobDef == null)
-        {
-            bool bedLovin = ctx.InitiatorInBed || ctx.RecipientInBed;
+        if (res.ChosenJobDef != null)
+            return;
 
-            res.ChosenJobDef = bedLovin
-                ? LovinModule_JobDefOf.Job_GetBedLovin
-                : LovinModule_JobDefOf.Job_GetLovin;
+        if (IsSelfLovinRequest(req, lovinType))
+        {
+            res.ChosenJobDef = LovinModule_JobDefOf.Job_SelfLovin;
+            return;
         }
+
+        bool bedLovin = ctx.InitiatorInBed || ctx.RecipientInBed;
+        res.ChosenJobDef = bedLovin
+            ? LovinModule_JobDefOf.Job_GetBedLovin
+            : LovinModule_JobDefOf.Job_GetLovin;
     }
 
-    private static bool IsLovinRequest(InteractionRequest req)
+    private static bool TryGetRequestedLovinType(InteractionRequest req, out LovinTypeDef lovinType)
     {
-        if (req == null) return false;
-
-        if (req.Channel == Channels.ManualLovin)
-            return true;
+        lovinType = null;
+        if (req == null)
+            return false;
 
         if (!req.RequestedStageId.NullOrEmpty())
-            return DefDatabase<LovinTypeDef>.GetNamedSilentFail(req.RequestedStageId) != null;
+            lovinType = DefDatabase<LovinTypeDef>.GetNamedSilentFail(req.RequestedStageId);
 
-        return false;
+        return req.Channel == Channels.ManualLovin
+            || req.Channel == Channels.ManualSelfLovin
+            || lovinType != null;
+    }
+
+    private static bool IsSelfLovinRequest(InteractionRequest req, LovinTypeDef lovinType)
+    {
+        return req?.Channel == Channels.ManualSelfLovin || lovinType?.isSolo == true;
     }
 }

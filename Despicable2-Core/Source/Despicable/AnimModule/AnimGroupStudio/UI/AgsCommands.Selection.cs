@@ -35,6 +35,8 @@ public partial class Dialog_AnimGroupStudio
                 selectedStageIndex = 0;
                 preview.ConfigureFor(group);
                 preview.SelectedStageIndex = 0;
+                if (group != null && preview.StageCount > 0)
+                    preview.ShowSelectedStageAtTick(0);
             }
     private void RebuildFamilies()
             {

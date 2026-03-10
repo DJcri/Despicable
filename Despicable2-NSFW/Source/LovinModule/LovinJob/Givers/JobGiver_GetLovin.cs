@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
 using Verse.AI;
-using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 using Despicable.NSFW.Integrations;
 
 namespace Despicable;
@@ -29,6 +23,12 @@ public class JobGiver_GetLovin : ThinkNode_JobGiver
             return null;
         }
 
-        return new Job(LovinModule_JobDefOf.Job_GetLovin, partner);
+        LovinTypeDef lovinType = LovinUtil.FindAutonomousLovinType(pawn, partner);
+        if (lovinType == null)
+            return null;
+
+        Job job = new Job(LovinModule_JobDefOf.Job_GetLovin, partner);
+        LovinUtil.StampAutonomousLovinJob(job, pawn.Map, lovinType);
+        return job;
     }
 }

@@ -18,6 +18,7 @@ public class InteractionMenu
         // GenUI.TargetsAt can yield the same pawn more than once, and/or multiple
         // Harmony patches can call into this method.
         var addedTargets = new HashSet<int>();
+        bool addedSelfOption = false;
 
             // The user has clicked on something and the loop is running.
             foreach (LocalTargetInfo target in validTargets)
@@ -36,8 +37,25 @@ public class InteractionMenu
                 // Handle same-pawn case separately.
                 if (pawn == targetPawn)
                 {
-                    // Actions for self
-                    // ...
+                    if (addedSelfOption)
+                        continue;
+
+                    var selfSpecs = GenerateSelfOptionSpecs(pawn, target).ToList();
+                    if (selfSpecs.Count == 0)
+                        continue;
+
+                    addedSelfOption = true;
+                    string label = "InteractionCategory_Self".Translate();
+
+                    if (opts.Any(o => o?.Label != null && o.Label.StartsWith(label)))
+                        continue;
+
+                    FloatMenuOption option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(label, delegate ()
+                    {
+                        ManualMenuRequest request = BuildSelfMenuRequest(pawn, target, selfSpecs);
+                        ManualMenuHost.Open(request);
+                    }, targetPawn, Color.white, MenuOptionPriority.High), pawn, target);
+                    opts.Add(option);
                 }
                 else
                 {
@@ -63,6 +81,22 @@ public class InteractionMenu
                     opts.Add(option);
                 }
             }
+    }
+
+
+    private static ManualMenuRequest BuildSelfMenuRequest(Pawn pawn, LocalTargetInfo target, IEnumerable<ManualMenuOptionSpec> optionSpecs = null)
+    {
+        IEnumerable<ManualMenuOptionSpec> specs = optionSpecs ?? GenerateSelfOptionSpecs(pawn, target);
+        return new ManualMenuRequest("ManualInteraction/Self", specs)
+        {
+            GivesColonistOrders = false,
+            VanishIfMouseDistant = false
+        };
+    }
+
+    private static IEnumerable<ManualMenuOptionSpec> GenerateSelfOptionSpecs(Pawn pawn, LocalTargetInfo target)
+    {
+        return new List<ManualMenuOptionSpec>();
     }
 
     private static ManualMenuRequest BuildSocialMenuRequest(Pawn pawn, LocalTargetInfo target)

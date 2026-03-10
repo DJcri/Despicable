@@ -2,6 +2,7 @@ using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using Verse.AI;
 using Despicable.NSFW.Integrations;
 
 namespace Despicable;
@@ -144,4 +145,58 @@ public static partial class LovinUtil
 
         return GetShortLovinFailureReason(pawn, pawn2);
     }
+
+
+    internal static LovinTypeDef FindAutonomousLovinType(Pawn pawn, Pawn target)
+    {
+        if (pawn == null || target == null)
+            return null;
+
+        foreach (LovinTypeDef lovinType in DefDatabase<LovinTypeDef>.AllDefsListForReading)
+        {
+            if (lovinType == null || lovinType.isSolo)
+                continue;
+
+            if (ReproCompatibilityUtil.PairSatisfiesLovinTypeRequirements(pawn, target, lovinType))
+                return lovinType;
+        }
+
+        return null;
+    }
+
+    internal static LovinTypeDef FindAutonomousSelfLovinType(Pawn pawn)
+    {
+        if (pawn == null)
+            return null;
+
+        foreach (LovinTypeDef lovinType in DefDatabase<LovinTypeDef>.AllDefsListForReading)
+        {
+            if (lovinType == null || !lovinType.isSolo)
+                continue;
+
+            if (!ReproCompatibilityUtil.PawnSatisfiesSoloLovinTypeRequirements(pawn, lovinType))
+                continue;
+
+            if (!TryGetAutonomousSelfLovinDisabledReason(pawn, lovinType, out _))
+                return lovinType;
+        }
+
+        return null;
+    }
+
+    internal static void StampAutonomousLovinJob(Job job, Map map, LovinTypeDef lovinType)
+    {
+        if (job == null || map == null || lovinType == null)
+            return;
+
+        var store = Despicable.Core.InteractionInstanceStore.Get(map);
+        if (store == null)
+            return;
+
+        string interactionId = lovinType.interaction?.defName ?? lovinType.defName;
+        store.Set(job.loadID, interactionId);
+        store.SetStage(job.loadID, lovinType.defName);
+        store.SetChannel(job.loadID, Despicable.Core.Channels.Auto);
+    }
+
 }

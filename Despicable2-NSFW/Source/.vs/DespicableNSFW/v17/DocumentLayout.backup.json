@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\deavy\\OneDrive\\Desktop\\Despicable\\Despicable2-NSFW\\Source\\",
+  "WorkspaceRootPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RimWorld\\Mods\\Despicable2-NSFW\\Source\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7F6E4EFD-CE0B-4EFB-A60A-49615B158EC7}|DespicableNSFW.csproj|c:\\users\\deavy\\onedrive\\desktop\\despicable\\despicable2-nsfw\\source\\integrations\\intimacy\\intimacyvalidationbridge.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7F6E4EFD-CE0B-4EFB-A60A-49615B158EC7}|DespicableNSFW.csproj|c:\\program files (x86)\\steam\\steamapps\\common\\rimworld\\mods\\despicable2-nsfw\\source\\integrations\\intimacy\\intimacyvalidationbridge.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7F6E4EFD-CE0B-4EFB-A60A-49615B158EC7}|DespicableNSFW.csproj|solutionrelative:integrations\\intimacy\\intimacyvalidationbridge.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "IntimacyValidationBridge.cs",
-              "DocumentMoniker": "C:\\Users\\deavy\\OneDrive\\Desktop\\Despicable\\Despicable2-NSFW\\Source\\Integrations\\Intimacy\\IntimacyValidationBridge.cs",
+              "DocumentMoniker": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RimWorld\\Mods\\Despicable2-NSFW\\Source\\Integrations\\Intimacy\\IntimacyValidationBridge.cs",
               "RelativeDocumentMoniker": "Integrations\\Intimacy\\IntimacyValidationBridge.cs",
-              "ToolTip": "C:\\Users\\deavy\\OneDrive\\Desktop\\Despicable\\Despicable2-NSFW\\Source\\Integrations\\Intimacy\\IntimacyValidationBridge.cs*",
-              "RelativeToolTip": "Integrations\\Intimacy\\IntimacyValidationBridge.cs*",
-              "ViewState": "AgIAAMEAAAAAAAAAAAAtwNUAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RimWorld\\Mods\\Despicable2-NSFW\\Source\\Integrations\\Intimacy\\IntimacyValidationBridge.cs",
+              "RelativeToolTip": "Integrations\\Intimacy\\IntimacyValidationBridge.cs",
+              "ViewState": "AgIAAMEAAAAAAAAAAAAtwN4AAABWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-09T07:31:47.42Z",
               "EditorCaption": ""

@@ -31,6 +31,52 @@ public static class Interactions
         Core.InteractionRequest req,
         Core.InteractionContext ctx)
     {
+        StartOrderedResolvedJob(
+            fallbackJobDef,
+            pawn,
+            target.Pawn?.thingIDNumber ?? 0,
+            req,
+            ctx,
+            jobDef => JobMaker.MakeJob(jobDef, target),
+            key => $"Blocked duplicate start key={key}",
+            res => $"No JobDef after resolve id={res.ChosenInteractionId} stage={res.ChosenStageId}",
+            res => $"Resolve blocked allowed={res?.Allowed ?? false} reason={res?.Reason}");
+    }
+
+
+    /// <summary>
+    /// Core-aware ordered self job with idempotence + per-job instance tracking.
+    /// </summary>
+    public static void OrderedSelfJob(
+        JobDef fallbackJobDef,
+        Pawn pawn,
+        Core.InteractionRequest req,
+        Core.InteractionContext ctx)
+    {
+        StartOrderedResolvedJob(
+            fallbackJobDef,
+            pawn,
+            0,
+            req,
+            ctx,
+            jobDef => JobMaker.MakeJob(jobDef),
+            key => $"Blocked duplicate self start key={key}",
+            res => $"No Self JobDef after resolve id={res.ChosenInteractionId} stage={res.ChosenStageId}",
+            res => $"Resolve self blocked allowed={res?.Allowed ?? false} reason={res?.Reason}");
+    }
+
+
+    private static void StartOrderedResolvedJob(
+        JobDef fallbackJobDef,
+        Pawn pawn,
+        int recipientId,
+        Core.InteractionRequest req,
+        Core.InteractionContext ctx,
+        System.Func<JobDef, Job> createJob,
+        System.Func<Core.InteractionKey, string> duplicateLog,
+        System.Func<Core.InteractionResolution, string> noJobLog,
+        System.Func<Core.InteractionResolution, string> blockedLog)
+    {
         if (pawn == null) return;
 
         int tick = ctx?.Tick ?? Find.TickManager.TicksGame;
@@ -40,35 +86,31 @@ public static class Interactions
         if ((bool)!req?.RequestedStageId.NullOrEmpty())
             id = $"{id}:{req.RequestedStageId}";
 
-        int recipientId = target.Pawn?.thingIDNumber ?? 0;
         var key = new Core.InteractionKey(pawn.thingIDNumber, recipientId, id, bucket);
-
-        bool ok = Core.InteractionRegistry.TryRegister(pawn.Map, key);
-        if (!ok)
+        if (!Core.InteractionRegistry.TryRegister(pawn.Map, key))
         {
-            Core.DebugLogger.Debug($"Blocked duplicate start key={key}");
+            Core.DebugLogger.Debug(duplicateLog?.Invoke(key) ?? $"Blocked duplicate start key={key}");
             return;
         }
 
-        // Resolve (hooks may fill in job defs, animation, etc.)
         var res = Core.Resolver.Resolve(req, ctx);
         if (res == null || !res.Allowed)
         {
-            Core.DebugLogger.Debug($"Resolve blocked allowed={res?.Allowed ?? false} reason={res?.Reason}");
+            Core.DebugLogger.Debug(blockedLog?.Invoke(res) ?? $"Resolve blocked allowed={res?.Allowed ?? false} reason={res?.Reason}");
             return;
         }
 
         JobDef jobDef = res.ChosenJobDef ?? fallbackJobDef;
         if (jobDef == null)
         {
-            Core.DebugLogger.Debug($"No JobDef after resolve id={res.ChosenInteractionId} stage={res.ChosenStageId}");
+            Core.DebugLogger.Debug(noJobLog?.Invoke(res) ?? $"No JobDef after resolve id={res?.ChosenInteractionId} stage={res?.ChosenStageId}");
             return;
         }
 
-        // Create job HERE so we can store by job.loadID
-        Job job = JobMaker.MakeJob(jobDef, target);
+        Job job = createJob != null
+            ? createJob(jobDef)
+            : JobMaker.MakeJob(jobDef);
 
-        // Record resolved interaction per job instance (safe for multiple pairs)
         var store = Core.InteractionInstanceStore.Get(pawn.Map);
         if (store != null)
         {
@@ -80,4 +122,5 @@ public static class Interactions
         pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
         pawn.jobs.TryTakeOrderedJob(job);
     }
+
 }

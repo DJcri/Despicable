@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <JoyGiverDef>
+        <defName>D2N_JoyGiver_SelfLovin</defName>
+        <giverClass>Despicable.JoyGiver_SelfLovin</giverClass>
+        <baseChance>0.045</baseChance>
+        <pctPawnsEverDo>1.0</pctPawnsEverDo>
+        <canDoWhileInBed>true</canDoWhileInBed>
+        <joyKind>Social</joyKind>
+        <jobDef>Job_SelfLovin</jobDef>
+    </JoyGiverDef>
+</Defs>

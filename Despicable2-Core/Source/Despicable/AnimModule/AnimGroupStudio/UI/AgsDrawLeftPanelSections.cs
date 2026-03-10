@@ -7,6 +7,7 @@ using Verse;
 using Despicable.UIFramework;
 using Despicable.UIFramework.Controls;
 using Despicable.UIFramework.Layout;
+using Despicable.AnimModule.AnimGroupStudio.Export;
 using Despicable.AnimModule.AnimGroupStudio.Model;
 
 namespace Despicable.AnimModule.AnimGroupStudio.UI;
@@ -97,6 +98,10 @@ public partial class Dialog_AnimGroupStudio
         var defH = new HRow(scrollCtx, defRow);
         D2Widgets.Label(scrollCtx, defH.NextFixed(90f, UIRectTag.Label, "Project/BaseDefLabel"), "Base def", "Project/BaseDefLabel");
         project.export.baseDefName = D2Widgets.TextField(scrollCtx, defH.Remaining(UIRectTag.TextField, "Project/BaseDefField"), project.export.baseDefName ?? "", 256, "Project/BaseDefField");
+
+        string baseDefHint = GetDefNameValidationHint(project.export.baseDefName);
+        if (!baseDefHint.NullOrEmpty())
+            v.NextTextBlock(scrollCtx, baseDefHint, GameFont.Small, padding: 2f, label: "Project/BaseDefHint");
 
         var projectActions = new List<D2ActionBar.Item>
         {

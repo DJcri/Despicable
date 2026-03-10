@@ -13,6 +13,7 @@ public class LovinModule_JobDefOf
     public static JobDef Job_GetLovin;
     public static JobDef Job_GetBedLovin;
     public static JobDef Job_GiveLovin;
+    public static JobDef Job_SelfLovin;
 
     static LovinModule_JobDefOf()
     {

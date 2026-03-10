@@ -153,20 +153,28 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                 catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:6", "Dialog_AnimGroupStudio ignored a non-fatal editor exception.", ex); }
             }
         }
+        private static int HashCombine(int hash, int value)
+        {
+            unchecked
+            {
+                return (hash * 31) + value;
+            }
+        }
+
         private static int ComputeStageHash(AgsModel.StageSpec stage)
         {
             unchecked
             {
                 int h = 17;
-                h *= 31 + (stage?.durationTicks ?? 0);
-                h *= 31 + (stage?.repeatCount ?? 1);
+                h = HashCombine(h, stage?.durationTicks ?? 0);
+                h = HashCombine(h, stage?.repeatCount ?? 1);
 
                 if (stage?.variants != null)
                 {
                     for (int v = 0; v < stage.variants.Count; v++)
                     {
                         var variant = stage.variants[v];
-                        h *= 31 + (variant?.variantId?.GetHashCode() ?? 0);
+                        h = HashCombine(h, variant?.variantId?.GetHashCode() ?? 0);
                         if (variant?.clips != null)
                         {
                             // Stable ordering for hash.
@@ -175,7 +183,7 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                             for (int c = 0; c < ordered.Count; c++)
                             {
                                 var rc = ordered[c];
-                                h *= 31 + (rc.roleKey?.GetHashCode() ?? 0);
+                                h = HashCombine(h, rc.roleKey?.GetHashCode() ?? 0);
                                 h = HashClip(h, rc.clip);
                             }
                         }
@@ -189,28 +197,33 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
             unchecked
             {
                 if (clip?.tracks == null) return h;
-                h *= 31 + clip.lengthTicks;
+                h = HashCombine(h, clip.lengthTicks);
                 for (int t = 0; t < clip.tracks.Count; t++)
                 {
                     var tr = clip.tracks[t];
-                    h *= 31 + (tr?.nodeTag?.GetHashCode() ?? 0);
+                    h = HashCombine(h, tr?.nodeTag?.GetHashCode() ?? 0);
                     if (tr?.keys == null) continue;
                     for (int k = 0; k < tr.keys.Count; k++)
                     {
                         var key = tr.keys[k];
                         if (key == null) continue;
-                        h *= 31 + key.tick;
-                        h *= 31 + key.rotation.AsInt;
-                        h *= 31 + (key.visible ? 1 : 0);
-                        h *= 31 + key.offset.GetHashCode();
-                        h *= 31 + key.angle.GetHashCode();
-                        h *= 31 + key.scale.GetHashCode();
-                        h *= 31 + (key.graphicState?.GetHashCode() ?? 0);
+                        h = HashCombine(h, key.tick);
+                        h = HashCombine(h, key.rotation.AsInt);
+                        h = HashCombine(h, key.visible ? 1 : 0);
+                        h = HashCombine(h, key.offset.GetHashCode());
+                        h = HashCombine(h, key.angle.GetHashCode());
+                        h = HashCombine(h, key.scale.GetHashCode());
+                        h = HashCombine(h, key.graphicState?.GetHashCode() ?? 0);
                         // KeySpec.variant is int (-1 means unset).
-                        h *= 31 + (key.variant == -1 ? 0 : key.variant.GetHashCode());
-                        h *= 31 + key.layerBias;
-                        h *= 31 + (key.soundDefName?.GetHashCode() ?? 0);
-                        h *= 31 + (key.facialAnimDefName?.GetHashCode() ?? 0);
+                        h = HashCombine(h, key.variant == -1 ? 0 : key.variant.GetHashCode());
+                        h = HashCombine(h, key.layerBias);
+                        h = HashCombine(h, key.soundDefName?.GetHashCode() ?? 0);
+                        h = HashCombine(h, key.facialAnimDefName?.GetHashCode() ?? 0);
+                        h = HashCombine(h, key.prop?.propDefName?.GetHashCode() ?? 0);
+                        h = HashCombine(h, key.prop != null && key.prop.propVisible ? 1 : 0);
+                        h = HashCombine(h, key.prop != null ? key.prop.propOffset.GetHashCode() : 0);
+                        h = HashCombine(h, key.prop != null ? key.prop.propAngle.GetHashCode() : 0);
+                        h = HashCombine(h, key.prop != null ? key.prop.propScale.GetHashCode() : 0);
                     }
                 }
                 return h;
@@ -233,22 +246,22 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
             int hash = 17;
             unchecked
             {
-                hash *= 31 + stageTotal;
+                hash = HashCombine(hash, stageTotal);
                 if (project.roles != null)
                 {
                     for (int i = 0; i < project.roles.Count; i++)
                     {
                         var role = project.roles[i];
-                        hash *= 31 + (role?.roleKey?.GetHashCode() ?? 0);
-                        hash *= 31 + (role?.displayName?.GetHashCode() ?? 0);
-                        hash *= 31 + (role != null ? (int)role.genderReq : 0);
-                        hash *= 31 + (role?.previewDummyBodyTypeDefName?.GetHashCode() ?? 0);
+                        hash = HashCombine(hash, role?.roleKey?.GetHashCode() ?? 0);
+                        hash = HashCombine(hash, role?.displayName?.GetHashCode() ?? 0);
+                        hash = HashCombine(hash, role != null ? (int)role.genderReq : 0);
+                        hash = HashCombine(hash, role?.previewDummyBodyTypeDefName?.GetHashCode() ?? 0);
                     }
                 }
                 if (project.stages != null)
                 {
                     for (int i = 0; i < project.stages.Count; i++)
-                        hash = HashClip(hash, null) ^ ComputeStageHash(project.stages[i]);
+                        hash = HashCombine(hash, ComputeStageHash(project.stages[i]));
                 }
             }
 

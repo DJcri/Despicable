@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
 using Verse.AI;
-using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 using Despicable.NSFW.Integrations;
 
 namespace Despicable;
@@ -36,7 +30,13 @@ public class JobGiver_GetBedLovin : ThinkNode_JobGiver
             if (pawn?.CurJob != null && pawn?.jobs?.curDriver != null)
                 pawn?.jobs?.curDriver?.EndJobWith(JobCondition.InterruptForced);
 
-            return JobMaker.MakeJob(LovinModule_JobDefOf.Job_GetBedLovin, partner, bed);
+            LovinTypeDef lovinType = LovinUtil.FindAutonomousLovinType(pawn, partner);
+            if (lovinType == null)
+                return null;
+
+            Job job = JobMaker.MakeJob(LovinModule_JobDefOf.Job_GetBedLovin, partner, bed);
+            LovinUtil.StampAutonomousLovinJob(job, pawn.Map, lovinType);
+            return job;
         }
 
         return null;

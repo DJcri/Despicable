@@ -30,27 +30,7 @@ public static class LovinStagePlayback
         Thing anchorThing = bed != null ? (Thing)bed : initiator;
 
         // Prefer resolved stage id (manual selection) when present; fallback to job def extension.
-
-        string stageTag = null;
-
-        try
-
-        {
-
-            var store = Despicable.Core.InteractionInstanceStore.Get(initiator.Map);
-
-            if (store != null && job != null && store.TryGetStage(job.loadID, out var stageId) && !stageId.NullOrEmpty())
-
-                stageTag = stageId;
-
-        }
-
-        catch { /* ignore */ }
-
-
-        if (stageTag.NullOrEmpty())
-
-            stageTag = job?.def?.GetModExtension<ModExtension_LovinType>()?.lovinType?.defName;
+        string stageTag = LovinJobStageUtil.GetResolvedStageTag(job, initiator.Map);
 
 
         var stageReq = new Despicable.Core.Staging.StageRequest

@@ -21,17 +21,10 @@ public partial class Dialog_AnimGroupStudio
     {
         var ctx = frameworkCtx;
         var parts = D2Section.Layout(ctx, rect, new D2Section.Spec("AuthorLeft", headerHeight: SectionHeaderHeight, soft: true, pad: true, drawBackground: true, padOverride: ctx.Style.Pad));
-        D2Section.DrawCaptionStrip(ctx, parts.Header, "Project & Structure", "AuthorLeft/Header", GameFont.Medium);
+        string headerTitle = sourceMode == SourceMode.ExistingDef ? "Browse Existing" : "Project & Structure";
+        D2Section.DrawCaptionStrip(ctx, parts.Header, headerTitle, "AuthorLeft/Header", GameFont.Medium);
 
         Rect scrollRect = parts.Body;
-        if (sourceMode == SourceMode.ExistingDef)
-        {
-            var bodyStack = ctx.VStack(parts.Body, label: "AuthorLeft/Body");
-            string groupLabel = selectedGroup?.defName ?? "No group selected.";
-            D2Text.DrawWrappedLabel(ctx, bodyStack.NextLine(UIRectTag.Label, "AuthorLeft/SelectedGroup"), groupLabel, GameFont.Small, UIRectTag.Label, "AuthorLeft/SelectedGroupText");
-            bodyStack.NextSpace(Mathf.Max(2f, ctx.Style.Gap * 0.5f));
-            scrollRect = bodyStack.Remaining(UIRectTag.Body, "AuthorLeft/ScrollRect");
-        }
 
         var authorLeftScrollLocal = authorLeftScroll;
         var authorLeftContentHeightLocal = authorLeftContentHeight;

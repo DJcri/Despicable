@@ -25,6 +25,7 @@ internal sealed class AgsEditorSessionState
     public int AuthorRightPaneTab;
 
     public bool AuthorScaleLock = true;
+    public AgsModel.Keyframe AuthorKeyClipboard;
     public readonly Dictionary<string, bool> PropTagCache = new();
 
     public string LastExportFolder;

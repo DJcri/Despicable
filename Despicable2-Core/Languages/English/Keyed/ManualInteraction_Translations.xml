@@ -2,6 +2,7 @@
 <LanguageData>
   <!-- Manual interaction menu (Core) -->
   <InteractionCategory>Interact with {0}</InteractionCategory>
+  <InteractionCategory_Self>Interact with yourself</InteractionCategory_Self>
   <InteractionOption_SocialFight>Provoke {0}</InteractionOption_SocialFight>
   <!-- Removed trailing apostrophe -->
   <InteractionOption_Insult>Insult {0}</InteractionOption_Insult>

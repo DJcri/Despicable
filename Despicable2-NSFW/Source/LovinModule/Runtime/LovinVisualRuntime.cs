@@ -13,7 +13,8 @@ internal static class LovinVisualRuntime
         return jobDef == JobDefOf.Lovin
             || jobDef == LovinModule_JobDefOf.Job_GiveLovin
             || jobDef == LovinModule_JobDefOf.Job_GetLovin
-            || jobDef == LovinModule_JobDefOf.Job_GetBedLovin;
+            || jobDef == LovinModule_JobDefOf.Job_GetBedLovin
+            || jobDef == LovinModule_JobDefOf.Job_SelfLovin;
     }
 
     internal static bool CanShowLovinNudity(Pawn pawn)

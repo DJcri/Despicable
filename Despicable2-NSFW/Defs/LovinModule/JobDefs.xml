@@ -33,4 +33,13 @@
 		<casualInterruptible>false</casualInterruptible>
 		<suspendable>false</suspendable>
 	</JobDef>
+
+	<JobDef>
+		<defName>Job_SelfLovin</defName>
+		<driverClass>Despicable.JobDriver_SelfLovin</driverClass>
+		<reportString>enjoying some private lovin'.</reportString>
+		<joyKind>Social</joyKind>
+		<casualInterruptible>false</casualInterruptible>
+		<suspendable>false</suspendable>
+	</JobDef>
 </Defs>

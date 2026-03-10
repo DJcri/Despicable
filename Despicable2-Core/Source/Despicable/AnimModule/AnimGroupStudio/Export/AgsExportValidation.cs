@@ -22,6 +22,8 @@ public sealed partial class AgsExport
         if (project.export == null) project.export = new AgsModel.ExportSpec();
         if (project.export.baseDefName.NullOrEmpty())
             vr.errors.Add("Base defName is empty. Set a Base def value in the left panel.");
+        else if (!AgsExportUtil.IsExactDefName(project.export.baseDefName))
+            vr.errors.Add("Base defName must use only letters, digits, and underscores, and cannot start with a digit.");
 
         if (project.roles.NullOrEmpty())
             vr.errors.Add("Project has no roles.");
@@ -34,6 +36,31 @@ public sealed partial class AgsExport
         var variantIds = CollectVariantIds(project);
         if (variantIds.Count == 0)
             vr.errors.Add("No variants found. Each stage must contain at least one variant (e.g. 'Base').");
+
+        var roleNameMap = new Dictionary<string, string>(StringComparer.Ordinal);
+        for (int ri = 0; ri < project.roles.Count; ri++)
+        {
+            var role = project.roles[ri];
+            if (role == null || role.roleKey.NullOrEmpty())
+                continue;
+
+            string safeRoleKey = AgsExportUtil.MakeSafeDefName(role.roleKey);
+            if (roleNameMap.TryGetValue(safeRoleKey, out var otherRoleKey) && otherRoleKey != role.roleKey)
+                vr.errors.Add($"Role keys '{otherRoleKey}' and '{role.roleKey}' normalize to the same exported name '{safeRoleKey}'.");
+            else
+                roleNameMap[safeRoleKey] = role.roleKey;
+        }
+
+        var variantCodeMap = new Dictionary<string, string>(StringComparer.Ordinal);
+        for (int vi = 0; vi < variantIds.Count; vi++)
+        {
+            string vid = variantIds[vi];
+            string code = VariantIdToCode(vid);
+            if (variantCodeMap.TryGetValue(code, out var otherVariant) && otherVariant != vid)
+                vr.errors.Add($"Variants '{otherVariant}' and '{vid}' normalize to the same exported code '{(code == "" ? "Base" : code)}'.");
+            else
+                variantCodeMap[code] = vid;
+        }
 
         for (int si = 0; si < project.stages.Count; si++)
         {
@@ -187,6 +214,8 @@ public sealed partial class AgsExport
                     vr.errors.Add(context + $": track '{tr.nodeTag}' keyframe tick {k.tick} is outside 0..{durationTicks}.");
                 if (k.tick < prev)
                     vr.errors.Add(context + $": track '{tr.nodeTag}' keyframes are not sorted by tick (tick {k.tick} after {prev}).");
+                else if (k.tick == prev)
+                    vr.errors.Add(context + $": track '{tr.nodeTag}' has more than one keyframe at tick {k.tick}.");
                 prev = k.tick;
 
                 if (!AgsExportUtil.IsFinite(k.angle))

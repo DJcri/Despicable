@@ -56,6 +56,7 @@ public partial class Dialog_AnimGroupStudio : Window
 
     // Inspector UX state
     private bool authorScaleLock { get => session.AuthorScaleLock; set => session.AuthorScaleLock = value; }
+    private AgsModel.Keyframe authorKeyClipboard { get => session.AuthorKeyClipboard; set => session.AuthorKeyClipboard = value; }
     private Dictionary<string, bool> isPropTagCache => session.PropTagCache;
 
     // Export UX state
@@ -98,7 +99,7 @@ public partial class Dialog_AnimGroupStudio : Window
 
     private readonly AgsPreviewSession preview;
 
-    public override Vector2 InitialSize => new Vector2(1180f, 760f);
+    public override Vector2 InitialSize => new Vector2(1480f, 800f);
 
     private const float WindowHeaderHeight = 58f;
     private const float SectionHeaderHeight = 28f;
@@ -166,6 +167,7 @@ public partial class Dialog_AnimGroupStudio : Window
         if (Event.current == null || Event.current.type == EventType.Repaint)
         {
             preview.Update(Time.deltaTime);
+            SyncExistingStageSelectionToPlayback();
             authorPreviewPlaying = preview.IsPlaying;
             authorPreviewTick = preview.CurrentTick;
         }
@@ -217,25 +219,52 @@ public partial class Dialog_AnimGroupStudio : Window
     {
         var ctx = frameworkCtx ?? new UIContext(D2UIStyle.Default, null, nameof(Dialog_AnimGroupStudio), UIPass.Draw);
 
-        var panes = D2PaneLayout.Columns(
+        if (sourceMode == SourceMode.ExistingDef)
+        {
+            var panes = D2PaneLayout.Columns(
+                ctx,
+                rect,
+                new[]
+                {
+                    new D2PaneLayout.PaneSpec("Left", 332f, 372f, 0.2f, canCollapse: false, priority: 0),
+                    new D2PaneLayout.PaneSpec("Center", 588f, 760f, 1.75f, canCollapse: false, priority: 0),
+                    new D2PaneLayout.PaneSpec("Right", 260f, 320f, 0.3f, canCollapse: false, priority: 0),
+                },
+                gap: ctx.Style.Gap * 1.5f,
+                fallback: D2PaneLayout.FallbackMode.Stack,
+                label: "AnimGroupStudio/ExistingPanes");
+
+            if (panes.Rects.Length > 0 && panes.Rects[0].width > 0f && panes.Rects[0].height > 0f)
+                DrawAuthorLeft(panes.Rects[0]);
+            if (panes.Rects.Length > 1 && panes.Rects[1].width > 0f && panes.Rects[1].height > 0f)
+                DrawAuthorCenter(panes.Rects[1]);
+            if (panes.Rects.Length > 2 && panes.Rects[2].width > 0f && panes.Rects[2].height > 0f)
+                DrawExistingInfo(panes.Rects[2]);
+            return;
+        }
+
+        var authorPanes = D2PaneLayout.Columns(
             ctx,
             rect,
             new[]
             {
-                new D2PaneLayout.PaneSpec("Left", 300f, 340f, 0f, canCollapse: false, priority: 0),
-                new D2PaneLayout.PaneSpec("Center", 420f, 560f, 1.2f, canCollapse: false, priority: 0),
-                new D2PaneLayout.PaneSpec("Right", 300f, 360f, 0f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Left", 300f, 330f, 0f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Center", 430f, 560f, 1.25f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Data", 260f, 300f, 0.55f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Inspector", 320f, 360f, 0.75f, canCollapse: false, priority: 0),
             },
             gap: ctx.Style.Gap * 1.5f,
             fallback: D2PaneLayout.FallbackMode.Stack,
-            label: "AnimGroupStudio/MainPanes");
+            label: "AnimGroupStudio/AuthorPanes");
 
-        if (panes.Rects.Length > 0 && panes.Rects[0].width > 0f && panes.Rects[0].height > 0f)
-            DrawAuthorLeft(panes.Rects[0]);
-        if (panes.Rects.Length > 1 && panes.Rects[1].width > 0f && panes.Rects[1].height > 0f)
-            DrawAuthorCenter(panes.Rects[1]);
-        if (panes.Rects.Length > 2 && panes.Rects[2].width > 0f && panes.Rects[2].height > 0f)
-            DrawAuthorRight(panes.Rects[2]);
+        if (authorPanes.Rects.Length > 0 && authorPanes.Rects[0].width > 0f && authorPanes.Rects[0].height > 0f)
+            DrawAuthorLeft(authorPanes.Rects[0]);
+        if (authorPanes.Rects.Length > 1 && authorPanes.Rects[1].width > 0f && authorPanes.Rects[1].height > 0f)
+            DrawAuthorCenter(authorPanes.Rects[1]);
+        if (authorPanes.Rects.Length > 2 && authorPanes.Rects[2].width > 0f && authorPanes.Rects[2].height > 0f)
+            DrawAuthorData(authorPanes.Rects[2]);
+        if (authorPanes.Rects.Length > 3 && authorPanes.Rects[3].width > 0f && authorPanes.Rects[3].height > 0f)
+            DrawAuthorInspectorColumn(authorPanes.Rects[3]);
     }
 
 
@@ -246,4 +275,17 @@ public partial class Dialog_AnimGroupStudio : Window
 
 
 
+
+    private void SyncExistingStageSelectionToPlayback()
+    {
+        if (sourceMode != SourceMode.ExistingDef || !preview.IsPlaying || preview.StageCount <= 0)
+            return;
+
+        int playbackStage = preview.CurrentStageIndex;
+        if (playbackStage == selectedStageIndex)
+            return;
+
+        selectedStageIndex = playbackStage;
+        preview.SelectedStageIndex = playbackStage;
+    }
 }

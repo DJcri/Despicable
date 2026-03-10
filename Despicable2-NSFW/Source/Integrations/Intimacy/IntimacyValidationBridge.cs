@@ -48,15 +48,48 @@ internal static class IntimacyValidationBridge
         if (!reason.NullOrEmpty())
             return true;
 
-        reason = GetPawnFailureReason(orderedPawn, otherPawn, isOtherPawn: false);
+        // Preserve Despicable's manual ordered-pawn leniency here: Intimacy still governs approval,
+        // but the ordered pawn may be drafted without the bridge vetoing the command up front.
+        reason = GetPawnFailureReason(orderedPawn, otherPawn, isOtherPawn: false, allowDrafted: true, allowRecentLovin: false);
         if (!reason.NullOrEmpty())
             return true;
 
-        reason = GetPawnFailureReason(otherPawn, orderedPawn, isOtherPawn: true);
+        reason = GetPawnFailureReason(otherPawn, orderedPawn, isOtherPawn: true, allowDrafted: false, allowRecentLovin: false);
         if (!reason.NullOrEmpty())
             return true;
 
         reason = GetPairFailureReason(orderedPawn, otherPawn);
+        if (!reason.NullOrEmpty())
+            return true;
+
+        return false;
+    }
+
+    internal static bool PassesSelfLovinCheck(Pawn pawn, out string reason)
+    {
+        return !TryGetSelfLovinDisabledReason(pawn, out reason);
+    }
+
+    internal static bool TryGetSelfLovinDisabledReason(Pawn pawn, out string reason)
+    {
+        reason = null;
+
+        if (!IntegrationGuards.ShouldUseIntimacyForLovinValidation())
+            return false;
+
+        if (!EnsureCached())
+        {
+            reason = "D2N_LovinReason_Unknown".Translate();
+            return true;
+        }
+
+        reason = GetSoloHardFailureReason(pawn);
+        if (!reason.NullOrEmpty())
+            return true;
+
+        // Preserve Despicable's ordered-action leniency for solo manual lovin too: if the player explicitly
+        // orders the action, being drafted should not make Intimacy veto it up front.
+        reason = GetPawnFailureReason(pawn, counterpart: null, isOtherPawn: false, allowDrafted: true, allowRecentLovin: true);
         if (!reason.NullOrEmpty())
             return true;
 
@@ -83,6 +116,7 @@ internal static class IntimacyValidationBridge
             if (commonChecks != null)
             {
                 Cache.IsOldEnough = CreateUnary(commonChecks, "IsOldEnough");
+                Cache.HasTemporarilyPreventLovinHediff = CreateUnary(commonChecks, "HasTemporarilyPreventLovinHediff");
                 Cache.PawnsTolerateEachOther = CreateBinary(commonChecks, "PawnsTolerateEachOther");
                 Cache.AreMutuallyAttracted = CreateBinary(commonChecks, "AreMutuallyAttracted");
                 Cache.PairingIsIncestious = CreateBinary(commonChecks, "PariringIsIncestious");
@@ -122,6 +156,26 @@ internal static class IntimacyValidationBridge
         return (Func<Pawn, Pawn, bool>)Delegate.CreateDelegate(typeof(Func<Pawn, Pawn, bool>), method);
     }
 
+    private static string GetSoloHardFailureReason(Pawn pawn)
+    {
+        if (pawn == null)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+
+        if (pawn.RaceProps?.Humanlike != true)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsNotHumanlike".Translate());
+
+        if (!pawn.Spawned)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+
+        if (pawn.Dead)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsDead".Translate());
+
+        if (Cache.IsOldEnough != null && !Cache.IsOldEnough(pawn))
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsUnderage".Translate());
+
+        return null;
+    }
+
     private static string GetPairHardFailureReason(Pawn orderedPawn, Pawn otherPawn)
     {
         if (orderedPawn == null || otherPawn == null)
@@ -154,7 +208,7 @@ internal static class IntimacyValidationBridge
         return null;
     }
 
-    private static string GetPawnFailureReason(Pawn pawn, Pawn counterpart, bool isOtherPawn)
+    private static string GetPawnFailureReason(Pawn pawn, Pawn counterpart, bool isOtherPawn, bool allowDrafted, bool allowRecentLovin)
     {
         if (pawn == null)
             return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsMissing".Translate());
@@ -162,7 +216,7 @@ internal static class IntimacyValidationBridge
         if (!pawn.Spawned)
             return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsMissing".Translate());
 
-        if (pawn.Drafted)
+        if (!allowDrafted && pawn.Drafted)
             return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsDrafted".Translate());
 
         if (pawn.Downed)
@@ -186,14 +240,20 @@ internal static class IntimacyValidationBridge
         if (pawn.CurJob?.playerForced == true)
             return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsBusy".Translate());
 
-        if (pawn.mindState?.canLovinTick > Find.TickManager.TicksGame)
+        if (!allowRecentLovin && pawn.mindState?.canLovinTick > Find.TickManager.TicksGame)
             return BuildRoleReason(isOtherPawn, "D2N_LovinReason_HadLovinRecently".Translate());
+
+        if (Cache.HasTemporarilyPreventLovinHediff != null && Cache.HasTemporarilyPreventLovinHediff(pawn))
+            return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsBusy".Translate());
 
         if (Cache.IsAlreadyDoingLovin != null && Cache.IsAlreadyDoingLovin(pawn))
             return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsBusy".Translate());
 
         if (Cache.CanCurrentlyDoLovin != null && !Cache.CanCurrentlyDoLovin(pawn))
-            return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsBusy".Translate());
+        {
+            if (!(allowDrafted && pawn.Drafted))
+                return BuildRoleReason(isOtherPawn, "D2N_LovinReason_IsBusy".Translate());
+        }
 
         if (Cache.CanEverDoLovin != null && !Cache.CanEverDoLovin(pawn))
         {
@@ -270,6 +330,7 @@ internal static class IntimacyValidationBridge
         internal Func<Pawn, bool> CanEverDoLovin;
         internal Func<Pawn, bool> CanCurrentlyDoLovin;
         internal Func<Pawn, bool> IsAlreadyDoingLovin;
+        internal Func<Pawn, bool> HasTemporarilyPreventLovinHediff;
         internal Func<Pawn, Pawn, bool> PawnsTolerateEachOther;
         internal Func<Pawn, Pawn, bool> AreMutuallyAttracted;
         internal Func<Pawn, Pawn, bool> PairingIsIncestious;
@@ -283,6 +344,7 @@ internal static class IntimacyValidationBridge
                     && CanEverDoLovin != null
                     && CanCurrentlyDoLovin != null
                     && IsAlreadyDoingLovin != null
+                    && HasTemporarilyPreventLovinHediff != null
                     && PawnsTolerateEachOther != null
                     && AreMutuallyAttracted != null
                     && PairingIsIncestious != null
@@ -297,6 +359,7 @@ internal static class IntimacyValidationBridge
             CanEverDoLovin = null;
             CanCurrentlyDoLovin = null;
             IsAlreadyDoingLovin = null;
+            HasTemporarilyPreventLovinHediff = null;
             PawnsTolerateEachOther = null;
             AreMutuallyAttracted = null;
             PairingIsIncestious = null;

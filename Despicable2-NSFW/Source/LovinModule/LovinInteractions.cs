@@ -22,7 +22,7 @@ public class LovinInteractions
         if (pawn.HostileTo(targetPawn))
             return opts;
 
-        foreach (LovinTypeDef lovinTypeDef in DefDatabase<LovinTypeDef>.AllDefsListForReading.ToList())
+        foreach (LovinTypeDef lovinTypeDef in DefDatabase<LovinTypeDef>.AllDefsListForReading.Where(def => !def.isSolo).ToList())
         {
             if (!ReproCompatibilityUtil.PairSatisfiesLovinTypeRequirements(pawn, targetPawn, lovinTypeDef))
                 continue;
@@ -87,4 +87,80 @@ public class LovinInteractions
     {
         return ManualMenuBuilder.BuildOptions(GenerateLovinOptionSpecs(pawn, target));
     }
+
+
+    public static List<ManualMenuOptionSpec> GenerateSelfLovinOptionSpecs(Pawn pawn)
+    {
+        List<ManualMenuOptionSpec> opts = new();
+        if (pawn == null)
+            return opts;
+
+        foreach (LovinTypeDef lovinTypeDef in DefDatabase<LovinTypeDef>.AllDefsListForReading.Where(def => def.isSolo).ToList())
+        {
+            if (!ReproCompatibilityUtil.PawnSatisfiesSoloLovinTypeRequirements(pawn, lovinTypeDef))
+                continue;
+
+            bool disabled = LovinUtil.TryGetSelfLovinDisabledReason(pawn, lovinTypeDef, out string disabledReason);
+
+            string optionLabel = lovinTypeDef.ResolvePlayerFacingLabel();
+            Texture2D menuIcon = lovinTypeDef.ResolveMenuIcon();
+
+            if (disabled)
+            {
+                opts.Add(new ManualMenuOptionSpec
+                {
+                    Label = $"{optionLabel} ({disabledReason ?? "D2N_LovinReason_Unknown".Translate()})",
+                    Action = null,
+                    Disabled = true,
+                    DisabledReason = disabledReason ?? "D2N_LovinReason_Unknown".Translate(),
+                    Tooltip = disabledReason ?? "D2N_LovinReason_Unknown".Translate(),
+                    Priority = MenuOptionPriority.High,
+                    RevalidateClickTarget = pawn,
+                    IconTex = menuIcon,
+                    IconThing = menuIcon == null ? pawn : null,
+                    IconColor = Color.white
+                });
+                continue;
+            }
+
+            Action action = delegate()
+            {
+                if (!LovinUtil.PassesSelfLovinCheck(pawn, lovinTypeDef, out string blockedReason))
+                {
+                    Messages.Message(blockedReason ?? "D2N_LovinReason_Unknown".Translate(), pawn, MessageTypeDefOf.RejectInput, historical: false);
+                    return;
+                }
+
+                if (!InteractionEntry.TryPrepareManualSelf(
+                    pawn,
+                    Despicable.Core.Channels.ManualSelfLovin,
+                    req =>
+                    {
+                        req.RequestedInteractionId = lovinTypeDef?.interaction?.defName ?? lovinTypeDef?.defName;
+                        req.RequestedStageId = lovinTypeDef?.defName;
+                    },
+                    out var req,
+                    out var ctx))
+                {
+                    return;
+                }
+
+                Interactions.OrderedSelfJob(LovinModule_JobDefOf.Job_SelfLovin, pawn, req, ctx);
+            };
+
+            opts.Add(new ManualMenuOptionSpec
+            {
+                Label = optionLabel,
+                Action = action,
+                Priority = MenuOptionPriority.High,
+                RevalidateClickTarget = pawn,
+                IconTex = menuIcon,
+                IconThing = menuIcon == null ? pawn : null,
+                IconColor = Color.white
+            });
+        }
+
+        return opts;
+    }
+
 }

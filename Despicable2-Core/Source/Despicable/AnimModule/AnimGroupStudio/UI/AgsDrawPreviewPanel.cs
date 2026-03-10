@@ -68,11 +68,12 @@ public partial class Dialog_AnimGroupStudio
             }
 
             int stageCount = preview.StageCount;
-            string info = selectedGroup.defName
-                + (stageCount > 0
-                    ? $"   |   Stage {Mathf.Clamp(selectedStageIndex, 0, stageCount - 1)}/{Mathf.Max(0, stageCount - 1)}"
-                    : "");
-            D2Widgets.Label(ctx, v.NextLine(UIRectTag.Label, "Center/Existing/Info"), info, "Center/Existing/Info");
+            string stageInfo = stageCount > 0
+                ? $"Stage {Mathf.Clamp(selectedStageIndex, 0, stageCount - 1):00} / {Mathf.Max(0, stageCount - 1):00}"
+                : "No stages";
+            string playInfo = preview.IsPlaying ? "Playback is driving stage selection." : "Click a stage on the left to inspect it.";
+            v.NextTextBlock(ctx, selectedGroup.defName ?? "(unnamed)", GameFont.Small, padding: 2f, label: "Center/Existing/DefName");
+            v.NextTextBlock(ctx, stageInfo + "   •   " + playInfo, GameFont.Small, padding: 2f, label: "Center/Existing/Info");
 
             Rect view = v.NextFill(UIRectTag.Body, "Center/Existing/Viewport");
             using (var previewPanel = ctx.GroupPanel("Center/Existing/PreviewSurface", view, soft: true, pad: true, padOverride: ctx.Style.Pad, drawBackground: true, label: "Center/Existing/PreviewSurface"))

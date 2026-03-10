@@ -7,4 +7,6 @@
 	<Job_GetLovin.reportString>getting lovin' from TargetA.</Job_GetLovin.reportString>
 	<!-- Job_GiveLovin (reportString) -->
 	<Job_GiveLovin.reportString>giving lovin' to TargetA.</Job_GiveLovin.reportString>
+	<!-- Job_SelfLovin (reportString) -->
+	<Job_SelfLovin.reportString>enjoying some private lovin'.</Job_SelfLovin.reportString>
 </LanguageData>

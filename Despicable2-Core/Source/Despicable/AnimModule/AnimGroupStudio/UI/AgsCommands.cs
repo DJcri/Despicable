@@ -42,16 +42,15 @@ public partial class Dialog_AnimGroupStudio
                     {
                         var res = exporter.ExportAll(project, allowOverwrite: true);
     
-                        lastExportFolder = Path.Combine(plan.rootDir, "Defs");
+                        lastExportFolder = plan.packageDir;
                         lastExportWritten = res.filesWritten.Count;
                         lastExportOverwritten = res.filesOverwritten.Count;
     
                         string msg = "Export complete.\n\n" +
-                                     $"Root: {plan.rootDir}\n" +
-                                     $"GroupDefs: {plan.groupsDir}\n" +
-                                     $"RoleDefs: {plan.rolesDir}\n" +
-                                     $"AnimationDefs: {plan.animsDir}\n" +
-                                     $"OffsetDefs: {plan.offsetsDir}\n\n" +
+                                     $"Package: {plan.packageDir}\n" +
+                                     $"Group file: {plan.groupFilePath}\n" +
+                                     $"Offsets file: {plan.offsetFilePath}\n" +
+                                     $"Stages: {plan.stagesDir}\n\n" +
                                      $"Wrote {lastExportWritten} file(s) ({lastExportOverwritten} overwritten).\n\n" +
                                      "Restart RimWorld to load the new defs.";
                         Find.WindowStack.Add(new Dialog_MessageBox(msg));
@@ -66,7 +65,7 @@ public partial class Dialog_AnimGroupStudio
                 if (plan != null && !plan.existingTargets.NullOrEmpty())
                 {
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-                        $"Export will overwrite {plan.existingTargets.Count} existing file(s). Continue?\n\n{plan.groupsDir}",
+                        $"Export will overwrite {plan.existingTargets.Count} existing file(s). Continue?\n\n{plan.packageDir}",
                         doExport));
                 }
                 else

@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Patch>
-    <!--
-    <Operation Class="PatchOperationAdd">
-        <xpath>Defs/ThinkTreeDef[defName="Humanlike"]/thinkRoot/subNodes/li[@Class="ThinkNode_ConditionalColonist"]/subNodes/li[@Class="ThinkNode_Tagger"]/subNodes/li[@Class="ThinkNode_ConditionalNeedPercentageAbove"]/subNodes</xpath>
-        <value>
-            <li Class="Despicable.JobGiver_GetLovin"/>
-            <li Class="Despicable.JobGiver_GetBedLovin"/>
-        </value>
+    <Operation Class="PatchOperationSequence">
+        <success>Always</success>
+        <operations>
+            <!-- Bed autonomy belongs in the vanilla lovin lane, next to JobGiver_DoLovin. -->
+            <li Class="PatchOperationAdd">
+                <xpath>Defs/ThinkTreeDef[defName="Humanlike"]/thinkRoot/subNodes/li[@Class="ThinkNode_ConditionalLyingDown"]/subNodes/li[@Class="ThinkNode_ChancePerHour_Lovin"]/subNodes/li[@Class="ThinkNode_Tagger"]/subNodes[not(li[@Class="Despicable.JobGiver_GetBedLovin"])]</xpath>
+                <value>
+                    <li Class="Despicable.JobGiver_GetBedLovin"/>
+                </value>
+            </li>
+
+            <!-- Non-bed autonomy needs a real priority-bearing child for MainColonistBehaviorCore. -->
+            <li Class="PatchOperationAdd">
+                <xpath>Defs/ThinkTreeDef[defName="MainColonistBehaviorCore"]/thinkRoot/subNodes/li[@Class="ThinkNode_PrioritySorter"]/subNodes[not(li[@Class="Despicable.ThinkNode_Priority_GetLovin"])]</xpath>
+                <value>
+                    <li Class="Despicable.ThinkNode_Priority_GetLovin">
+                        <priority>4.5</priority>
+                    </li>
+                </value>
+            </li>
+        </operations>
     </Operation>
-    -->
 </Patch>

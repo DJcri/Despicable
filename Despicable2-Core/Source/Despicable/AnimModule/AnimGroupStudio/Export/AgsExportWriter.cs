@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 using Verse;
+using System.Xml;
 using Despicable.AnimModule.AnimGroupStudio.Model;
 
 namespace Despicable.AnimModule.AnimGroupStudio.Export;
@@ -13,45 +13,65 @@ public sealed partial class AgsExport
 {
     private static void EnsureDirs(ExportPlan plan)
     {
-        Directory.CreateDirectory(plan.groupsDir);
-        Directory.CreateDirectory(plan.rolesDir);
-        Directory.CreateDirectory(plan.animsDir);
-        Directory.CreateDirectory(plan.offsetsDir);
+        Directory.CreateDirectory(plan.packageDir);
+        Directory.CreateDirectory(plan.stagesDir);
     }
 
-    private static void WriteAnimGroupDefXml(AgsModel.Project project, string groupDefName, List<string> roleDefNames, string fullPath)
+    private static void WriteGroupPackageXml(AgsModel.Project project, ExportPlan plan, string fullPath)
     {
-        var loop = new List<int>();
-        for (int i = 0; i < project.stages.Count; i++)
-            loop.Add(Mathf.Max(1, project.stages[i]?.repeatCount ?? 1));
-
         AgsExportUtil.WriteXmlAtomic(fullPath, w =>
         {
             w.WriteStartDocument();
             w.WriteStartElement("Defs");
-            w.WriteStartElement("AnimGroupDef");
 
-            AgsExportUtil.WriteElement(w, "defName", groupDefName);
-            AgsExportUtil.WriteElement(w, "label", project.label ?? groupDefName);
-            AgsExportUtil.WriteElement(w, "numActors", Mathf.Max(1, project.roles.Count).ToString(CultureInfo.InvariantCulture));
+            for (int vi = 0; vi < plan.variantIds.Count; vi++)
+            {
+                string variantId = plan.variantIds[vi];
+                string groupDefName = AgsExportUtil.MakeGroupDefName(plan.projectKey, variantId);
 
-            w.WriteStartElement("animRoles");
-            for (int i = 0; i < roleDefNames.Count; i++)
-                AgsExportUtil.WriteElement(w, "li", roleDefNames[i]);
-            w.WriteEndElement();
+                w.WriteStartElement(typeof(AnimGroupDef).FullName);
+                AgsExportUtil.WriteElement(w, "defName", groupDefName);
 
-            w.WriteStartElement("loopIndex");
-            for (int i = 0; i < loop.Count; i++)
-                AgsExportUtil.WriteElement(w, "li", loop[i].ToString(CultureInfo.InvariantCulture));
-            w.WriteEndElement();
+                w.WriteStartElement("stageTags");
+                AgsExportUtil.WriteElement(w, "li", plan.projectKey);
+                w.WriteEndElement();
 
-            w.WriteEndElement();
+                AgsExportUtil.WriteElement(w, "numActors", Mathf.Max(1, project.roles.Count).ToString(CultureInfo.InvariantCulture));
+
+                w.WriteStartElement("loopIndex");
+                for (int i = 0; i < project.stages.Count; i++)
+                {
+                    int repeatCount = Mathf.Max(1, project.stages[i]?.repeatCount ?? 1);
+                    AgsExportUtil.WriteElement(w, "li", repeatCount.ToString(CultureInfo.InvariantCulture));
+                }
+                w.WriteEndElement();
+
+                w.WriteStartElement("animRoles");
+                for (int ri = 0; ri < project.roles.Count; ri++)
+                {
+                    var role = project.roles[ri];
+                    if (role == null) continue;
+                    string roleKey = role.roleKey ?? $"role_{ri + 1}";
+                    AgsExportUtil.WriteElement(w, "li", AgsExportUtil.MakeRoleDefName(plan.projectKey, variantId, roleKey));
+                }
+                w.WriteEndElement();
+
+                w.WriteEndElement();
+
+                for (int ri = 0; ri < project.roles.Count; ri++)
+                {
+                    var role = project.roles[ri];
+                    if (role == null) continue;
+                    WriteAnimRoleDefElement(w, plan.projectKey, variantId, role, ri, project.stages.Count);
+                }
+            }
+
             w.WriteEndElement();
             w.WriteEndDocument();
         });
     }
 
-    private static void WriteAnimRoleDefXml(AgsModel.RoleSpec role, string roleDefName, List<string> animDefNames, string offsetDefName, string fullPath)
+    private static void WriteAnimRoleDefElement(XmlWriter w, string projectKey, string variantId, AgsModel.RoleSpec role, int roleIndex, int stageCount)
     {
         int gender = 0;
         if (role != null)
@@ -60,109 +80,46 @@ public sealed partial class AgsExport
             else if (role.genderReq == AgsModel.RoleGenderReq.Female) gender = 2;
         }
 
-        AgsExportUtil.WriteXmlAtomic(fullPath, w =>
-        {
-            w.WriteStartDocument();
-            w.WriteStartElement("Defs");
-            w.WriteStartElement("AnimRoleDef");
+        string roleKey = role?.roleKey ?? $"role_{roleIndex + 1}";
+        string roleDefName = AgsExportUtil.MakeRoleDefName(projectKey, variantId, roleKey);
+        string offsetDefName = AgsExportUtil.MakeOffsetDefName(projectKey, roleKey);
 
-            AgsExportUtil.WriteElement(w, "defName", roleDefName);
-            AgsExportUtil.WriteElement(w, "label", role?.displayName ?? roleDefName);
-            AgsExportUtil.WriteElement(w, "gender", gender.ToString(CultureInfo.InvariantCulture));
+        w.WriteStartElement(typeof(AnimRoleDef).FullName);
+        AgsExportUtil.WriteElement(w, "defName", roleDefName);
+        AgsExportUtil.WriteElement(w, "gender", gender.ToString(CultureInfo.InvariantCulture));
+        AgsExportUtil.WriteElement(w, "offsetDef", offsetDefName);
 
-            w.WriteStartElement("anims");
-            for (int i = 0; i < animDefNames.Count; i++)
-                AgsExportUtil.WriteElement(w, "li", animDefNames[i]);
-            w.WriteEndElement();
+        w.WriteStartElement("anims");
+        for (int si = 0; si < stageCount; si++)
+            AgsExportUtil.WriteElement(w, "li", AgsExportUtil.MakeAnimationDefName(projectKey, roleKey, si, variantId));
+        w.WriteEndElement();
 
-            if (!offsetDefName.NullOrEmpty())
-                AgsExportUtil.WriteElement(w, "offsetDef", offsetDefName);
-
-            w.WriteEndElement();
-            w.WriteEndElement();
-            w.WriteEndDocument();
-        });
+        w.WriteEndElement();
     }
 
-    private static void WriteAnimationDefXml(AgsModel.ClipSpec clip, string defName, int durationTicks, string fullPath)
+    private static void WriteOffsetPackageXml(AgsModel.Project project, ExportPlan plan, string fullPath)
     {
-        durationTicks = Mathf.Max(1, durationTicks);
-
         AgsExportUtil.WriteXmlAtomic(fullPath, w =>
         {
             w.WriteStartDocument();
             w.WriteStartElement("Defs");
-            w.WriteStartElement("AnimationDef");
 
-            AgsExportUtil.WriteElement(w, "defName", defName);
-            AgsExportUtil.WriteElement(w, "label", defName);
-            AgsExportUtil.WriteElement(w, "durationTicks", durationTicks.ToString(CultureInfo.InvariantCulture));
-
-            w.WriteStartElement("keyframeParts");
-
-            if (clip?.tracks != null)
+            for (int ri = 0; ri < project.roles.Count; ri++)
             {
-                for (int ti = 0; ti < clip.tracks.Count; ti++)
-                {
-                    var track = clip.tracks[ti];
-                    if (track == null) continue;
-                    if (track.nodeTag.NullOrEmpty()) continue;
-
-                    w.WriteStartElement("li");
-                    AgsExportUtil.WriteElement(w, "key", track.nodeTag);
-                    w.WriteStartElement("value");
-                    AgsExportUtil.WriteElement(w, "workerType", typeof(AnimationWorker_ExtendedKeyframes).FullName);
-                    w.WriteStartElement("keyframes");
-
-                    if (track.keys != null)
-                    {
-                        for (int ki = 0; ki < track.keys.Count; ki++)
-                        {
-                            var k = track.keys[ki];
-                            if (k == null) continue;
-
-                            w.WriteStartElement("li");
-                            w.WriteAttributeString("Class", typeof(ExtendedKeyframe).FullName);
-
-                            AgsExportUtil.WriteElement(w, "tick", Mathf.Clamp(k.tick, 0, durationTicks).ToString(CultureInfo.InvariantCulture));
-                            AgsExportUtil.WriteElement(w, "angle", k.angle.ToString(CultureInfo.InvariantCulture));
-                            AgsExportUtil.WriteElement(w, "visible", k.visible ? "true" : "false");
-
-                            if (k.offset != Vector3.zero)
-                                AgsExportUtil.WriteElement(w, "offset", AgsExportUtil.Vec3ToString(k.offset));
-                            if (k.scale != Vector3.one)
-                                AgsExportUtil.WriteElement(w, "scale", AgsExportUtil.Vec3ToString(k.scale));
-
-                            AgsExportUtil.WriteElement(w, "rotation", k.rotation.AsInt.ToString(CultureInfo.InvariantCulture));
-                            if (!k.graphicState.NullOrEmpty())
-                                AgsExportUtil.WriteElement(w, "graphicState", k.graphicState);
-                            if (k.variant != -1)
-                                AgsExportUtil.WriteElement(w, "variant", k.variant.ToString(CultureInfo.InvariantCulture));
-                            if (!k.soundDefName.NullOrEmpty())
-                                AgsExportUtil.WriteElement(w, "sound", k.soundDefName);
-                            if (!k.facialAnimDefName.NullOrEmpty())
-                                AgsExportUtil.WriteElement(w, "facialAnim", k.facialAnimDefName);
-                            if (k.layerBias != 0)
-                                AgsExportUtil.WriteElement(w, "layerBias", Mathf.Clamp(k.layerBias, -3, 3).ToString(CultureInfo.InvariantCulture));
-
-                            w.WriteEndElement();
-                        }
-                    }
-
-                    w.WriteEndElement(); // keyframes
-                    w.WriteEndElement(); // value
-                    w.WriteEndElement(); // li
-                }
+                var role = project.roles[ri];
+                if (role == null) continue;
+                string roleKey = role.roleKey ?? $"role_{ri + 1}";
+                string defName = AgsExportUtil.MakeOffsetDefName(plan.projectKey, roleKey);
+                var bodyOffsets = CollectBodyOffsets(project, roleKey);
+                WriteAnimationOffsetDefElement(w, defName, bodyOffsets);
             }
 
-            w.WriteEndElement(); // keyframeParts
-            w.WriteEndElement(); // AnimationDef
-            w.WriteEndElement(); // Defs
+            w.WriteEndElement();
             w.WriteEndDocument();
         });
     }
 
-    private static void WriteAnimationOffsetDef(AgsModel.Project project, string roleKey, string defName, string fullPath)
+    private static List<Despicable.BodyTypeOffset> CollectBodyOffsets(AgsModel.Project project, string roleKey)
     {
         var bodyOffsets = new List<Despicable.BodyTypeOffset>();
         if (project?.offsetsByRoleKey != null && !roleKey.NullOrEmpty() && project.offsetsByRoleKey.TryGetValue(roleKey, out var dict) && dict != null)
@@ -184,46 +141,156 @@ public sealed partial class AgsExport
                 });
             }
         }
+        return bodyOffsets;
+    }
+
+    private static void WriteAnimationOffsetDefElement(XmlWriter w, string defName, List<Despicable.BodyTypeOffset> bodyOffsets)
+    {
+        w.WriteStartElement(typeof(AnimationOffsetDef).FullName);
+        AgsExportUtil.WriteElement(w, "defName", defName);
+
+        w.WriteStartElement("offsets");
+        w.WriteStartElement("li");
+        w.WriteAttributeString("Class", typeof(AnimationOffset_BodyType).FullName);
+
+        w.WriteStartElement("races");
+        AgsExportUtil.WriteElement(w, "li", "Human");
+        w.WriteEndElement();
+
+        w.WriteStartElement("offsets");
+        for (int i = 0; i < bodyOffsets.Count; i++)
+        {
+            var bo = bodyOffsets[i];
+            if (bo?.bodyType == null) continue;
+            w.WriteStartElement("li");
+            AgsExportUtil.WriteElement(w, "bodyType", bo.bodyType.defName);
+            if (bo.rotation != 0)
+                AgsExportUtil.WriteElement(w, "rotation", bo.rotation.ToString(CultureInfo.InvariantCulture));
+            if (bo.offset != Vector3.zero)
+                AgsExportUtil.WriteElement(w, "offset", AgsExportUtil.Vec3ToString(bo.offset));
+            if (bo.scale != Vector3.one)
+                AgsExportUtil.WriteElement(w, "scale", AgsExportUtil.Vec3ToString(bo.scale));
+            w.WriteEndElement();
+        }
+        w.WriteEndElement();
+
+        w.WriteEndElement();
+        w.WriteEndElement();
+        w.WriteEndElement();
+    }
+
+    private static void WriteStagePackageXml(AgsModel.Project project, ExportPlan plan, string variantId, int stageIndex, string fullPath)
+    {
+        var stage = project?.stages != null && stageIndex >= 0 && stageIndex < project.stages.Count ? project.stages[stageIndex] : null;
+        int durationTicks = Mathf.Max(1, stage?.durationTicks ?? 1);
 
         AgsExportUtil.WriteXmlAtomic(fullPath, w =>
         {
             w.WriteStartDocument();
             w.WriteStartElement("Defs");
 
-            // Use full type name (matches Workshop exporter style).
-            w.WriteStartElement(typeof(AnimationOffsetDef).FullName);
-            AgsExportUtil.WriteElement(w, "defName", defName);
-            AgsExportUtil.WriteElement(w, "label", defName);
-
-            w.WriteStartElement("offsets");
-            w.WriteStartElement("li");
-            w.WriteAttributeString("Class", typeof(AnimationOffset_BodyType).FullName);
-            w.WriteStartElement("offsets");
-            for (int i = 0; i < bodyOffsets.Count; i++)
+            for (int ri = 0; ri < project.roles.Count; ri++)
             {
-                var bo = bodyOffsets[i];
-                if (bo?.bodyType == null) continue;
-                w.WriteStartElement("li");
-                AgsExportUtil.WriteElement(w, "bodyType", bo.bodyType.defName);
-                AgsExportUtil.WriteElement(w, "rotation", bo.rotation.ToString(CultureInfo.InvariantCulture));
-                if (bo.offset != Vector3.zero) AgsExportUtil.WriteElement(w, "offset", AgsExportUtil.Vec3ToString(bo.offset));
-                if (bo.scale != Vector3.one) AgsExportUtil.WriteElement(w, "scale", AgsExportUtil.Vec3ToString(bo.scale));
-                w.WriteEndElement();
-            }
-            w.WriteEndElement(); // offsets
-            w.WriteEndElement(); // li
-            w.WriteEndElement(); // offsets
+                var role = project.roles[ri];
+                if (role == null) continue;
+                string roleKey = role.roleKey ?? $"role_{ri + 1}";
+                var clip = GetClip(stage, variantId, roleKey);
+                if (clip == null)
+                    clip = new AgsModel.ClipSpec { lengthTicks = durationTicks, tracks = new List<AgsModel.Track>() };
 
-            w.WriteEndElement(); // AnimationOffsetDef
-            w.WriteEndElement(); // Defs
+                string animDefName = AgsExportUtil.MakeAnimationDefName(plan.projectKey, roleKey, stageIndex, variantId);
+                WriteAnimationDefElement(w, clip, animDefName, durationTicks);
+            }
+
+            w.WriteEndElement();
             w.WriteEndDocument();
         });
     }
 
+    private static void WriteAnimationDefElement(XmlWriter w, AgsModel.ClipSpec clip, string defName, int durationTicks)
+    {
+        durationTicks = Mathf.Max(1, durationTicks);
+
+        w.WriteStartElement("AnimationDef");
+        AgsExportUtil.WriteElement(w, "defName", defName);
+        AgsExportUtil.WriteElement(w, "durationTicks", durationTicks.ToString(CultureInfo.InvariantCulture));
+
+        w.WriteStartElement("keyframeParts");
+
+        if (clip?.tracks != null)
+        {
+            for (int ti = 0; ti < clip.tracks.Count; ti++)
+            {
+                var track = clip.tracks[ti];
+                if (track == null || track.nodeTag.NullOrEmpty()) continue;
+
+                w.WriteStartElement("li");
+                AgsExportUtil.WriteElement(w, "key", track.nodeTag);
+                w.WriteStartElement("value");
+                AgsExportUtil.WriteElement(w, "workerType", typeof(AnimationWorker_ExtendedKeyframes).FullName);
+                w.WriteStartElement("keyframes");
+
+                if (track.keys != null)
+                {
+                    for (int ki = 0; ki < track.keys.Count; ki++)
+                    {
+                        var k = track.keys[ki];
+                        if (k == null) continue;
+
+                        w.WriteStartElement("li");
+                        w.WriteAttributeString("Class", typeof(ExtendedKeyframe).FullName);
+
+                        AgsExportUtil.WriteElement(w, "tick", Mathf.Clamp(k.tick, 0, durationTicks).ToString(CultureInfo.InvariantCulture));
+                        AgsExportUtil.WriteElement(w, "angle", k.angle.ToString(CultureInfo.InvariantCulture));
+                        AgsExportUtil.WriteElement(w, "visible", k.visible ? "true" : "false");
+
+                        if (k.offset != Vector3.zero)
+                            AgsExportUtil.WriteElement(w, "offset", AgsExportUtil.Vec3ToString(k.offset));
+                        if (k.scale != Vector3.one)
+                            AgsExportUtil.WriteElement(w, "scale", AgsExportUtil.Vec3ToString(k.scale));
+
+                        AgsExportUtil.WriteElement(w, "rotation", Rot4ToExportString(k.rotation));
+                        if (!k.graphicState.NullOrEmpty())
+                            AgsExportUtil.WriteElement(w, "graphicState", k.graphicState);
+                        if (k.variant != -1)
+                            AgsExportUtil.WriteElement(w, "variant", k.variant.ToString(CultureInfo.InvariantCulture));
+                        if (!k.soundDefName.NullOrEmpty())
+                            AgsExportUtil.WriteElement(w, "sound", k.soundDefName);
+                        if (!k.facialAnimDefName.NullOrEmpty())
+                            AgsExportUtil.WriteElement(w, "facialAnim", k.facialAnimDefName);
+                        if (k.layerBias != 0)
+                            AgsExportUtil.WriteElement(w, "layerBias", Mathf.Clamp(k.layerBias, -3, 3).ToString(CultureInfo.InvariantCulture));
+
+                        w.WriteEndElement();
+                    }
+                }
+
+                w.WriteEndElement();
+                w.WriteEndElement();
+                w.WriteEndElement();
+            }
+        }
+
+        w.WriteEndElement();
+        w.WriteEndElement();
+    }
+
+
+    private static string Rot4ToExportString(Rot4 rot)
+    {
+        switch (rot.AsInt)
+        {
+            case 0: return "North";
+            case 1: return "East";
+            case 2: return "South";
+            case 3: return "West";
+            default: return "South";
+        }
+    }
+
     public static string VariantIdToCode(string variantId)
     {
-        if (variantId.NullOrEmpty() || variantId == "Base") return "";
-        return AgsExportUtil.NormalizeTag(variantId);
+        return AgsExportUtil.MakeVariantCode(variantId);
     }
 
     private static string ResolveExportRootDir()
@@ -240,7 +307,22 @@ public sealed partial class AgsExport
         {
             string modRoot = ModMain.Instance?.Content?.RootDir;
             if (!modRoot.NullOrEmpty() && Directory.Exists(modRoot))
+            {
+                string nsfwPath = Path.Combine(modRoot, "Defs", "LovinModule", "Animations");
+                if (Directory.Exists(nsfwPath))
+                    return modRoot;
+
+                var parentDir = Directory.GetParent(modRoot);
+                if (parentDir != null)
+                {
+                    string siblingNsfwRoot = Path.Combine(parentDir.FullName, "Despicable2-NSFW");
+                    string siblingNsfwPath = Path.Combine(siblingNsfwRoot, "Defs", "LovinModule", "Animations");
+                    if (Directory.Exists(siblingNsfwPath))
+                        return siblingNsfwRoot;
+                }
+
                 return modRoot;
+            }
         }
         catch (System.Exception e) { Despicable.Core.DebugLogger.WarnExceptionOnce("AgsExport.EmptyCatch:3", "AGS export best-effort step failed and fell back.", e); }
 
@@ -253,32 +335,30 @@ public sealed partial class AgsExport
     {
         plan.allTargetFiles.Clear();
         plan.existingTargets.Clear();
-        if (project == null || plan.variantIds.NullOrEmpty()) return;
+        plan.stageTargets.Clear();
+
+        if (project == null)
+            return;
+
+        AddTarget(plan, plan.groupFilePath);
+        AddTarget(plan, plan.offsetFilePath);
+
+        if (plan.variantIds.NullOrEmpty())
+            return;
 
         for (int vi = 0; vi < plan.variantIds.Count; vi++)
         {
             string variantId = plan.variantIds[vi];
-            string code = VariantIdToCode(variantId);
-            string groupDefName = AgsExportUtil.MakeSafeDefName(AgsExportUtil.MakeVariationDefName(plan.baseDefName, code));
-            AddTarget(plan, Path.Combine(plan.groupsDir, groupDefName + ".xml"));
-
-            for (int ri = 0; ri < project.roles.Count; ri++)
+            for (int si = 0; si < project.stages.Count; si++)
             {
-                var role = project.roles[ri];
-                if (role == null) continue;
-                string safeRoleKey = AgsExportUtil.MakeSafeDefName(role.roleKey ?? $"role_{ri + 1}");
-
-                string offsetDefName = $"{groupDefName}_{safeRoleKey}_Offsets";
-                AddTarget(plan, Path.Combine(plan.offsetsDir, offsetDefName + ".xml"));
-
-                string roleDefName = $"{groupDefName}_{safeRoleKey}";
-                AddTarget(plan, Path.Combine(plan.rolesDir, roleDefName + ".xml"));
-
-                for (int si = 0; si < project.stages.Count; si++)
+                string filePath = Path.Combine(plan.stagesDir, AgsExportUtil.MakeStageFileName(plan.projectKey, si, variantId));
+                plan.stageTargets.Add(new StageTarget
                 {
-                    string animDefName = $"{groupDefName}_S{si}_{safeRoleKey}";
-                    AddTarget(plan, Path.Combine(plan.animsDir, animDefName + ".xml"));
-                }
+                    variantId = variantId,
+                    stageIndex = si,
+                    filePath = filePath
+                });
+                AddTarget(plan, filePath);
             }
         }
     }
@@ -286,7 +366,9 @@ public sealed partial class AgsExport
     private static void AddTarget(ExportPlan plan, string path)
     {
         if (path.NullOrEmpty()) return;
-        plan.allTargetFiles.Add(path);
-        if (File.Exists(path)) plan.existingTargets.Add(path);
+        if (!plan.allTargetFiles.Contains(path))
+            plan.allTargetFiles.Add(path);
+        if (File.Exists(path) && !plan.existingTargets.Contains(path))
+            plan.existingTargets.Add(path);
     }
 }

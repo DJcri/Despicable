@@ -6,6 +6,7 @@ namespace Despicable;
 public class LovinTypeDef : Def
 {
     public InteractionDef interaction;
+    public bool isSolo = false;
     public bool requiresMale = false;
     public bool requiresFemale = false;
     public string iconPath;

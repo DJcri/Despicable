@@ -33,6 +33,7 @@ public static class D2ActionBar
         public string DisabledReason;
         public bool Checked;
         public float? MinWidthOverride;
+        public Texture2D Icon;
 
         public Item(string id, string label, ItemKind kind = ItemKind.Button, string tooltip = null)
         {
@@ -45,6 +46,7 @@ public static class D2ActionBar
             DisabledReason = null;
             Checked = false;
             MinWidthOverride = null;
+            Icon = null;
         }
     }
 
@@ -137,14 +139,22 @@ public static class D2ActionBar
                         TooltipHandler.TipRegion(slot, item.Tooltip);
                     if (item.Disabled && !string.IsNullOrEmpty(item.DisabledReason) && ctx != null && ctx.Pass == UIPass.Draw)
                         TooltipHandler.TipRegion(slot, item.DisabledReason);
+
+                    bool iconOnly = item.Icon != null && string.IsNullOrEmpty(item.Label);
                     if (item.Disabled)
                     {
                         using (new GUIEnabledScope(false))
-                            itemClicked = D2Widgets.ButtonText(ctx, slot, item.Label, item.Id ?? item.Label);
+                        {
+                            itemClicked = iconOnly
+                                ? D2Widgets.ButtonIcon(ctx, slot, item.Icon, tooltip: item.Tooltip, label: item.Id ?? "ActionBarIcon")
+                                : D2Widgets.ButtonText(ctx, slot, item.Label, item.Id ?? item.Label);
+                        }
                     }
                     else
                     {
-                        itemClicked = D2Widgets.ButtonText(ctx, slot, item.Label, item.Id ?? item.Label);
+                        itemClicked = iconOnly
+                            ? D2Widgets.ButtonIcon(ctx, slot, item.Icon, tooltip: item.Tooltip, label: item.Id ?? "ActionBarIcon")
+                            : D2Widgets.ButtonText(ctx, slot, item.Label, item.Id ?? item.Label);
                     }
                     break;
             }
@@ -173,6 +183,8 @@ public static class D2ActionBar
             case ItemKind.Checkbox:
                 return Mathf.Max(minClick, 24f + pad + labelW);
             default:
+                if (item.Icon != null && string.IsNullOrEmpty(item.Label))
+                    return Mathf.Max(minClick, ctx != null && ctx.Style != null ? ctx.Style.RowHeight : 28f);
                 return Mathf.Max(minClick * 1.5f, labelW + (pad * 2f));
         }
     }

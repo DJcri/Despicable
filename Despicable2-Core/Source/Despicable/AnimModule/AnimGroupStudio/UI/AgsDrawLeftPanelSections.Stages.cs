@@ -18,27 +18,15 @@ public partial class Dialog_AnimGroupStudio
         DrawGroupedHeader(scrollCtx, ref v, "Left/Stages", "Stages", topPadding: true);
         EnsureStages(project);
         authorStageIndex = Mathf.Clamp(authorStageIndex, 0, project.stages.Count - 1);
+
+        float rowHeight = 26f;
+        float rowGap = 3f;
+        float listPad = Mathf.Clamp(scrollCtx.Style.Pad * 0.45f, 4f, 8f);
+        float listHeight = MeasureStageListHeight(project.stages, rowHeight, rowGap, listPad);
+        Rect listOuter = v.Next(listHeight, UIRectTag.None, "Stages/ListPanel");
+        DrawAuthorStageList(scrollCtx, listOuter, rowHeight, rowGap, listPad);
+
         var curStage = GetStage(project, authorStageIndex);
-        string curStageLabel = curStage?.label ?? ("Stage " + authorStageIndex);
-        if (D2Widgets.ButtonText(scrollCtx, v.NextRow(UIRectTag.Button, "Stages/Picker"), $"{authorStageIndex}: {curStageLabel}", "Stages/Picker"))
-        {
-            var opts = new List<FloatMenuOption>();
-            for (int i = 0; i < project.stages.Count; i++)
-    {
-                int idx = i;
-                var s = project.stages[i];
-                if (s == null) continue;
-                string lbl = $"{idx}: {s.label ?? ("Stage " + idx)}";
-                opts.Add(new FloatMenuOption(lbl, () =>
-                {
-                    authorStageIndex = idx;
-                    authorTrackIndex = -1;
-                    authorKeyIndex = -1;
-                }));
-            }
-            if (opts.Count == 0) opts.Add(new FloatMenuOption("(none)", null));
-            Find.WindowStack.Add(new FloatMenu(opts));
-        }
 
         Rect stageNameRow = v.NextRow(UIRectTag.Input, "Stages/NameRow");
         var stageNameH = new HRow(scrollCtx, stageNameRow);
@@ -48,116 +36,189 @@ public partial class Dialog_AnimGroupStudio
         else
             scrollCtx.Record(stageNameH.Remaining(UIRectTag.TextField, "Stages/NameFieldDisabled"), UIRectTag.TextField, "Stages/NameFieldDisabled");
 
-        var stageActions1 = new List<D2ActionBar.Item>
+        Rect actionsRow = v.NextRow(UIRectTag.Input, "Stages/Actions");
+        var actionsH = new HRow(scrollCtx, actionsRow);
+        float iconSize = scrollCtx.Style.RowHeight;
+
+        if (DrawIconButton(scrollCtx, actionsH.NextFixed(iconSize, UIRectTag.Button, "Stages/Actions/Add"), D2VanillaTex.Plus, "Add stage", "Stages/Actions/Add"))
+            AddAuthorStage();
+
+        if (DrawIconButton(scrollCtx, actionsH.NextFixed(iconSize, UIRectTag.Button, "Stages/Actions/Duplicate"), D2VanillaTex.Copy, "Duplicate selected stage", "Stages/Actions/Duplicate"))
+            DuplicateAuthorStage();
+
+        bool canDeleteStage = project.stages != null && project.stages.Count > 1 && authorStageIndex >= 0 && authorStageIndex < project.stages.Count;
+        Rect deleteRect = actionsH.NextFixed(iconSize, UIRectTag.Button, "Stages/Actions/Delete");
+        if (canDeleteStage)
         {
-            new D2ActionBar.Item("AddStage", "+") { MinWidthOverride = 56f },
-            new D2ActionBar.Item("DuplicateStage", "Duplicate") { MinWidthOverride = 98f },
-            new D2ActionBar.Item("DeleteStage", "Delete")
-    {
-                MinWidthOverride = 88f,
-                Disabled = project.stages == null || project.stages.Count <= 1,
-                DisabledReason = "A project needs at least one stage."
-            },
-        };
-        float stageActions1H = D2ActionBar.MeasureHeight(scrollCtx, new Rect(0f, 0f, v.Bounds.width, 9999f), stageActions1);
-        var stageActions1Res = D2ActionBar.Draw(scrollCtx, v.Next(stageActions1H, UIRectTag.Input, "Stages/Actions1"), stageActions1, "Stages/Actions1");
-        if (stageActions1Res.Clicked)
+            if (DrawIconButton(scrollCtx, deleteRect, D2VanillaTex.Delete, "Delete selected stage", "Stages/Actions/Delete"))
+                DeleteAuthorStage();
+        }
+        else
         {
-            switch (stageActions1Res.ActivatedId)
-    {
-                case "AddStage":
-                {
-                    EnsureStages(project);
-                    int idx = project.stages.Count;
-                    project.stages.Add(new AgsModel.StageSpec { stageIndex = idx, label = "Stage " + idx, durationTicks = 60, repeatCount = 1, variants = new List<AgsModel.StageVariant>() });
-                    authorStageIndex = idx;
-                    authorTrackIndex = -1;
-                    authorKeyIndex = -1;
-                    TrySaveProjects();
-                    break;
-                }
-                case "DuplicateStage":
-                {
-                    EnsureStages(project);
-                    var src = GetStage(project, authorStageIndex);
-                    if (src != null)
-                    {
-                        var clone = DeepCloneStage(src);
-                        clone.stageIndex = project.stages.Count;
-                        clone.label = (src.label ?? ("Stage " + authorStageIndex)) + " Copy";
-                        project.stages.Add(clone);
-                        authorStageIndex = project.stages.Count - 1;
-                        authorTrackIndex = -1;
-                        authorKeyIndex = -1;
-                        TrySaveProjects();
-                    }
-                    break;
-                }
-                case "DeleteStage":
-                {
-                    EnsureStages(project);
-                    if (project.stages.Count > 1 && authorStageIndex >= 0 && authorStageIndex < project.stages.Count)
-                    {
-                        project.stages.RemoveAt(authorStageIndex);
-                        for (int i = 0; i < project.stages.Count; i++)
-                            if (project.stages[i] != null) project.stages[i].stageIndex = i;
-                        authorStageIndex = Mathf.Clamp(authorStageIndex, 0, project.stages.Count - 1);
-                        authorTrackIndex = -1;
-                        authorKeyIndex = -1;
-                        TrySaveProjects();
-                    }
-                    break;
-                }
-            }
+            DrawIconButton(scrollCtx, deleteRect, D2VanillaTex.Delete, "Delete selected stage", "Stages/Actions/DeleteDisabled", enabled: false, disabledReason: "A project needs at least one stage.");
         }
 
-        var stageActions2 = new List<D2ActionBar.Item>
+        actionsH.NextFixed(Mathf.Max(6f, scrollCtx.Style.Gap), UIRectTag.None, "Stages/Actions/Spacer");
+
+        Rect moveUpRect = actionsH.NextFixed(iconSize, UIRectTag.Button, "Stages/Actions/MoveUp");
+        if (authorStageIndex > 0)
         {
-            new D2ActionBar.Item("MoveUp", "Move up")
-    {
-                MinWidthOverride = 96f,
-                Disabled = authorStageIndex <= 0,
-                DisabledReason = "This stage is already first."
-            },
-            new D2ActionBar.Item("MoveDown", "Move down")
-    {
-                MinWidthOverride = 96f,
-                Disabled = project.stages == null || authorStageIndex < 0 || authorStageIndex >= project.stages.Count - 1,
-                DisabledReason = "This stage is already last."
-            },
-        };
-        float stageActions2H = D2ActionBar.MeasureHeight(scrollCtx, new Rect(0f, 0f, v.Bounds.width, 9999f), stageActions2);
-        var stageActions2Res = D2ActionBar.Draw(scrollCtx, v.Next(stageActions2H, UIRectTag.Input, "Stages/Actions2"), stageActions2, "Stages/Actions2");
-        if (stageActions2Res.Clicked)
-        {
-            if (stageActions2Res.ActivatedId == "MoveUp")
-    {
-                EnsureStages(project);
-                if (authorStageIndex > 0 && authorStageIndex < project.stages.Count)
-                {
-                    var tmp = project.stages[authorStageIndex - 1];
-                    project.stages[authorStageIndex - 1] = project.stages[authorStageIndex];
-                    project.stages[authorStageIndex] = tmp;
-                    for (int i = 0; i < project.stages.Count; i++)
-                        if (project.stages[i] != null) project.stages[i].stageIndex = i;
-                    authorStageIndex = Mathf.Max(0, authorStageIndex - 1);
-                    TrySaveProjects();
-                }
-            }
-            else if (stageActions2Res.ActivatedId == "MoveDown")
-    {
-                EnsureStages(project);
-                if (authorStageIndex >= 0 && authorStageIndex < project.stages.Count - 1)
-                {
-                    var tmp = project.stages[authorStageIndex + 1];
-                    project.stages[authorStageIndex + 1] = project.stages[authorStageIndex];
-                    project.stages[authorStageIndex] = tmp;
-                    for (int i = 0; i < project.stages.Count; i++)
-                        if (project.stages[i] != null) project.stages[i].stageIndex = i;
-                    authorStageIndex = Mathf.Min(project.stages.Count - 1, authorStageIndex + 1);
-                    TrySaveProjects();
-                }
-            }
+            if (DrawIconButton(scrollCtx, moveUpRect, D2VanillaTex.ReorderUp, "Move stage up", "Stages/Actions/MoveUp"))
+                MoveAuthorStageUp();
         }
+        else
+        {
+            DrawIconButton(scrollCtx, moveUpRect, D2VanillaTex.ReorderUp, "Move stage up", "Stages/Actions/MoveUpDisabled", enabled: false, disabledReason: "This stage is already first.");
+        }
+
+        bool canMoveDown = project.stages != null && authorStageIndex >= 0 && authorStageIndex < project.stages.Count - 1;
+        Rect moveDownRect = actionsH.NextFixed(iconSize, UIRectTag.Button, "Stages/Actions/MoveDown");
+        if (canMoveDown)
+        {
+            if (DrawIconButton(scrollCtx, moveDownRect, D2VanillaTex.ReorderDown, "Move stage down", "Stages/Actions/MoveDown"))
+                MoveAuthorStageDown();
+        }
+        else
+        {
+            DrawIconButton(scrollCtx, moveDownRect, D2VanillaTex.ReorderDown, "Move stage down", "Stages/Actions/MoveDownDisabled", enabled: false, disabledReason: "This stage is already last.");
+        }
+    }
+
+    private float MeasureStageListHeight(List<AgsModel.StageSpec> stages, float rowHeight, float rowGap, float listPad)
+    {
+        int count = Mathf.Max(1, stages?.Count ?? 0);
+        float rowsH = (count * rowHeight) + (Mathf.Max(0, count - 1) * rowGap);
+        return rowsH + (listPad * 2f);
+    }
+
+    private void DrawAuthorStageList(UIContext ctx, Rect rect, float rowHeight, float rowGap, float listPad)
+    {
+        using var listPanel = ctx.GroupPanel("Stages/ListPanel", rect, soft: true, pad: true, padOverride: listPad, drawBackground: true, label: "Stages/ListPanel");
+        Rect inner = listPanel.Inner;
+        float y = inner.yMin;
+
+        for (int i = 0; i < project.stages.Count; i++)
+        {
+            var stage = project.stages[i];
+            Rect rowRect = new Rect(inner.xMin, y, inner.width, rowHeight);
+            bool selected = i == authorStageIndex;
+            ctx.RecordRect(rowRect, selected ? UIRectTag.ListRowSelected : UIRectTag.ListRow, $"Stages/List/Row[{i}]");
+
+            string label = BuildStageListLabel(i, stage);
+            if (ctx.Pass == UIPass.Draw && SelectableRowButton(rowRect, label, selected))
+                SelectAuthorStage(i);
+
+            y += rowHeight + rowGap;
+        }
+    }
+
+    private string BuildStageListLabel(int index, AgsModel.StageSpec stage)
+    {
+        string label = stage?.label;
+        if (label.NullOrEmpty())
+            label = "Stage " + index;
+        return $"{index:00}  {label}";
+    }
+
+    private void SelectAuthorStage(int index)
+    {
+        EnsureStages(project);
+        int clamped = Mathf.Clamp(index, 0, project.stages.Count - 1);
+        authorStageIndex = clamped;
+        authorTrackIndex = -1;
+        authorKeyIndex = -1;
+
+        if (sourceMode == SourceMode.AuthorProject)
+        {
+            preview.SelectedStageIndex = clamped;
+            var stage = GetStage(project, clamped);
+            int previewTick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage?.durationTicks ?? 1));
+            preview.ShowSelectedStageAtTick(previewTick);
+        }
+    }
+
+    private void AddAuthorStage()
+    {
+        EnsureStages(project);
+        int idx = project.stages.Count;
+        AgsModel.StageSpec newStage;
+        if (!project.stages.NullOrEmpty())
+        {
+            var src = project.stages[project.stages.Count - 1];
+            newStage = src != null
+                ? DeepCloneStage(src)
+                : new AgsModel.StageSpec { durationTicks = 60, repeatCount = 1, variants = new List<AgsModel.StageVariant>() };
+        }
+        else
+        {
+            newStage = new AgsModel.StageSpec { durationTicks = 60, repeatCount = 1, variants = new List<AgsModel.StageVariant>() };
+        }
+
+        newStage.stageIndex = idx;
+        newStage.label = "Stage " + idx;
+        project.stages.Add(newStage);
+        SelectAuthorStage(idx);
+        TrySaveProjects();
+    }
+
+    private void DuplicateAuthorStage()
+    {
+        EnsureStages(project);
+        var src = GetStage(project, authorStageIndex);
+        if (src == null)
+            return;
+
+        var clone = DeepCloneStage(src);
+        clone.stageIndex = project.stages.Count;
+        clone.label = (src.label ?? ("Stage " + authorStageIndex)) + " Copy";
+        project.stages.Add(clone);
+        SelectAuthorStage(project.stages.Count - 1);
+        TrySaveProjects();
+    }
+
+    private void DeleteAuthorStage()
+    {
+        EnsureStages(project);
+        if (project.stages.Count <= 1 || authorStageIndex < 0 || authorStageIndex >= project.stages.Count)
+            return;
+
+        project.stages.RemoveAt(authorStageIndex);
+        for (int i = 0; i < project.stages.Count; i++)
+            if (project.stages[i] != null) project.stages[i].stageIndex = i;
+
+        SelectAuthorStage(Mathf.Clamp(authorStageIndex, 0, project.stages.Count - 1));
+        TrySaveProjects();
+    }
+
+    private void MoveAuthorStageUp()
+    {
+        EnsureStages(project);
+        if (authorStageIndex <= 0 || authorStageIndex >= project.stages.Count)
+            return;
+
+        var tmp = project.stages[authorStageIndex - 1];
+        project.stages[authorStageIndex - 1] = project.stages[authorStageIndex];
+        project.stages[authorStageIndex] = tmp;
+        for (int i = 0; i < project.stages.Count; i++)
+            if (project.stages[i] != null) project.stages[i].stageIndex = i;
+
+        SelectAuthorStage(authorStageIndex - 1);
+        TrySaveProjects();
+    }
+
+    private void MoveAuthorStageDown()
+    {
+        EnsureStages(project);
+        if (authorStageIndex < 0 || authorStageIndex >= project.stages.Count - 1)
+            return;
+
+        var tmp = project.stages[authorStageIndex + 1];
+        project.stages[authorStageIndex + 1] = project.stages[authorStageIndex];
+        project.stages[authorStageIndex] = tmp;
+        for (int i = 0; i < project.stages.Count; i++)
+            if (project.stages[i] != null) project.stages[i].stageIndex = i;
+
+        SelectAuthorStage(authorStageIndex + 1);
+        TrySaveProjects();
     }
 }
