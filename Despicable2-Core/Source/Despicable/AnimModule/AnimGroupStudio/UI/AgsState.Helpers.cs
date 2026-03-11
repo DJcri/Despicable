@@ -269,7 +269,33 @@ public partial class Dialog_AnimGroupStudio
     {
         if (value.NullOrEmpty()) return null;
         string safe = AgsExportUtil.MakeSafeDefName(value);
-        return AgsExportUtil.IsExactDefName(value) ? null : "Export will normalize this def name to: " + safe;
+        return AgsExportUtil.IsExactDefName(value) ? null : "Export will normalize this def prefix to: " + safe;
+    }
+
+    private static string GetVariationLabelValidationHint(string value)
+    {
+        if (value.NullOrEmpty()) return null;
+        string safe = AgsExportUtil.MakeVariationCode(value);
+        return safe == value.Trim() ? null : "Export will normalize this variation label to: " + safe;
+    }
+
+    private static string GetResolvedProjectVariationDefName(AgsModel.Project project)
+    {
+        string baseDef = project?.export?.baseDefName;
+        if (baseDef.NullOrEmpty())
+            baseDef = project?.projectId ?? "AGS_Export";
+        return AgsExportUtil.MakeGroupDefName(baseDef, project?.label ?? "");
+    }
+
+    private static string GetProjectDisplayName(AgsModel.Project project)
+    {
+        if (project == null)
+            return "(select)";
+
+        if (project?.export?.baseDefName.NullOrEmpty() == false || !project.label.NullOrEmpty())
+            return GetResolvedProjectVariationDefName(project);
+
+        return project.projectId ?? "(unnamed)";
     }
 
     private static AgsModel.Keyframe FindKeyframeAtTick(AgsModel.Track tr, int tick)

@@ -14,10 +14,10 @@ namespace Despicable.AnimModule.AnimGroupStudio.Export;
 /// - Writes deterministic Def XML into a RimWorld-loadable Defs/ folder
 ///   (so the content loads after restart)
 ///
-/// Output package:
-/// - GroupAnimation_<ProjectKey>.xml (AnimGroupDef + AnimRoleDef entries)
-/// - OffsetDefs_<ProjectKey>.xml     (AnimationOffsetDef entries)
-/// - Stages/*.xml                    (AnimationDef entries, grouped by stage slice)
+/// Output package (family-scoped):
+/// - GroupAnimation_<BaseDef>.xml (AnimGroupDef + AnimRoleDef entries for one or more variations)
+/// - OffsetDefs_<BaseDef>.xml     (AnimationOffsetDef entries for one or more variations)
+/// - Stages/*.xml                 (AnimationDef entries, one file per stage per variation)
 /// </summary>
 public sealed partial class AgsExport
 {
@@ -33,7 +33,9 @@ public sealed partial class AgsExport
         public string rootDir;
         public string baseDefName;
         public string projectKey;
-        public List<string> variantIds;
+        public string variationLabel;
+        public string variationCode;
+        public string variationDefName;
 
         public string packageDir;
         public string stagesDir;
@@ -43,11 +45,13 @@ public sealed partial class AgsExport
         public readonly List<StageTarget> stageTargets = new();
         public readonly List<string> allTargetFiles = new();
         public readonly List<string> existingTargets = new();
+        public readonly List<string> staleStageFiles = new();
+        public readonly List<string> existingOwnedRoleDefNames = new();
+        public readonly List<string> existingOwnedOffsetDefNames = new();
     }
 
     public sealed partial class StageTarget
     {
-        public string variantId;
         public int stageIndex;
         public string filePath;
     }
@@ -57,6 +61,7 @@ public sealed partial class AgsExport
         public string exportRootDir;
         public readonly List<string> filesWritten = new();
         public readonly List<string> filesOverwritten = new();
+        public readonly List<string> filesDeleted = new();
     }
 
     public ValidationResult Validate(AgsModel.Project project)
@@ -69,10 +74,12 @@ public sealed partial class AgsExport
     public ExportPlan BuildPlan(AgsModel.Project project)
     {
         var plan = new ExportPlan();
-        plan.baseDefName = AgsExportUtil.MakeSafeDefName(project?.export?.baseDefName ?? project?.label ?? project?.projectId ?? "AGS_Export");
+        plan.baseDefName = AgsExportUtil.MakeSafeDefName(project?.export?.baseDefName ?? "AGS_Export");
         plan.projectKey = AgsExportUtil.MakeExportProjectKey(plan.baseDefName);
+        plan.variationLabel = project?.label ?? "";
+        plan.variationCode = AgsExportUtil.MakeVariationCode(plan.variationLabel);
+        plan.variationDefName = AgsExportUtil.MakeGroupDefName(plan.baseDefName, plan.variationLabel);
         plan.rootDir = ResolveExportRootDir();
-        plan.variantIds = CollectVariantIds(project);
 
         plan.packageDir = Path.Combine(plan.rootDir, "Defs", "LovinModule", "Animations", "Exported", "Groups", plan.projectKey);
         plan.stagesDir = Path.Combine(plan.packageDir, "Stages");
@@ -93,11 +100,14 @@ public sealed partial class AgsExport
 
         var plan = BuildPlan(project);
         EnsureDirs(plan);
+        CaptureExistingVariationRefs(plan);
 
         var result = new ExportResult { exportRootDir = plan.packageDir };
 
         if (!allowOverwrite && plan.existingTargets.Count > 0)
             throw new InvalidOperationException("Export would overwrite existing files. Confirmation required.");
+
+        DeleteStaleStageFiles(plan, result);
 
         WriteTracked(plan.groupFilePath, result, path => WriteGroupPackageXml(project, plan, path));
         WriteTracked(plan.offsetFilePath, result, path => WriteOffsetPackageXml(project, plan, path));
@@ -108,9 +118,8 @@ public sealed partial class AgsExport
             if (target == null || target.filePath.NullOrEmpty())
                 continue;
 
-            string variantId = target.variantId.NullOrEmpty() ? "Base" : target.variantId;
             int stageIndex = Mathf.Clamp(target.stageIndex, 0, Mathf.Max(0, project.stages.Count - 1));
-            WriteTracked(target.filePath, result, path => WriteStagePackageXml(project, plan, variantId, stageIndex, path));
+            WriteTracked(target.filePath, result, path => WriteStagePackageXml(project, plan, stageIndex, path));
         }
 
         return result;

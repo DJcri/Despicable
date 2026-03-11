@@ -79,8 +79,8 @@ public static partial class AgsModel
         public bool loop;
 
         /// <summary>
-        /// Optional content tags written into the exported AnimGroupDef.stageTags alongside the
-        /// project key. Useful for filtering (e.g. "lovin_oral", "lovin_anal").
+        /// Legacy project data only. Older AGS saves stored exported group tags per-stage;
+        /// current projects migrate these into Project.groupTags and no longer expose them in the UI.
         /// </summary>
         public List<string> stageTags;
 

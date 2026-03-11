@@ -68,6 +68,10 @@ public static partial class AgsModel
         // Group-scoped prop membership (union of any prop referenced anywhere).
         public HashSet<string> propLibrary = new();
 
+        // Group-scoped tags written to the exported AnimGroupDef.stageTags.
+        // Legacy projects may still carry per-stage stageTags; those are migrated into this list on load.
+        public List<string> groupTags = new();
+
         // Offsets are per role (AnimRoleDef.offsetDef), keyed by body type.
         public Dictionary<string, Dictionary<string, BodyTypeOffset>> offsetsByRoleKey = new();
 
@@ -88,6 +92,8 @@ public static partial class AgsModel
             Scribe_Collections.Look(ref propList, "propLibrary", LookMode.Value);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
                 propLibrary = propList != null ? new HashSet<string>(propList) : new HashSet<string>();
+
+            Scribe_Collections.Look(ref groupTags, "groupTags", LookMode.Value);
 
             // Offsets per role (v2+)
             var bundles = new List<RoleOffsetsBundle>();
@@ -137,6 +143,7 @@ public static partial class AgsModel
                 }
 
                 NormalizeRoles();
+                NormalizeMetadata();
             }
 
             Scribe_Deep.Look(ref export, "export");
@@ -145,6 +152,7 @@ public static partial class AgsModel
             {
                 // Ensure stable data when saving.
                 NormalizeRoles();
+                NormalizeMetadata();
             }
         }
 

@@ -98,7 +98,7 @@ public class CompExtendedAnimator : ThingComp
 
     public void CheckAndPlayFacialAnim()
     {
-        EffectController.CheckAndPlayFacialAnim(pawn);
+        EffectController.CheckAndPlayFacialAnim(pawn, _runtime);
     }
 
     public void CheckAndPlaySounds()

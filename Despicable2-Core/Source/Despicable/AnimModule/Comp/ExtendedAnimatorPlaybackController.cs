@@ -36,7 +36,7 @@ public sealed class ExtendedAnimatorPlaybackController
 
             if (runtime.usesExtendedAnimationFeatures)
             {
-                effectController?.CheckAndPlayFacialAnim(pawn);
+                effectController?.CheckAndPlayFacialAnim(pawn, runtime);
                 effectController?.CheckAndPlaySounds(pawn);
             }
 

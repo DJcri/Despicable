@@ -29,7 +29,8 @@ public partial class Dialog_AnimGroupStudio
                     var p = new AgsModel.Project
                     {
                         projectId = System.Guid.NewGuid().ToString("N"),
-                        label = group.defName + " (Imported)",
+                        label = "",
+                        groupTags = new List<string>(),
                         roles = new List<AgsModel.RoleSpec>(),
                         stages = new List<AgsModel.StageSpec>(),
                         propLibrary = new HashSet<string>(),
@@ -37,11 +38,13 @@ public partial class Dialog_AnimGroupStudio
                         export = new AgsModel.ExportSpec()
                     };
     
-                    // Base def name: prefer family key so "A/B/C" variations share a base.
-                    string baseName = selectedFamilyKey.NullOrEmpty() ? group.defName : selectedFamilyKey;
-                    if (baseName.NullOrEmpty()) baseName = "AGD_Player";
-                    baseName = baseName.Replace(' ', '_');
-                    p.export.baseDefName = MakeUniqueBaseDefName(baseName + "_Player");
+                    AgsModel.Name.SplitFamilyAndCode(group.defName, out string importedBaseDef, out string importedVariationLabel);
+                    if (importedBaseDef.NullOrEmpty()) importedBaseDef = group.defName;
+                    if (importedBaseDef.NullOrEmpty()) importedBaseDef = "AGD_Player";
+                    p.export.baseDefName = importedBaseDef.Replace(' ', '_');
+                    p.label = importedVariationLabel ?? "";
+                    if (!group.stageTags.NullOrEmpty())
+                        p.groupTags = new List<string>(group.stageTags.Where(x => !x.NullOrEmpty()));
     
                     // Roles
                     int maleN = 0, femaleN = 0, uniN = 0;
@@ -227,7 +230,7 @@ public partial class Dialog_AnimGroupStudio
                     EnsureRoles(project);
                     EnsureAuthorRoleKeyValid(project);
     
-                    Messages.Message("Imported as a new player project.", MessageTypeDefOf.PositiveEvent, false);
+                    Messages.Message("Imported as a new project variation.", MessageTypeDefOf.PositiveEvent, false);
                 }
                 catch (Exception e)
                 {

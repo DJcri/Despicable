@@ -1,7 +1,6 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -21,9 +20,9 @@ public sealed partial class AgsExport
 
         if (project.export == null) project.export = new AgsModel.ExportSpec();
         if (project.export.baseDefName.NullOrEmpty())
-            vr.errors.Add("Base defName is empty. Set a Base def value in the left panel.");
+            vr.errors.Add("Base def prefix is empty. Set a Def prefix value in the left panel.");
         else if (!AgsExportUtil.IsExactDefName(project.export.baseDefName))
-            vr.errors.Add("Base defName must use only letters, digits, and underscores, and cannot start with a digit.");
+            vr.errors.Add("Base def prefix must use only letters, digits, and underscores, and cannot start with a digit.");
 
         if (project.roles.NullOrEmpty())
             vr.errors.Add("Project has no roles.");
@@ -32,10 +31,6 @@ public sealed partial class AgsExport
             vr.errors.Add("Project has no stages.");
 
         if (!vr.Ok) return;
-
-        var variantIds = CollectVariantIds(project);
-        if (variantIds.Count == 0)
-            vr.errors.Add("No variants found. Each stage must contain at least one variant (e.g. 'Base').");
 
         var roleNameMap = new Dictionary<string, string>(StringComparer.Ordinal);
         for (int ri = 0; ri < project.roles.Count; ri++)
@@ -49,17 +44,6 @@ public sealed partial class AgsExport
                 vr.errors.Add($"Role keys '{otherRoleKey}' and '{role.roleKey}' normalize to the same exported name '{safeRoleKey}'.");
             else
                 roleNameMap[safeRoleKey] = role.roleKey;
-        }
-
-        var variantCodeMap = new Dictionary<string, string>(StringComparer.Ordinal);
-        for (int vi = 0; vi < variantIds.Count; vi++)
-        {
-            string vid = variantIds[vi];
-            string code = VariantIdToCode(vid);
-            if (variantCodeMap.TryGetValue(code, out var otherVariant) && otherVariant != vid)
-                vr.errors.Add($"Variants '{otherVariant}' and '{vid}' normalize to the same exported code '{(code == "" ? "Base" : code)}'.");
-            else
-                variantCodeMap[code] = vid;
         }
 
         for (int si = 0; si < project.stages.Count; si++)
@@ -81,78 +65,80 @@ public sealed partial class AgsExport
                 continue;
             }
 
-            // Each stage must contain all variants.
-            for (int vi = 0; vi < variantIds.Count; vi++)
+            var baseVariant = s.variants.FirstOrDefault(x => x != null && (x.variantId.NullOrEmpty() ? "Base" : x.variantId) == "Base");
+            if (baseVariant == null)
+                vr.errors.Add($"Stage {si} is missing the Base variant.");
+
+            for (int vi = 0; vi < s.variants.Count; vi++)
             {
-                string vid = variantIds[vi];
-                var v = s.variants.FirstOrDefault(x => x != null && (x.variantId.NullOrEmpty() ? "Base" : x.variantId) == vid);
-                if (v == null)
+                var variant = s.variants[vi];
+                if (variant == null)
+                    continue;
+
+                string variantId = variant.variantId.NullOrEmpty() ? "Base" : variant.variantId;
+                if (variantId != "Base")
+                    vr.errors.Add($"Stage {si} uses legacy variant '{variantId}'. AGS export now expects one variation per project; import or rebuild this variation as its own project.");
+            }
+
+            if (baseVariant == null)
+                continue;
+
+            for (int ri = 0; ri < project.roles.Count; ri++)
+            {
+                var role = project.roles[ri];
+                if (role == null) continue;
+                if (role.roleKey.NullOrEmpty())
                 {
-                    vr.errors.Add($"Stage {si} is missing variant '{vid}'.");
+                    vr.errors.Add($"Role {ri} is missing roleKey.");
                     continue;
                 }
 
-                for (int ri = 0; ri < project.roles.Count; ri++)
+                var clip = baseVariant.GetClip(role.roleKey);
+                if (clip == null)
                 {
-                    var role = project.roles[ri];
-                    if (role == null) continue;
-                    if (role.roleKey.NullOrEmpty())
-                    {
-                        vr.errors.Add($"Role {ri} is missing roleKey.");
-                        continue;
-                    }
-
-                    var clip = v.GetClip(role.roleKey);
-                    if (clip == null)
-                    {
-                        vr.errors.Add($"Stage {si} variant '{vid}' is missing clip for role '{role.roleKey}'.");
-                        continue;
-                    }
-
-                    ValidateClip(vr, clip, s.durationTicks, $"Stage {si} '{s.label ?? "(unnamed)"}' variant '{vid}' role '{role.roleKey}'");
+                    vr.errors.Add($"Stage {si} is missing the Base clip for role '{role.roleKey}'.");
+                    continue;
                 }
+
+                ValidateClip(vr, clip, s.durationTicks, $"Stage {si} '{s.label ?? "(unnamed)"}' role '{role.roleKey}'");
             }
         }
 
-        // Validate referenced defs.
         for (int si = 0; si < project.stages.Count; si++)
         {
             var s = project.stages[si];
-            if (s?.variants == null) continue;
-            for (int vi = 0; vi < s.variants.Count; vi++)
+            var baseVariant = s?.variants?.FirstOrDefault(x => x != null && (x.variantId.NullOrEmpty() ? "Base" : x.variantId) == "Base");
+            if (baseVariant?.clips == null)
+                continue;
+
+            for (int ci = 0; ci < baseVariant.clips.Count; ci++)
             {
-                var v = s.variants[vi];
-                if (v?.clips == null) continue;
-                for (int ci = 0; ci < v.clips.Count; ci++)
+                var rc = baseVariant.clips[ci];
+                if (rc?.clip?.tracks == null) continue;
+                for (int ti = 0; ti < rc.clip.tracks.Count; ti++)
                 {
-                    var rc = v.clips[ci];
-                    if (rc?.clip?.tracks == null) continue;
-                    for (int ti = 0; ti < rc.clip.tracks.Count; ti++)
+                    var tr = rc.clip.tracks[ti];
+                    if (tr == null) continue;
+
+                    if (!tr.nodeTag.NullOrEmpty() && DefDatabase<PawnRenderNodeTagDef>.GetNamedSilentFail(tr.nodeTag) == null)
+                        vr.errors.Add($"Missing PawnRenderNodeTagDef '{tr.nodeTag}' (stage {si} role '{rc.roleKey}').");
+
+                    if (tr.keys == null) continue;
+                    for (int ki = 0; ki < tr.keys.Count; ki++)
                     {
-                        var tr = rc.clip.tracks[ti];
-                        if (tr == null) continue;
-
-                        if (!tr.nodeTag.NullOrEmpty() && DefDatabase<PawnRenderNodeTagDef>.GetNamedSilentFail(tr.nodeTag) == null)
-                            vr.errors.Add($"Missing PawnRenderNodeTagDef '{tr.nodeTag}' (stage {si} variant '{v.variantId}' role '{rc.roleKey}').");
-
-                        if (tr.keys == null) continue;
-                        for (int ki = 0; ki < tr.keys.Count; ki++)
-                        {
-                            var k = tr.keys[ki];
-                            if (k == null) continue;
-                            if (!k.soundDefName.NullOrEmpty() && DefDatabase<SoundDef>.GetNamedSilentFail(k.soundDefName) == null)
-                                vr.errors.Add($"Missing SoundDef '{k.soundDefName}' (stage {si} variant '{v.variantId}' role '{rc.roleKey}', tick {k.tick}).");
-                            if (!k.facialAnimDefName.NullOrEmpty() && DefDatabase<FacialAnimDef>.GetNamedSilentFail(k.facialAnimDefName) == null)
-                                vr.errors.Add($"Missing FacialAnimDef '{k.facialAnimDefName}' (stage {si} variant '{v.variantId}' role '{rc.roleKey}', tick {k.tick}).");
-                            if (k.prop != null && !k.prop.propDefName.NullOrEmpty() && DefDatabase<ThingDef>.GetNamedSilentFail(k.prop.propDefName) == null)
-                                vr.errors.Add($"Missing ThingDef for prop '{k.prop.propDefName}' (stage {si} variant '{v.variantId}' role '{rc.roleKey}', tick {k.tick}).");
-                        }
+                        var k = tr.keys[ki];
+                        if (k == null) continue;
+                        if (!k.soundDefName.NullOrEmpty() && DefDatabase<SoundDef>.GetNamedSilentFail(k.soundDefName) == null)
+                            vr.errors.Add($"Missing SoundDef '{k.soundDefName}' (stage {si} role '{rc.roleKey}', tick {k.tick}).");
+                        if (!k.facialAnimDefName.NullOrEmpty() && DefDatabase<FacialAnimDef>.GetNamedSilentFail(k.facialAnimDefName) == null)
+                            vr.errors.Add($"Missing FacialAnimDef '{k.facialAnimDefName}' (stage {si} role '{rc.roleKey}', tick {k.tick}).");
+                        if (k.prop != null && !k.prop.propDefName.NullOrEmpty() && DefDatabase<ThingDef>.GetNamedSilentFail(k.prop.propDefName) == null)
+                            vr.errors.Add($"Missing ThingDef for prop '{k.prop.propDefName}' (stage {si} role '{rc.roleKey}', tick {k.tick}).");
                     }
                 }
             }
         }
 
-        // Export root existence/writability.
         var root = ResolveExportRootDir();
         if (root.NullOrEmpty() || !Directory.Exists(root))
             vr.errors.Add("Export root directory does not exist: " + (root ?? "(null)"));
@@ -230,31 +216,7 @@ public sealed partial class AgsExport
         }
     }
 
-    private static List<string> CollectVariantIds(AgsModel.Project project)
-    {
-        var set = new HashSet<string>();
-        if (project?.stages != null)
-        {
-            for (int si = 0; si < project.stages.Count; si++)
-            {
-                var s = project.stages[si];
-                if (s?.variants == null) continue;
-                for (int vi = 0; vi < s.variants.Count; vi++)
-                {
-                    var v = s.variants[vi];
-                    if (v == null) continue;
-                    set.Add(v.variantId.NullOrEmpty() ? "Base" : v.variantId);
-                }
-            }
-        }
-
-        var list = set.ToList();
-        list.Sort(StringComparer.Ordinal);
-        if (list.Remove("Base")) list.Insert(0, "Base");
-        return list;
-    }
-
-    private static AgsModel.ClipSpec GetClip(AgsModel.StageSpec stage, string variantId, string roleKey)
+    private static AgsModel.ClipSpec GetClip(AgsModel.StageSpec stage, string roleKey)
     {
         if (stage?.variants == null) return null;
         for (int i = 0; i < stage.variants.Count; i++)
@@ -262,7 +224,7 @@ public sealed partial class AgsExport
             var v = stage.variants[i];
             if (v == null) continue;
             string id = v.variantId.NullOrEmpty() ? "Base" : v.variantId;
-            if (id != variantId) continue;
+            if (id != "Base") continue;
             return v.GetClip(roleKey);
         }
         return null;

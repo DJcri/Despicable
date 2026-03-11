@@ -35,28 +35,28 @@ public sealed class ExtendedAnimatorEffectController
         return true;
     }
 
-    // Last animation tick at which we checked for facial triggers.
-    // Lets us scan a range instead of a single exact tick, so we never miss a
-    // trigger when the render tree advances by more than one tick between calls
-    // (game speed multiplier, frame drops, or sync drift between CompTick and
-    // the render tree AnimationTick getter).
-    private int lastCheckedFacialTick = -1;
-
-    public void CheckAndPlayFacialAnim(Pawn pawn)
+    public void CheckAndPlayFacialAnim(Pawn pawn, ExtendedAnimatorRuntimeState runtime)
     {
-        if (pawn == null || ModMain.IsNlFacialInstalled)
+        if (pawn == null || runtime == null || ModMain.IsNlFacialInstalled)
             return;
 
         if (!TryGetExtendedKeyframeContext(pawn, out AnimationWorker_ExtendedKeyframes animWorker, out AnimationPart animPart, out int animationTick))
             return;
 
+        AnimationDef currentAnimation = pawn.Drawer?.renderer?.CurAnimation;
+        if (runtime.lastCheckedFacialAnimation != currentAnimation)
+        {
+            runtime.lastCheckedFacialAnimation = currentAnimation;
+            runtime.lastCheckedFacialTick = -1;
+        }
+
         // Detect animation loop or reset: if the current tick went backwards,
         // restart the scan window from the beginning of the animation.
-        if (animationTick < lastCheckedFacialTick)
-            lastCheckedFacialTick = -1;
+        if (animationTick < runtime.lastCheckedFacialTick)
+            runtime.lastCheckedFacialTick = -1;
 
-        FacialAnimDef facialAnim = ScanFacialAnimInRange(lastCheckedFacialTick, animationTick, animPart);
-        lastCheckedFacialTick = animationTick;
+        FacialAnimDef facialAnim = ScanFacialAnimInRange(runtime.lastCheckedFacialTick, animationTick, animPart);
+        runtime.lastCheckedFacialTick = animationTick;
 
         if (facialAnim == null)
             return;

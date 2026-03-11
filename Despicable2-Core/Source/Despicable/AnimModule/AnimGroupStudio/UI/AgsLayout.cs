@@ -64,8 +64,8 @@ public partial class Dialog_AnimGroupStudio
                 if (sourceMode == SourceMode.ExistingDef)
                     return "Browse Existing";
 
-                if (!string.IsNullOrWhiteSpace(project?.label))
-                    return project.label;
+                if (project != null)
+                    return GetProjectDisplayName(project);
 
                 return "Author";
             }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using System.Xml;
@@ -17,80 +18,137 @@ public sealed partial class AgsExport
         Directory.CreateDirectory(plan.stagesDir);
     }
 
-    private static void WriteGroupPackageXml(AgsModel.Project project, ExportPlan plan, string fullPath)
+    private static void CaptureExistingVariationRefs(ExportPlan plan)
     {
-        AgsExportUtil.WriteXmlAtomic(fullPath, w =>
+        plan.existingOwnedRoleDefNames.Clear();
+        plan.existingOwnedOffsetDefNames.Clear();
+
+        if (plan == null || plan.groupFilePath.NullOrEmpty() || !File.Exists(plan.groupFilePath))
+            return;
+
+        try
         {
-            w.WriteStartDocument();
-            w.WriteStartElement("Defs");
+            var doc = LoadDefsDocument(plan.groupFilePath);
+            var root = doc.DocumentElement;
+            if (root == null)
+                return;
 
-            for (int vi = 0; vi < plan.variantIds.Count; vi++)
+            var groupEl = FindDefElement(root, plan.variationDefName);
+            if (groupEl == null)
+                return;
+
+            foreach (string roleDefName in ReadListValues(groupEl, "animRoles"))
             {
-                string variantId = plan.variantIds[vi];
-                string groupDefName = AgsExportUtil.MakeGroupDefName(plan.projectKey, variantId);
+                if (roleDefName.NullOrEmpty() || plan.existingOwnedRoleDefNames.Contains(roleDefName))
+                    continue;
 
-                w.WriteStartElement(typeof(AnimGroupDef).FullName);
-                AgsExportUtil.WriteElement(w, "defName", groupDefName);
+                plan.existingOwnedRoleDefNames.Add(roleDefName);
+                var roleEl = FindDefElement(root, roleDefName);
+                if (roleEl == null)
+                    continue;
 
-                w.WriteStartElement("stageTags");
-                AgsExportUtil.WriteElement(w, "li", plan.projectKey);
-                if (project.stages != null)
-                {
-                    // Collect the union of all per-stage tags across the project so every
-                    // variation exposes the same searchable tag set.
-                    var extraTags = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
-                    for (int si = 0; si < project.stages.Count; si++)
-                    {
-                        var s = project.stages[si];
-                        if (s?.stageTags == null) continue;
-                        for (int ti = 0; ti < s.stageTags.Count; ti++)
-                        {
-                            string t = s.stageTags[ti];
-                            if (!t.NullOrEmpty() && !t.Equals(plan.projectKey, System.StringComparison.OrdinalIgnoreCase))
-                                extraTags.Add(t);
-                        }
-                    }
-                    foreach (string tag in extraTags)
-                        AgsExportUtil.WriteElement(w, "li", tag);
-                }
-                w.WriteEndElement();
-
-                AgsExportUtil.WriteElement(w, "numActors", Mathf.Max(1, project.roles.Count).ToString(CultureInfo.InvariantCulture));
-
-                w.WriteStartElement("loopIndex");
-                for (int i = 0; i < project.stages.Count; i++)
-                {
-                    int repeatCount = Mathf.Max(1, project.stages[i]?.repeatCount ?? 1);
-                    AgsExportUtil.WriteElement(w, "li", repeatCount.ToString(CultureInfo.InvariantCulture));
-                }
-                w.WriteEndElement();
-
-                w.WriteStartElement("animRoles");
-                for (int ri = 0; ri < project.roles.Count; ri++)
-                {
-                    var role = project.roles[ri];
-                    if (role == null) continue;
-                    string roleKey = role.roleKey ?? $"role_{ri + 1}";
-                    AgsExportUtil.WriteElement(w, "li", AgsExportUtil.MakeRoleDefName(plan.projectKey, variantId, roleKey));
-                }
-                w.WriteEndElement();
-
-                w.WriteEndElement();
-
-                for (int ri = 0; ri < project.roles.Count; ri++)
-                {
-                    var role = project.roles[ri];
-                    if (role == null) continue;
-                    WriteAnimRoleDefElement(w, plan.projectKey, variantId, role, ri, project.stages.Count);
-                }
+                string offsetDefName = GetChildText(roleEl, "offsetDef");
+                if (!offsetDefName.NullOrEmpty() && !plan.existingOwnedOffsetDefNames.Contains(offsetDefName))
+                    plan.existingOwnedOffsetDefNames.Add(offsetDefName);
             }
-
-            w.WriteEndElement();
-            w.WriteEndDocument();
-        });
+        }
+        catch (Exception e)
+        {
+            Despicable.Core.DebugLogger.WarnExceptionOnce("AgsExport.CaptureExistingVariationRefs", "AGS export could not inspect the existing family package; continuing with append-only merge.", e);
+        }
     }
 
-    private static void WriteAnimRoleDefElement(XmlWriter w, string projectKey, string variantId, AgsModel.RoleSpec role, int roleIndex, int stageCount)
+    private static void DeleteStaleStageFiles(ExportPlan plan, ExportResult result)
+    {
+        if (plan?.staleStageFiles == null)
+            return;
+
+        for (int i = 0; i < plan.staleStageFiles.Count; i++)
+        {
+            string stale = plan.staleStageFiles[i];
+            if (stale.NullOrEmpty() || !File.Exists(stale))
+                continue;
+
+            try
+            {
+                File.Delete(stale);
+                result.filesDeleted.Add(stale);
+            }
+            catch (Exception e)
+            {
+                throw new IOException("Failed to delete stale stage export file: " + stale, e);
+            }
+        }
+    }
+
+    private static void WriteGroupPackageXml(AgsModel.Project project, ExportPlan plan, string fullPath)
+    {
+        var doc = LoadOrCreateDefsDocument(fullPath);
+        var root = doc.DocumentElement ?? doc.AppendChild(doc.CreateElement("Defs")) as XmlElement;
+
+        RemoveDefElement(root, plan.variationDefName);
+        RemoveDefElements(root, plan.existingOwnedRoleDefNames);
+        for (int ri = 0; ri < project.roles.Count; ri++)
+        {
+            var role = project.roles[ri];
+            if (role == null) continue;
+            RemoveDefElement(root, AgsExportUtil.MakeRoleDefName(plan.baseDefName, project.label, role.roleKey ?? $"role_{ri + 1}"));
+        }
+
+        root.AppendChild(BuildAnimGroupDefElement(doc, project, plan));
+        for (int ri = 0; ri < project.roles.Count; ri++)
+        {
+            var role = project.roles[ri];
+            if (role == null) continue;
+            root.AppendChild(BuildAnimRoleDefElement(doc, plan, project.label, role, ri, project.stages.Count));
+        }
+
+        SaveXmlDocumentAtomic(fullPath, doc);
+    }
+
+    private static XmlElement BuildAnimGroupDefElement(XmlDocument doc, AgsModel.Project project, ExportPlan plan)
+    {
+        var groupEl = doc.CreateElement(typeof(AnimGroupDef).FullName);
+        AppendTextElement(doc, groupEl, "defName", plan.variationDefName);
+
+        var tagsEl = doc.CreateElement("stageTags");
+        var emittedTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (project?.groupTags != null)
+        {
+            for (int i = 0; i < project.groupTags.Count; i++)
+            {
+                string tag = project.groupTags[i]?.Trim();
+                if (tag.NullOrEmpty() || !emittedTags.Add(tag))
+                    continue;
+                AppendTextElement(doc, tagsEl, "li", tag);
+            }
+        }
+        groupEl.AppendChild(tagsEl);
+
+        AppendTextElement(doc, groupEl, "numActors", Mathf.Max(1, project.roles.Count).ToString(CultureInfo.InvariantCulture));
+
+        var loopEl = doc.CreateElement("loopIndex");
+        for (int i = 0; i < project.stages.Count; i++)
+        {
+            int repeatCount = Mathf.Max(1, project.stages[i]?.repeatCount ?? 1);
+            AppendTextElement(doc, loopEl, "li", repeatCount.ToString(CultureInfo.InvariantCulture));
+        }
+        groupEl.AppendChild(loopEl);
+
+        var rolesEl = doc.CreateElement("animRoles");
+        for (int ri = 0; ri < project.roles.Count; ri++)
+        {
+            var role = project.roles[ri];
+            if (role == null) continue;
+            string roleKey = role.roleKey ?? $"role_{ri + 1}";
+            AppendTextElement(doc, rolesEl, "li", AgsExportUtil.MakeRoleDefName(plan.baseDefName, project.label, roleKey));
+        }
+        groupEl.AppendChild(rolesEl);
+
+        return groupEl;
+    }
+
+    private static XmlElement BuildAnimRoleDefElement(XmlDocument doc, ExportPlan plan, string variationLabel, AgsModel.RoleSpec role, int roleIndex, int stageCount)
     {
         int gender = 0;
         if (role != null)
@@ -100,42 +158,46 @@ public sealed partial class AgsExport
         }
 
         string roleKey = role?.roleKey ?? $"role_{roleIndex + 1}";
-        string roleDefName = AgsExportUtil.MakeRoleDefName(projectKey, variantId, roleKey);
-        string offsetDefName = AgsExportUtil.MakeOffsetDefName(projectKey, roleKey);
+        string roleDefName = AgsExportUtil.MakeRoleDefName(plan.baseDefName, variationLabel, roleKey);
+        string offsetDefName = AgsExportUtil.MakeOffsetDefName(plan.baseDefName, variationLabel, roleKey);
 
-        w.WriteStartElement(typeof(AnimRoleDef).FullName);
-        AgsExportUtil.WriteElement(w, "defName", roleDefName);
-        AgsExportUtil.WriteElement(w, "gender", gender.ToString(CultureInfo.InvariantCulture));
-        AgsExportUtil.WriteElement(w, "offsetDef", offsetDefName);
+        var roleEl = doc.CreateElement(typeof(AnimRoleDef).FullName);
+        AppendTextElement(doc, roleEl, "defName", roleDefName);
+        AppendTextElement(doc, roleEl, "gender", gender.ToString(CultureInfo.InvariantCulture));
+        AppendTextElement(doc, roleEl, "offsetDef", offsetDefName);
 
-        w.WriteStartElement("anims");
+        var animsEl = doc.CreateElement("anims");
         for (int si = 0; si < stageCount; si++)
-            AgsExportUtil.WriteElement(w, "li", AgsExportUtil.MakeAnimationDefName(projectKey, roleKey, si, variantId));
-        w.WriteEndElement();
+            AppendTextElement(doc, animsEl, "li", AgsExportUtil.MakeAnimationDefName(plan.baseDefName, variationLabel, roleKey, si));
+        roleEl.AppendChild(animsEl);
 
-        w.WriteEndElement();
+        return roleEl;
     }
 
     private static void WriteOffsetPackageXml(AgsModel.Project project, ExportPlan plan, string fullPath)
     {
-        AgsExportUtil.WriteXmlAtomic(fullPath, w =>
+        var doc = LoadOrCreateDefsDocument(fullPath);
+        var root = doc.DocumentElement ?? doc.AppendChild(doc.CreateElement("Defs")) as XmlElement;
+
+        RemoveDefElements(root, plan.existingOwnedOffsetDefNames);
+        for (int ri = 0; ri < project.roles.Count; ri++)
         {
-            w.WriteStartDocument();
-            w.WriteStartElement("Defs");
+            var role = project.roles[ri];
+            if (role == null) continue;
+            RemoveDefElement(root, AgsExportUtil.MakeOffsetDefName(plan.baseDefName, project.label, role.roleKey ?? $"role_{ri + 1}"));
+        }
 
-            for (int ri = 0; ri < project.roles.Count; ri++)
-            {
-                var role = project.roles[ri];
-                if (role == null) continue;
-                string roleKey = role.roleKey ?? $"role_{ri + 1}";
-                string defName = AgsExportUtil.MakeOffsetDefName(plan.projectKey, roleKey);
-                var bodyOffsets = CollectBodyOffsets(project, roleKey);
-                WriteAnimationOffsetDefElement(w, defName, bodyOffsets);
-            }
+        for (int ri = 0; ri < project.roles.Count; ri++)
+        {
+            var role = project.roles[ri];
+            if (role == null) continue;
+            string roleKey = role.roleKey ?? $"role_{ri + 1}";
+            string defName = AgsExportUtil.MakeOffsetDefName(plan.baseDefName, project.label, roleKey);
+            var bodyOffsets = CollectBodyOffsets(project, roleKey);
+            root.AppendChild(BuildAnimationOffsetDefElement(doc, defName, bodyOffsets));
+        }
 
-            w.WriteEndElement();
-            w.WriteEndDocument();
-        });
+        SaveXmlDocumentAtomic(fullPath, doc);
     }
 
     private static List<Despicable.BodyTypeOffset> CollectBodyOffsets(AgsModel.Project project, string roleKey)
@@ -163,42 +225,44 @@ public sealed partial class AgsExport
         return bodyOffsets;
     }
 
-    private static void WriteAnimationOffsetDefElement(XmlWriter w, string defName, List<Despicable.BodyTypeOffset> bodyOffsets)
+    private static XmlElement BuildAnimationOffsetDefElement(XmlDocument doc, string defName, List<Despicable.BodyTypeOffset> bodyOffsets)
     {
-        w.WriteStartElement(typeof(AnimationOffsetDef).FullName);
-        AgsExportUtil.WriteElement(w, "defName", defName);
+        var defEl = doc.CreateElement(typeof(AnimationOffsetDef).FullName);
+        AppendTextElement(doc, defEl, "defName", defName);
 
-        w.WriteStartElement("offsets");
-        w.WriteStartElement("li");
-        w.WriteAttributeString("Class", typeof(AnimationOffset_BodyType).FullName);
+        var offsetsEl = doc.CreateElement("offsets");
+        var entryEl = doc.CreateElement("li");
+        var classAttr = doc.CreateAttribute("Class");
+        classAttr.Value = typeof(AnimationOffset_BodyType).FullName;
+        entryEl.Attributes.Append(classAttr);
 
-        w.WriteStartElement("races");
-        AgsExportUtil.WriteElement(w, "li", "Human");
-        w.WriteEndElement();
+        var racesEl = doc.CreateElement("races");
+        AppendTextElement(doc, racesEl, "li", "Human");
+        entryEl.AppendChild(racesEl);
 
-        w.WriteStartElement("offsets");
+        var listEl = doc.CreateElement("offsets");
         for (int i = 0; i < bodyOffsets.Count; i++)
         {
             var bo = bodyOffsets[i];
             if (bo?.bodyType == null) continue;
-            w.WriteStartElement("li");
-            AgsExportUtil.WriteElement(w, "bodyType", bo.bodyType.defName);
+            var bodyEl = doc.CreateElement("li");
+            AppendTextElement(doc, bodyEl, "bodyType", bo.bodyType.defName);
             if (bo.rotation != 0)
-                AgsExportUtil.WriteElement(w, "rotation", bo.rotation.ToString(CultureInfo.InvariantCulture));
+                AppendTextElement(doc, bodyEl, "rotation", bo.rotation.ToString(CultureInfo.InvariantCulture));
             if (bo.offset != Vector3.zero)
-                AgsExportUtil.WriteElement(w, "offset", AgsExportUtil.Vec3ToString(bo.offset));
+                AppendTextElement(doc, bodyEl, "offset", AgsExportUtil.Vec3ToString(bo.offset));
             if (bo.scale != Vector3.one)
-                AgsExportUtil.WriteElement(w, "scale", AgsExportUtil.Vec3ToString(bo.scale));
-            w.WriteEndElement();
+                AppendTextElement(doc, bodyEl, "scale", AgsExportUtil.Vec3ToString(bo.scale));
+            listEl.AppendChild(bodyEl);
         }
-        w.WriteEndElement();
+        entryEl.AppendChild(listEl);
 
-        w.WriteEndElement();
-        w.WriteEndElement();
-        w.WriteEndElement();
+        offsetsEl.AppendChild(entryEl);
+        defEl.AppendChild(offsetsEl);
+        return defEl;
     }
 
-    private static void WriteStagePackageXml(AgsModel.Project project, ExportPlan plan, string variantId, int stageIndex, string fullPath)
+    private static void WriteStagePackageXml(AgsModel.Project project, ExportPlan plan, int stageIndex, string fullPath)
     {
         var stage = project?.stages != null && stageIndex >= 0 && stageIndex < project.stages.Count ? project.stages[stageIndex] : null;
         int durationTicks = Mathf.Max(1, stage?.durationTicks ?? 1);
@@ -213,11 +277,11 @@ public sealed partial class AgsExport
                 var role = project.roles[ri];
                 if (role == null) continue;
                 string roleKey = role.roleKey ?? $"role_{ri + 1}";
-                var clip = GetClip(stage, variantId, roleKey);
+                var clip = GetClip(stage, roleKey);
                 if (clip == null)
                     clip = new AgsModel.ClipSpec { lengthTicks = durationTicks, tracks = new List<AgsModel.Track>() };
 
-                string animDefName = AgsExportUtil.MakeAnimationDefName(plan.projectKey, roleKey, stageIndex, variantId);
+                string animDefName = AgsExportUtil.MakeAnimationDefName(plan.baseDefName, project.label, roleKey, stageIndex);
                 WriteAnimationDefElement(w, clip, animDefName, durationTicks);
             }
 
@@ -294,7 +358,6 @@ public sealed partial class AgsExport
         w.WriteEndElement();
     }
 
-
     private static string Rot4ToExportString(Rot4 rot)
     {
         switch (rot.AsInt)
@@ -305,11 +368,6 @@ public sealed partial class AgsExport
             case 3: return "West";
             default: return "South";
         }
-    }
-
-    public static string VariantIdToCode(string variantId)
-    {
-        return AgsExportUtil.MakeVariantCode(variantId);
     }
 
     private static string ResolveExportRootDir()
@@ -355,6 +413,7 @@ public sealed partial class AgsExport
         plan.allTargetFiles.Clear();
         plan.existingTargets.Clear();
         plan.stageTargets.Clear();
+        plan.staleStageFiles.Clear();
 
         if (project == null)
             return;
@@ -362,23 +421,31 @@ public sealed partial class AgsExport
         AddTarget(plan, plan.groupFilePath);
         AddTarget(plan, plan.offsetFilePath);
 
-        if (plan.variantIds.NullOrEmpty())
+        for (int si = 0; si < project.stages.Count; si++)
+        {
+            string filePath = Path.Combine(plan.stagesDir, AgsExportUtil.MakeStageFileName(plan.baseDefName, si, plan.variationLabel));
+            plan.stageTargets.Add(new StageTarget
+            {
+                stageIndex = si,
+                filePath = filePath
+            });
+            AddTarget(plan, filePath);
+        }
+
+        if (!Directory.Exists(plan.stagesDir))
             return;
 
-        for (int vi = 0; vi < plan.variantIds.Count; vi++)
+        var liveTargets = new HashSet<string>(plan.stageTargets.Select(x => x.filePath), StringComparer.OrdinalIgnoreCase);
+        foreach (string existing in Directory.GetFiles(plan.stagesDir, "*.xml", SearchOption.TopDirectoryOnly))
         {
-            string variantId = plan.variantIds[vi];
-            for (int si = 0; si < project.stages.Count; si++)
-            {
-                string filePath = Path.Combine(plan.stagesDir, AgsExportUtil.MakeStageFileName(plan.projectKey, si, variantId));
-                plan.stageTargets.Add(new StageTarget
-                {
-                    variantId = variantId,
-                    stageIndex = si,
-                    filePath = filePath
-                });
-                AddTarget(plan, filePath);
-            }
+            string fileName = Path.GetFileName(existing);
+            if (!AgsExportUtil.IsStageFileForVariation(fileName, plan.baseDefName, plan.variationLabel))
+                continue;
+            if (liveTargets.Contains(existing))
+                continue;
+
+            plan.staleStageFiles.Add(existing);
+            AddTarget(plan, existing);
         }
     }
 
@@ -389,5 +456,110 @@ public sealed partial class AgsExport
             plan.allTargetFiles.Add(path);
         if (File.Exists(path) && !plan.existingTargets.Contains(path))
             plan.existingTargets.Add(path);
+    }
+
+    private static XmlDocument LoadOrCreateDefsDocument(string path)
+    {
+        if (!path.NullOrEmpty() && File.Exists(path))
+            return LoadDefsDocument(path);
+
+        var doc = new XmlDocument();
+        doc.AppendChild(doc.CreateXmlDeclaration("1.0", "utf-8", null));
+        doc.AppendChild(doc.CreateElement("Defs"));
+        return doc;
+    }
+
+    private static XmlDocument LoadDefsDocument(string path)
+    {
+        var doc = new XmlDocument();
+        doc.PreserveWhitespace = false;
+        doc.Load(path);
+        if (doc.DocumentElement == null)
+            doc.AppendChild(doc.CreateElement("Defs"));
+        return doc;
+    }
+
+    private static void SaveXmlDocumentAtomic(string fullPath, XmlDocument doc)
+    {
+        AgsExportUtil.WriteXmlAtomic(fullPath, w => doc.WriteTo(w));
+    }
+
+    private static XmlElement FindDefElement(XmlElement root, string defName)
+    {
+        if (root == null || defName.NullOrEmpty())
+            return null;
+
+        foreach (XmlNode node in root.ChildNodes)
+        {
+            if (node is not XmlElement el)
+                continue;
+            if (string.Equals(GetChildText(el, "defName"), defName, StringComparison.Ordinal))
+                return el;
+        }
+
+        return null;
+    }
+
+    private static void RemoveDefElement(XmlElement root, string defName)
+    {
+        var el = FindDefElement(root, defName);
+        if (el != null)
+            root.RemoveChild(el);
+    }
+
+    private static void RemoveDefElements(XmlElement root, IEnumerable<string> defNames)
+    {
+        if (root == null || defNames == null)
+            return;
+
+        foreach (string defName in defNames)
+        {
+            if (defName.NullOrEmpty())
+                continue;
+            RemoveDefElement(root, defName);
+        }
+    }
+
+    private static string GetChildText(XmlElement parent, string childName)
+    {
+        if (parent == null || childName.NullOrEmpty())
+            return null;
+        foreach (XmlNode node in parent.ChildNodes)
+        {
+            if (node is XmlElement child && child.Name == childName)
+                return child.InnerText;
+        }
+        return null;
+    }
+
+    private static IEnumerable<string> ReadListValues(XmlElement parent, string listName)
+    {
+        if (parent == null || listName.NullOrEmpty())
+            yield break;
+
+        XmlElement listEl = null;
+        foreach (XmlNode node in parent.ChildNodes)
+        {
+            if (node is XmlElement child && child.Name == listName)
+            {
+                listEl = child;
+                break;
+            }
+        }
+        if (listEl == null)
+            yield break;
+
+        foreach (XmlNode node in listEl.ChildNodes)
+        {
+            if (node is XmlElement li && li.Name == "li" && !li.InnerText.NullOrEmpty())
+                yield return li.InnerText;
+        }
+    }
+
+    private static void AppendTextElement(XmlDocument doc, XmlElement parent, string name, string value)
+    {
+        var el = doc.CreateElement(name);
+        el.InnerText = value ?? string.Empty;
+        parent.AppendChild(el);
     }
 }

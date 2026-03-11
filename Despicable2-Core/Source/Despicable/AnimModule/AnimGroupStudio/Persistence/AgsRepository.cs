@@ -70,7 +70,8 @@ public sealed class AgsRepository
         var p = new AgsModel.Project
         {
             projectId = System.Guid.NewGuid().ToString("N"),
-            label = "New Anim Group",
+            label = "",
+            groupTags = new List<string>(),
             export = new AgsModel.ExportSpec { baseDefName = "AGD_NewGroup" }
         };
 

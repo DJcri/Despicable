@@ -25,6 +25,11 @@ public sealed class ExtendedAnimatorRuntimeState
     public bool usesExtendedAnimationFeatures;
     public AnimationDef lastSetAnimation;
 
+    // Runtime-owned facial trigger scan state. This must stay per animator/pawn
+    // so pair animations do not share a single trigger cursor.
+    public int lastCheckedFacialTick = -1;
+    public AnimationDef lastCheckedFacialAnimation;
+
 
     public void ExposeData()
     {
@@ -53,6 +58,9 @@ public sealed class ExtendedAnimatorRuntimeState
         offset = Vector3.zero;
 
         usesExtendedAnimationFeatures = false;
+        lastSetAnimation = null;
+        lastCheckedFacialTick = -1;
+        lastCheckedFacialAnimation = null;
 
         loopIndex?.Clear();
         animQueue?.Clear();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace Despicable.AnimModule.AnimGroupStudio.Model;
@@ -80,6 +81,50 @@ public static partial class AgsModel
                 if (!offsetsByRoleKey.ContainsKey(r.roleKey))
                     offsetsByRoleKey[r.roleKey] = new Dictionary<string, BodyTypeOffset>();
             }
+        }
+
+        private void NormalizeMetadata()
+        {
+            if (groupTags == null)
+                groupTags = new List<string>();
+
+            if (groupTags.Count == 0 && stages != null)
+            {
+                var migrated = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                for (int si = 0; si < stages.Count; si++)
+                {
+                    var stage = stages[si];
+                    if (stage?.stageTags == null)
+                        continue;
+
+                    for (int ti = 0; ti < stage.stageTags.Count; ti++)
+                    {
+                        string tag = stage.stageTags[ti]?.Trim();
+                        if (!tag.NullOrEmpty())
+                            migrated.Add(tag);
+                    }
+                }
+
+                if (migrated.Count > 0)
+                    groupTags = migrated.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList();
+            }
+
+            if (groupTags.Count > 0)
+            {
+                var normalized = new List<string>();
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < groupTags.Count; i++)
+                {
+                    string tag = groupTags[i]?.Trim();
+                    if (tag.NullOrEmpty() || !seen.Add(tag))
+                        continue;
+                    normalized.Add(tag);
+                }
+                groupTags = normalized;
+            }
+
+            if (export == null)
+                export = new ExportSpec();
         }
 
         private string FindFirstRoleKey(RoleGenderReq req)

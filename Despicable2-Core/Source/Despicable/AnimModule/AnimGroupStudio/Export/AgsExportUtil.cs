@@ -8,12 +8,17 @@ using Verse;
 namespace Despicable.AnimModule.AnimGroupStudio.Export;
 internal static class AgsExportUtil
 {
-    public static string MakeVariationDefName(string baseDefName, string code)
+    public static string MakeVariationDefName(string baseDefName, string label)
     {
-        if (baseDefName.NullOrEmpty()) baseDefName = "AGD_Export";
-        code = NormalizeTag(code);
-        if (code == "") return baseDefName;
-        return baseDefName + "_" + code;
+        string safeBase = MakeSafeDefName(baseDefName);
+        string code = MakeVariationCode(label);
+        if (code == "") return safeBase;
+        return safeBase + "_" + code;
+    }
+
+    public static string MakeVariationCode(string label)
+    {
+        return NormalizeTag(label);
     }
 
     public static string NormalizeTag(string s)
@@ -70,55 +75,68 @@ internal static class AgsExportUtil
         return MakeSafeFileName(MakeSafeDefName(baseDefName));
     }
 
-    public static string MakeGroupPackageFileName(string projectKey) => $"GroupAnimation_{MakeExportProjectKey(projectKey)}.xml";
+    public static string MakeGroupPackageFileName(string familyKey) => $"GroupAnimation_{MakeExportProjectKey(familyKey)}.xml";
 
-    public static string MakeOffsetPackageFileName(string projectKey) => $"OffsetDefs_{MakeExportProjectKey(projectKey)}.xml";
+    public static string MakeOffsetPackageFileName(string familyKey) => $"OffsetDefs_{MakeExportProjectKey(familyKey)}.xml";
 
-    public static string MakeVariantCode(string variantId)
+    public static string MakeGroupDefName(string baseDefName, string label)
     {
-        if (variantId.NullOrEmpty() || variantId == "Base")
-            return "";
-        return NormalizeTag(variantId);
+        return MakeVariationDefName(baseDefName, label);
     }
 
-    public static string MakeGroupDefName(string projectKey, string variantId)
+    public static string MakeRoleDefName(string baseDefName, string label, string roleKey)
     {
-        string code = MakeVariantCode(variantId);
-        if (code == "") return MakeSafeDefName(projectKey);
-        return MakeSafeDefName($"{projectKey}_{code}");
-    }
-
-    public static string MakeRoleDefName(string projectKey, string variantId, string roleKey)
-    {
-        string safeProject = MakeSafeDefName(projectKey);
+        string safeVariation = MakeVariationDefName(baseDefName, label);
         string safeRole = MakeSafeDefName(roleKey);
-        string code = MakeVariantCode(variantId);
-        if (code == "")
-            return $"Role_{safeProject}_{safeRole}";
-        return $"Role_{safeProject}_{code}_{safeRole}";
+        return $"Role_{safeVariation}_{safeRole}";
     }
 
-    public static string MakeOffsetDefName(string projectKey, string roleKey)
+    public static string MakeOffsetDefName(string baseDefName, string label, string roleKey)
     {
-        return $"Offset_{MakeSafeDefName(projectKey)}_{MakeSafeDefName(roleKey)}";
+        string safeVariation = MakeVariationDefName(baseDefName, label);
+        string safeRole = MakeSafeDefName(roleKey);
+        return $"Offset_{safeVariation}_{safeRole}";
     }
 
-    public static string MakeStageToken(int stageIndex, string variantId)
+    public static string MakeStageToken(int stageIndex, string label)
     {
         string stageToken = $"Stage{Math.Max(1, stageIndex + 1)}";
-        string code = MakeVariantCode(variantId);
+        string code = MakeVariationCode(label);
         if (code == "") return stageToken;
         return $"{stageToken}_{code}";
     }
 
-    public static string MakeStageFileName(string projectKey, int stageIndex, string variantId)
+    public static string MakeStageFileName(string baseDefName, int stageIndex, string label)
     {
-        return $"{MakeExportProjectKey(projectKey)}_{MakeStageToken(stageIndex, variantId)}.xml";
+        return $"{MakeExportProjectKey(baseDefName)}_{MakeStageToken(stageIndex, label)}.xml";
     }
 
-    public static string MakeAnimationDefName(string projectKey, string roleKey, int stageIndex, string variantId)
+    public static bool IsStageFileForVariation(string fileName, string baseDefName, string label)
     {
-        return MakeSafeDefName($"{projectKey}_{MakeSafeDefName(roleKey)}_{MakeStageToken(stageIndex, variantId)}");
+        if (fileName.NullOrEmpty())
+            return false;
+
+        string stem = Path.GetFileNameWithoutExtension(fileName);
+        string prefix = MakeExportProjectKey(baseDefName) + "_";
+        if (!stem.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        string tail = stem.Substring(prefix.Length);
+        if (!tail.StartsWith("Stage", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        string code = MakeVariationCode(label);
+        int us = tail.IndexOf('_');
+        if (code == "")
+            return us < 0;
+        if (us < 0 || us >= tail.Length - 1)
+            return false;
+        return string.Equals(tail.Substring(us + 1), code, StringComparison.Ordinal);
+    }
+
+    public static string MakeAnimationDefName(string baseDefName, string label, string roleKey, int stageIndex)
+    {
+        return MakeSafeDefName($"{MakeVariationDefName(baseDefName, label)}_{MakeSafeDefName(roleKey)}_{MakeStageToken(stageIndex, label)}");
     }
 
     public static bool IsFinite(float f) => !float.IsNaN(f) && !float.IsInfinity(f);
