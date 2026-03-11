@@ -18,13 +18,6 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
 {
     public partial class Dialog_AnimGroupStudio
     {
-        private void UpdateAuthorPreview(float deltaTime)
-        {
-            preview.Update(deltaTime);
-// Guardrail-Reason: Preview lifecycle and compilation stay co-located while author-preview state remains a single seam.
-            authorPreviewPlaying = preview.IsPlaying;
-            authorPreviewTick = preview.CurrentTick;
-        }
         private void StopAuthorPreview(bool resetTick)
         {
             preview.Stop();
@@ -32,127 +25,14 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
             authorPreviewTickAcc = 0f;
             if (resetTick)
             {
-                authorPreviewTick = 0;
-                preview.SelectedStageIndex = authorStageIndex;
-                preview.ShowSelectedStageAtTick(0);
+                ShowAuthorStageAtTick(authorStageIndex, 0, seekIfPlaying: false);
             }
             else
             {
                 authorPreviewTick = preview.CurrentTick;
             }
         }
-        private void EnsureAuthorPreviewSlots()
-        {
-            EnsureRoles(project);
-            EnsureAuthorRoleKeyValid(project);
 
-            // Track which keys are still used.
-            var alive = new HashSet<string>();
-            var ordered = new List<AuthorPreviewSlot>();
-
-            for (int i = 0; i < project.roles.Count; i++)
-            {
-                var r = project.roles[i];
-                if (r == null || r.roleKey.NullOrEmpty()) continue;
-
-                alive.Add(r.roleKey);
-
-                if (!authorSlotsByKey.TryGetValue(r.roleKey, out var slot) || slot == null)
-                {
-                    slot = new AuthorPreviewSlot
-                    {
-                        RoleKey = r.roleKey,
-                        Label = r.displayName ?? r.roleKey,
-                        GenderReq = r.genderReq,
-                        Renderer = new WorkshopPreviewRenderer(360, 520)
-                    };
-                    authorSlotsByKey[r.roleKey] = slot;
-                }
-
-                slot.RoleKey = r.roleKey;
-                slot.Label = r.displayName ?? r.roleKey;
-                slot.GenderReq = r.genderReq;
-
-                int g = r.genderReq == AgsModel.RoleGenderReq.Female ? 1 : 0;
-                string bt = r.previewDummyBodyTypeDefName.NullOrEmpty() ? (r.genderReq == AgsModel.RoleGenderReq.Female ? "Female" : "Male") : r.previewDummyBodyTypeDefName;
-
-                slot.Pawn = authorPawnPool.GetOrCreate(r.roleKey, g, bt);
-                slot.Animator = slot.Pawn?.TryGetComp<CompExtendedAnimator>();
-
-                ordered.Add(slot);
-            }
-
-            // Dispose and remove stale slots.
-            var toRemove = new List<string>();
-            foreach (var kv in authorSlotsByKey)
-            {
-                if (kv.Key.NullOrEmpty()) continue;
-                if (!alive.Contains(kv.Key)) toRemove.Add(kv.Key);
-            }
-            for (int i = 0; i < toRemove.Count; i++)
-            {
-                string k = toRemove[i];
-                try { authorSlotsByKey[k]?.Renderer?.Dispose(); } catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:5", "Dialog_AnimGroupStudio ignored a non-fatal editor exception.", ex); }
-                authorSlotsByKey.Remove(k);
-            }
-
-            authorSlots.Clear();
-            authorSlots.AddRange(ordered);
-
-            // Destroy any generated preview pawns for roles that no longer exist.
-            authorPawnPool.ClearUnused(alive);
-        }
-        private void EnsureAuthorCompiled(AgsModel.StageSpec stage)
-        {
-            int hash = ComputeStageHash(stage);
-            if (hash == authorPreviewStageHash)
-            {
-                bool allReady = true;
-                for (int i = 0; i < authorSlots.Count; i++)
-                {
-                    if (authorSlots[i]?.CompiledAnim == null) { allReady = false; break; }
-                }
-                if (allReady) return;
-            }
-
-            authorPreviewStageHash = hash;
-
-            EnsureRoles(project);
-            EnsureAuthorRoleKeyValid(project);
-
-            // Compile + apply per role.
-            for (int i = 0; i < project.roles.Count; i++)
-            {
-                var r = project.roles[i];
-                if (r == null || r.roleKey.NullOrEmpty()) continue;
-
-                var clip = GetClip(stage, r.roleKey);
-                EnsureClip(clip, stage.durationTicks);
-
-                if (!authorSlotsByKey.TryGetValue(r.roleKey, out var slot) || slot == null) continue;
-
-                string safeKey = r.roleKey.Replace(' ', '_');
-                slot.CompiledAnim = AgsCompile.CompileClipToAnimationDef(clip, $"AGS_{project?.export?.baseDefName}_S{stage.stageIndex}_{safeKey}", stage.durationTicks);
-
-                // IMPORTANT: the workshop preview uses portrait:false rendering so we can keep roles in a shared
-                // scene. ExtendedKeyframe behaviors (facing/visibility/offset interpolation) are gated behind
-                // CompExtendedAnimator.hasAnimPlaying for non-portrait renders.
-                // So, for authoring preview we drive the compiled animation through the animator comp rather than
-                // SetAnimation() directly; this makes author playback behave like existing-def playback.
-                // ALSO IMPORTANT:
-                // SetAnimation() captures a start tick from PawnRenderTree.AnimationTick. We need that start tick
-                // to live in the workshop tick domain (not vanilla TicksGame), otherwise sampling at
-                // WorkshopRenderContext.Tick will appear frozen.
-                try
-                {
-                    using (new WorkshopRenderContext.Scope(active: true, tick: 0))
-                    {
-                        slot?.Pawn?.Drawer?.renderer?.SetAnimation(slot.CompiledAnim);
-                        }
-                }
-                catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:6", "Dialog_AnimGroupStudio ignored a non-fatal editor exception.", ex); }
-            }
-        }
         private static int HashCombine(int hash, int value)
         {
             unchecked
@@ -177,7 +57,6 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                         h = HashCombine(h, variant?.variantId?.GetHashCode() ?? 0);
                         if (variant?.clips != null)
                         {
-                            // Stable ordering for hash.
                             var ordered = variant.clips.Where(c => c != null && !c.roleKey.NullOrEmpty())
                                 .OrderBy(c => c.roleKey, StringComparer.Ordinal).ToList();
                             for (int c = 0; c < ordered.Count; c++)
@@ -192,6 +71,7 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                 return h;
             }
         }
+
         private static int HashClip(int h, AgsModel.ClipSpec clip)
         {
             unchecked
@@ -214,7 +94,6 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                         h = HashCombine(h, key.angle.GetHashCode());
                         h = HashCombine(h, key.scale.GetHashCode());
                         h = HashCombine(h, key.graphicState?.GetHashCode() ?? 0);
-                        // KeySpec.variant is int (-1 means unset).
                         h = HashCombine(h, key.variant == -1 ? 0 : key.variant.GetHashCode());
                         h = HashCombine(h, key.layerBias);
                         h = HashCombine(h, key.soundDefName?.GetHashCode() ?? 0);
@@ -229,25 +108,79 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                 return h;
             }
         }
-        private void EnsureAuthorPreviewSource()
+
+        private void RefreshAuthorPreviewIfNeeded()
         {
             if (project == null)
             {
                 preview.ConfigureForRuntime("Author Preview", new List<AgsPreviewSession.RuntimeRole>(), new List<AgsPreviewSession.RuntimeStage>());
                 authorPreviewPlaying = false;
                 authorPreviewTick = 0;
+                authorRuntime.StructureDirty = false;
+                authorRuntime.SelectionDirty = false;
+                authorRuntime.DirtyStageIndices.Clear();
+                authorRuntime.CompiledStageHashes.Clear();
+                authorPreviewSourceHash = int.MinValue;
                 return;
             }
 
             EnsureRoles(project);
             EnsureAuthorRoleKeyValid(project);
+            EnsureStages(project);
 
-            int stageTotal = project.stages != null ? project.stages.Count : 0;
+            int stageTotal = project.stages?.Count ?? 0;
+            bool structureChanged = SyncAuthorPreviewSlots(stageTotal);
+            structureChanged |= EnsureCompiledStageHashCacheSize(stageTotal);
+            if (preview.StageCount != stageTotal)
+                structureChanged = true;
+            if (structureChanged)
+                authorRuntime.StructureDirty = true;
+
+            int sourceHash = ComputeAuthorPreviewSourceHash();
+            bool sourceChanged = sourceHash != authorPreviewSourceHash;
+            if (sourceChanged)
+            {
+                DetectDirtyAuthorStages();
+                if (authorRuntime.DirtyStageIndices.Count == 0 && authorPreviewSourceHash == int.MinValue)
+                {
+                    for (int s = 0; s < stageTotal; s++)
+                        authorRuntime.DirtyStageIndices.Add(s);
+                }
+            }
+
+            bool needsRuntimeBinding = authorRuntime.StructureDirty || authorRuntime.DirtyStageIndices.Count > 0 || sourceChanged;
+            if (needsRuntimeBinding)
+            {
+                CompileDirtyAuthorStages(stageTotal, authorRuntime.StructureDirty);
+                ApplyAuthorPreviewBinding(stageTotal);
+                preview.SetSpeed(authorPreviewSpeed);
+                authorRuntime.StructureDirty = false;
+                authorRuntime.DirtyStageIndices.Clear();
+                authorPreviewSourceHash = sourceHash;
+                authorRuntime.SelectionDirty = true;
+            }
+
+            if (authorRuntime.SelectionDirty || needsRuntimeBinding || !preview.IsPlaying)
+                SyncAuthorPreviewSelection();
+
+            // While playing, mirror the live stage index back onto the author selection so the
+            // stage list highlights whichever stage is currently animating. We update the field
+            // directly — NOT through ShowAuthorStageAtTick — to avoid seeking/interrupting playback.
+            if (preview.IsPlaying)
+                authorStageIndex = preview.CurrentStageIndex;
+
+            authorPreviewPlaying = preview.IsPlaying;
+            authorPreviewTick = preview.CurrentTick;
+        }
+
+        private int ComputeAuthorPreviewSourceHash()
+        {
+            int stageTotal = project?.stages?.Count ?? 0;
             int hash = 17;
             unchecked
             {
                 hash = HashCombine(hash, stageTotal);
-                if (project.roles != null)
+                if (project?.roles != null)
                 {
                     for (int i = 0; i < project.roles.Count; i++)
                     {
@@ -258,41 +191,46 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
                         hash = HashCombine(hash, role?.previewDummyBodyTypeDefName?.GetHashCode() ?? 0);
                     }
                 }
-                if (project.stages != null)
+                if (project?.stages != null)
                 {
                     for (int i = 0; i < project.stages.Count; i++)
                         hash = HashCombine(hash, ComputeStageHash(project.stages[i]));
                 }
             }
+            return hash;
+        }
 
-            bool needsRebuild = hash != authorPreviewStageHash || preview.StageCount != stageTotal;
-
+        private bool SyncAuthorPreviewSlots(int stageTotal)
+        {
+            bool changed = false;
             var alive = new HashSet<string>();
-            if (project.roles != null)
+
+            if (project?.roles != null)
             {
                 for (int i = 0; i < project.roles.Count; i++)
                 {
-                    var r = project.roles[i];
-                    if (r == null || r.roleKey.NullOrEmpty()) continue;
-                    alive.Add(r.roleKey);
+                    var role = project.roles[i];
+                    if (role == null || role.roleKey.NullOrEmpty())
+                        continue;
 
-                    if (!authorSlotsByKey.TryGetValue(r.roleKey, out var slot) || slot == null)
+                    alive.Add(role.roleKey);
+                    if (!authorSlotsByKey.TryGetValue(role.roleKey, out var slot) || slot == null)
                     {
                         slot = new AuthorPreviewSlot();
-                        authorSlotsByKey[r.roleKey] = slot;
-                        needsRebuild = true;
+                        authorSlotsByKey[role.roleKey] = slot;
+                        changed = true;
                     }
 
-                    slot.RoleKey = r.roleKey;
-                    slot.Label = r.displayName ?? r.roleKey;
-                    slot.GenderReq = r.genderReq;
+                    slot.RoleKey = role.roleKey;
+                    slot.Label = role.displayName ?? role.roleKey;
+                    slot.GenderReq = role.genderReq;
                     if (slot.CompiledByStage == null)
-                    {
                         slot.CompiledByStage = new List<AnimationDef>();
-                        needsRebuild = true;
-                    }
                     if (slot.CompiledByStage.Count != stageTotal)
-                        needsRebuild = true;
+                    {
+                        ResizeCompiledStageList(slot, stageTotal);
+                        changed = true;
+                    }
                 }
             }
 
@@ -300,113 +238,225 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI
             for (int i = 0; i < staleKeys.Count; i++)
             {
                 authorSlotsByKey.Remove(staleKeys[i]);
-                needsRebuild = true;
+                changed = true;
+            }
+
+            var orderedSlots = new List<AuthorPreviewSlot>();
+            if (project?.roles != null)
+            {
+                for (int i = 0; i < project.roles.Count; i++)
+                {
+                    var role = project.roles[i];
+                    if (role == null || role.roleKey.NullOrEmpty())
+                        continue;
+                    if (authorSlotsByKey.TryGetValue(role.roleKey, out var slot) && slot != null)
+                        orderedSlots.Add(slot);
+                }
+            }
+
+            if (authorSlots.Count != orderedSlots.Count)
+                changed = true;
+            else
+            {
+                for (int i = 0; i < orderedSlots.Count; i++)
+                {
+                    if (!ReferenceEquals(authorSlots[i], orderedSlots[i]))
+                    {
+                        changed = true;
+                        break;
+                    }
+                }
             }
 
             authorSlots.Clear();
-            if (project.roles != null)
-            {
-                for (int i = 0; i < project.roles.Count; i++)
-                {
-                    var r = project.roles[i];
-                    if (r == null || r.roleKey.NullOrEmpty()) continue;
-                    if (authorSlotsByKey.TryGetValue(r.roleKey, out var slot) && slot != null)
-                        authorSlots.Add(slot);
-                }
-            }
+            authorSlots.AddRange(orderedSlots);
+            authorPawnPool.ClearUnused(alive);
+            return changed;
+        }
 
-            if (needsRebuild)
+        private static void ResizeCompiledStageList(AuthorPreviewSlot slot, int stageTotal)
+        {
+            if (slot == null)
+                return;
+            if (slot.CompiledByStage == null)
+                slot.CompiledByStage = new List<AnimationDef>();
+            while (slot.CompiledByStage.Count < stageTotal)
+                slot.CompiledByStage.Add(null);
+            while (slot.CompiledByStage.Count > stageTotal)
+                slot.CompiledByStage.RemoveAt(slot.CompiledByStage.Count - 1);
+        }
+
+        private bool EnsureCompiledStageHashCacheSize(int stageTotal)
+        {
+            bool changed = false;
+            while (authorRuntime.CompiledStageHashes.Count < stageTotal)
+            {
+                authorRuntime.CompiledStageHashes.Add(int.MinValue);
+                changed = true;
+            }
+            while (authorRuntime.CompiledStageHashes.Count > stageTotal)
+            {
+                authorRuntime.CompiledStageHashes.RemoveAt(authorRuntime.CompiledStageHashes.Count - 1);
+                changed = true;
+            }
+            return changed;
+        }
+
+        private void DetectDirtyAuthorStages()
+        {
+            int stageTotal = project?.stages?.Count ?? 0;
+            EnsureCompiledStageHashCacheSize(stageTotal);
+            for (int s = 0; s < stageTotal; s++)
+            {
+                int stageHash = ComputeStageHash(project.stages[s]);
+                if (authorRuntime.CompiledStageHashes[s] != stageHash)
+                    authorRuntime.DirtyStageIndices.Add(s);
+            }
+        }
+
+        private void CompileDirtyAuthorStages(int stageTotal, bool fullReset)
+        {
+            if (fullReset)
             {
                 for (int i = 0; i < authorSlots.Count; i++)
-                {
-                    var slot = authorSlots[i];
-                    slot.CompiledByStage.Clear();
-                    for (int s = 0; s < stageTotal; s++)
-                        slot.CompiledByStage.Add(null);
-                }
-
-                for (int s = 0; s < stageTotal; s++)
-                {
-                    var st = project.stages[s];
-                    if (st == null) continue;
-
-                    for (int r = 0; r < authorSlots.Count; r++)
-                    {
-                        var slot = authorSlots[r];
-                        var clip = GetClip(st, slot.RoleKey);
-                        EnsureClip(clip, st.durationTicks);
-
-                        string safeKey = (slot.RoleKey ?? ("Role" + r)).Replace(' ', '_');
-                        slot.CompiledByStage[s] = AgsCompile.CompileClipToAnimationDef(clip, "AGS_" + (project?.export?.baseDefName ?? "Preview") + "_S" + st.stageIndex + "_" + safeKey, st.durationTicks);
-                    }
-                }
-
-                var runtimeRoles = new List<AgsPreviewSession.RuntimeRole>();
-                for (int i = 0; i < project.roles.Count; i++)
-                {
-                    var r = project.roles[i];
-                    if (r == null || r.roleKey.NullOrEmpty()) continue;
-
-                    int gender = 1;
-                    if (r.genderReq == AgsModel.RoleGenderReq.Female) gender = 2;
-                    else if (r.genderReq == AgsModel.RoleGenderReq.Male) gender = 1;
-                    else gender = 1;
-
-                    string bodyType = r.previewDummyBodyTypeDefName;
-                    if (bodyType.NullOrEmpty())
-                        bodyType = gender == 2 ? "Female" : "Male";
-
-                    runtimeRoles.Add(new AgsPreviewSession.RuntimeRole
-                    {
-                        Key = r.roleKey,
-                        Label = r.displayName ?? r.roleKey,
-                        Gender = gender,
-                        BodyTypeDefName = bodyType
-                    });
-                }
-
-                var runtimeStages = new List<AgsPreviewSession.RuntimeStage>();
-                for (int s = 0; s < stageTotal; s++)
-                {
-                    var st = project.stages[s];
-                    var runtimeStage = new AgsPreviewSession.RuntimeStage
-                    {
-                        DurationTicks = Mathf.Max(1, st?.durationTicks ?? 60),
-                        RepeatCount = Mathf.Max(1, st?.repeatCount ?? 1),
-                        AnimationsByRole = new List<AnimationDef>()
-                    };
-
-                    for (int r = 0; r < authorSlots.Count; r++)
-                        runtimeStage.AnimationsByRole.Add(authorSlots[r]?.CompiledByStage != null && s < authorSlots[r].CompiledByStage.Count ? authorSlots[r].CompiledByStage[s] : null);
-
-                    runtimeStages.Add(runtimeStage);
-                }
-
-                preview.ConfigureForRuntime(project?.label ?? "Author Preview", runtimeRoles, runtimeStages);
-                preview.SetSpeed(authorPreviewSpeed);
-                authorPreviewStageHash = hash;
+                    ResizeCompiledStageList(authorSlots[i], stageTotal);
             }
 
-            if (stageTotal > 0)
+            var dirty = authorRuntime.DirtyStageIndices.OrderBy(i => i).ToList();
+            for (int di = 0; di < dirty.Count; di++)
             {
-                authorStageIndex = Mathf.Clamp(authorStageIndex, 0, stageTotal - 1);
-                preview.SelectedStageIndex = authorStageIndex;
-                if (!preview.IsPlaying)
+                int stageIndex = dirty[di];
+                if (stageIndex < 0 || stageIndex >= stageTotal)
+                    continue;
+
+                var stage = project.stages[stageIndex];
+                if (stage == null)
+                    continue;
+
+                int compiledStageHash = ComputeStageHash(stage);
+                for (int r = 0; r < authorSlots.Count; r++)
                 {
-                    var stage = GetStage(project, authorStageIndex);
-                    int tick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage?.durationTicks ?? 1));
-                    preview.ShowSelectedStageAtTick(tick);
+                    var slot = authorSlots[r];
+                    if (slot == null)
+                        continue;
+
+                    ResizeCompiledStageList(slot, stageTotal);
+                    var clip = GetClip(stage, slot.RoleKey);
+                    EnsureClip(clip, stage.durationTicks);
+                    string safeKey = (slot.RoleKey ?? ("Role" + r)).Replace(' ', '_');
+                    slot.CompiledByStage[stageIndex] = AgsCompile.CompileClipToAnimationDef(clip, "AGS_" + (project?.export?.baseDefName ?? "Preview") + "_S" + stage.stageIndex + "_" + safeKey, stage.durationTicks);
                 }
+
+                authorRuntime.CompiledStageHashes[stageIndex] = compiledStageHash;
             }
-            else
+        }
+
+        private void ApplyAuthorPreviewBinding(int stageTotal)
+        {
+            var runtimeRoles = BuildAuthorRuntimeRoles();
+            var runtimeStages = BuildAuthorRuntimeStages(stageTotal);
+            preview.ConfigureForRuntime(project?.label ?? "Author Preview", runtimeRoles, runtimeStages);
+        }
+
+        private List<AgsPreviewSession.RuntimeRole> BuildAuthorRuntimeRoles()
+        {
+            var runtimeRoles = new List<AgsPreviewSession.RuntimeRole>();
+            if (project?.roles == null)
+                return runtimeRoles;
+
+            for (int i = 0; i < project.roles.Count; i++)
+            {
+                var role = project.roles[i];
+                if (role == null || role.roleKey.NullOrEmpty())
+                    continue;
+
+                int gender = role.genderReq == AgsModel.RoleGenderReq.Female ? 2 : 1;
+                string bodyType = role.previewDummyBodyTypeDefName;
+                if (bodyType.NullOrEmpty())
+                    bodyType = gender == 2 ? "Female" : "Male";
+
+                runtimeRoles.Add(new AgsPreviewSession.RuntimeRole
+                {
+                    Key = role.roleKey,
+                    Label = role.displayName ?? role.roleKey,
+                    Gender = gender,
+                    BodyTypeDefName = bodyType
+                });
+            }
+
+            return runtimeRoles;
+        }
+
+        private List<AgsPreviewSession.RuntimeStage> BuildAuthorRuntimeStages(int stageTotal)
+        {
+            var runtimeStages = new List<AgsPreviewSession.RuntimeStage>();
+            for (int s = 0; s < stageTotal; s++)
+            {
+                var stage = project.stages[s];
+                var runtimeStage = new AgsPreviewSession.RuntimeStage
+                {
+                    DurationTicks = Mathf.Max(1, stage?.durationTicks ?? 60),
+                    RepeatCount = Mathf.Max(1, stage?.repeatCount ?? 1),
+                    AnimationsByRole = new List<AnimationDef>()
+                };
+
+                for (int r = 0; r < authorSlots.Count; r++)
+                {
+                    var slot = authorSlots[r];
+                    AnimationDef anim = null;
+                    if (slot?.CompiledByStage != null && s < slot.CompiledByStage.Count)
+                        anim = slot.CompiledByStage[s];
+                    runtimeStage.AnimationsByRole.Add(anim);
+                }
+
+                runtimeStages.Add(runtimeStage);
+            }
+            return runtimeStages;
+        }
+
+        private void SyncAuthorPreviewSelection()
+        {
+            int stageTotal = project?.stages?.Count ?? 0;
+            if (stageTotal <= 0)
             {
                 authorStageIndex = 0;
                 authorPreviewTick = 0;
+                authorRuntime.SelectionDirty = false;
+                return;
             }
 
-            authorPreviewPlaying = preview.IsPlaying;
-            authorPreviewTick = preview.CurrentTick;
+            authorStageIndex = Mathf.Clamp(authorStageIndex, 0, stageTotal - 1);
+            var stage = GetStage(project, authorStageIndex);
+            int tick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage?.durationTicks ?? 1));
+            ShowAuthorStageAtTick(authorStageIndex, tick, seekIfPlaying: false);
         }
+
+        private void ShowAuthorStageAtTick(int stageIndex, int tick, bool seekIfPlaying = true)
+        {
+            if (project == null || project.stages == null || project.stages.Count == 0)
+            {
+                authorStageIndex = 0;
+                authorPreviewTick = 0;
+                authorRuntime.SelectionDirty = false;
+                return;
+            }
+
+            int clampedStage = Mathf.Clamp(stageIndex, 0, project.stages.Count - 1);
+            var stage = GetStage(project, clampedStage);
+            int clampedTick = Mathf.Clamp(tick, 0, Mathf.Max(1, stage?.durationTicks ?? 1));
+
+            authorStageIndex = clampedStage;
+            authorPreviewTick = clampedTick;
+            preview.SelectedStageIndex = clampedStage;
+
+            if (!preview.IsPlaying)
+                preview.ShowSelectedStageAtTick(clampedTick);
+            else if (seekIfPlaying)
+                preview.Seek(clampedTick);
+
+            authorRuntime.SelectionDirty = false;
+        }
+
 private sealed class NaturalComparer : IComparer<string>
         {
             public int Compare(string a, string b)

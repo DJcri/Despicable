@@ -15,7 +15,20 @@ public partial class Dialog_AnimGroupStudio
 {
     private void TrySaveProjects()
             {
-                try { repo.SaveAll(projects); }
+                QueueAuthorSave();
+            }
+
+    private void FlushQueuedSaveIfNeeded(bool force = false)
+            {
+                if (!force && Event.current != null && Event.current.type != EventType.Repaint)
+                    return;
+                if (!authorRuntime.SavePending)
+                    return;
+                try
+                {
+                    repo.SaveAll(projects);
+                    authorRuntime.SavePending = false;
+                }
                 catch (System.Exception e) { Log.Warning("[Despicable] [AGS] Save failed: " + e.Message); }
             }
 

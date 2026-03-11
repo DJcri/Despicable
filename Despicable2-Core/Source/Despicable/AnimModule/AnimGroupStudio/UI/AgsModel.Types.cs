@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-
 using UnityEngine;
-
 using Verse;
 
 namespace Despicable.AnimModule.AnimGroupStudio.Model;
@@ -96,8 +94,7 @@ public static partial class AgsModel
             Scribe_Collections.Look(ref stageTags, "stageTags", LookMode.Value);
             Scribe_Collections.Look(ref variants, "variants", LookMode.Deep);
 
-            if (repeatCount < 1)
-                repeatCount = 1;
+            if (repeatCount < 1) repeatCount = 1;
             // If loading an older save that used `loop=true` and repeatCount is still default,
             // interpret it as an effectively-infinite repeat.
             if (loop && repeatCount == 1)
@@ -125,44 +122,36 @@ public static partial class AgsModel
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if (clips == null)
-                    clips = new List<RoleClip>();
+                if (clips == null) clips = new List<RoleClip>();
                 if (clips.Count == 0 && (male != null || female != null))
                 {
-                    if (male != null)
-                        clips.Add(new RoleClip { roleKey = "male_1", clip = male });
-                    if (female != null)
-                        clips.Add(new RoleClip { roleKey = "female_1", clip = female });
+                    if (male != null) clips.Add(new RoleClip { roleKey = "male_1", clip = male });
+                    if (female != null) clips.Add(new RoleClip { roleKey = "female_1", clip = female });
                 }
             }
         }
 
         public ClipSpec GetClip(string roleKey)
         {
-            if (clips.NullOrEmpty() || roleKey.NullOrEmpty())
-                return null;
+            if (clips.NullOrEmpty() || roleKey.NullOrEmpty()) return null;
             for (int i = 0; i < clips.Count; i++)
             {
                 var c = clips[i];
-                if (c != null && c.roleKey == roleKey)
-                    return c.clip;
+                if (c != null && c.roleKey == roleKey) return c.clip;
             }
             return null;
         }
 
         public ClipSpec EnsureClip(string roleKey)
         {
-            if (roleKey.NullOrEmpty())
-                return null;
-            if (clips == null)
-                clips = new List<RoleClip>();
+            if (roleKey.NullOrEmpty()) return null;
+            if (clips == null) clips = new List<RoleClip>();
             for (int i = 0; i < clips.Count; i++)
             {
                 var c = clips[i];
                 if (c != null && c.roleKey == roleKey)
                 {
-                    if (c.clip == null)
-                        c.clip = new ClipSpec();
+                    if (c.clip == null) c.clip = new ClipSpec();
                     return c.clip;
                 }
             }
@@ -364,21 +353,18 @@ public static partial class AgsModel
 
         public static bool IsAllCapsLetters(string s)
         {
-            if (string.IsNullOrEmpty(s))
-                return false;
+            if (string.IsNullOrEmpty(s)) return false;
             for (int i = 0; i < s.Length; i++)
             {
                 char c = s[i];
-                if (c < 'A' || c > 'Z')
-                    return false;
+                if (c < 'A' || c > 'Z') return false;
             }
             return true;
         }
 
         private static int TrailingCapsCut(string s)
         {
-            if (string.IsNullOrEmpty(s))
-                return -1;
+            if (string.IsNullOrEmpty(s)) return -1;
 
             // Count trailing caps letters.
             int i = s.Length - 1;
@@ -387,13 +373,10 @@ public static partial class AgsModel
             {
                 caps++;
                 i--;
-                if (caps > 4)
-                    break; // keep conservative
+                if (caps > 4) break; // keep conservative
             }
-            if (caps == 0 || caps > 4)
-                return -1;
-            if (i < 0)
-                return -1;
+            if (caps == 0 || caps > 4) return -1;
+            if (i < 0) return -1;
 
             // Require the character before the caps run to NOT be a cap.
             if (s[i] >= 'A' && s[i] <= 'Z')

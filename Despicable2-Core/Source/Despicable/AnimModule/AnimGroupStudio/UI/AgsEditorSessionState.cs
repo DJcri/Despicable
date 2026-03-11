@@ -24,6 +24,11 @@ internal sealed class AgsEditorSessionState
     public float AuthorInspectorContentHeight;
     public int AuthorRightPaneTab;
 
+    public float AuthorAngleSliderWindowCenter;
+    public int AuthorAngleSliderTrackIndex = -1;
+    public int AuthorAngleSliderKeyTick = int.MinValue;
+    public bool AuthorAngleSliderDragging;
+
     public bool AuthorScaleLock = true;
     public AgsModel.Keyframe AuthorKeyClipboard;
     public readonly Dictionary<string, bool> PropTagCache = new();

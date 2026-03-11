@@ -125,33 +125,51 @@ public struct VStack
     /// Use this for paragraphs and anything that needs to wrap (especially translations).
     /// For panels that should occupy leftover space, use NextFill instead.
     /// </summary>
-    public Rect NextTextBlock(UIContext ctx, string text, float width, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
+    /// <summary>
+    /// Allocate AND draw a wrapped text block with deterministic measurement.
+    /// Width is taken from the provided width parameter.
+    /// </summary>
+    public Rect NextTextBlock(string text, float width, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
     {
-        // Prefer the provided ctx (so callers can be explicit), but fall back to the VStack's ctx.
-        if (ctx == null) ctx = _ctx;
-
         float innerW = Mathf.Max(0f, width - (padding * 2f));
-        float innerH = D2Text.ParagraphHeight(ctx, text, innerW, font);
-
+        float innerH = D2Text.ParagraphHeight(_ctx, text, innerW, font);
         float totalH = innerH + (padding * 2f);
-
-        // Record the allocated rect once here, with measured-height meta for validation.
         string meta = $"mh={innerH:0.##};w={innerW:0.##};pad={padding:0.##};f={font}";
         Rect outer = NextWithMeta(totalH, tag, label, meta);
+        if (_ctx != null && _ctx.Pass == UIPass.Draw)
+        {
+            Rect inner = padding > 0f ? outer.ContractedBy(padding) : outer;
+            D2Text.DrawWrappedLabel(_ctx, inner, text, font, tag, labelForOverlay: label, recordRect: false);
+        }
+        return outer;
+    }
 
+    /// <inheritdoc cref="NextTextBlock(string,float,GameFont,float,string,UIRectTag)"/>
+    [System.Obsolete("Pass ctx is redundant — the VStack already holds it. Use NextTextBlock(text, width, font, ...) instead.")]
+    public Rect NextTextBlock(UIContext ctx, string text, float width, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
+    {
+        if (ctx == null) ctx = _ctx;
+        float innerW = Mathf.Max(0f, width - (padding * 2f));
+        float innerH = D2Text.ParagraphHeight(ctx, text, innerW, font);
+        float totalH = innerH + (padding * 2f);
+        string meta = $"mh={innerH:0.##};w={innerW:0.##};pad={padding:0.##};f={font}";
+        Rect outer = NextWithMeta(totalH, tag, label, meta);
         if (ctx != null && ctx.Pass == UIPass.Draw)
         {
             Rect inner = padding > 0f ? outer.ContractedBy(padding) : outer;
-            // Skip recording here because the allocator already recorded the rect.
             D2Text.DrawWrappedLabel(ctx, inner, text, font, tag, labelForOverlay: label, recordRect: false);
         }
-
         return outer;
     }
 
     /// <summary>
-    /// Overload that uses the VStack's current width.
+    /// Allocate AND draw a wrapped text block using the VStack's current width.
     /// </summary>
+    public Rect NextTextBlock(string text, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
+        => NextTextBlock(text, _bounds.width, font, padding, label, tag);
+
+    /// <inheritdoc cref="NextTextBlock(string,GameFont,float,string,UIRectTag)"/>
+    [System.Obsolete("Pass ctx is redundant — the VStack already holds it. Use NextTextBlock(text, font, ...) instead.")]
     public Rect NextTextBlock(UIContext ctx, string text, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
     {
         float w = _bounds.width;
@@ -161,6 +179,11 @@ public struct VStack
     /// <summary>
     /// TaggedString overload (translation keys / rich strings).
     /// </summary>
+    public Rect NextTextBlock(TaggedString text, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
+        => NextTextBlock(text.ToString(), _bounds.width, font, padding, label, tag);
+
+    /// <inheritdoc cref="NextTextBlock(TaggedString,GameFont,float,string,UIRectTag)"/>
+    [System.Obsolete("Pass ctx is redundant — the VStack already holds it. Use NextTextBlock(text, font, ...) instead.")]
     public Rect NextTextBlock(UIContext ctx, TaggedString text, GameFont font, float padding = 0f, string label = null, UIRectTag tag = UIRectTag.Text_Wrapped)
     {
         float w = _bounds.width;
@@ -173,6 +196,14 @@ public struct VStack
     ///
     /// Use this instead of manually doing "•" + NextTextBlock in a loop.
     /// </summary>
+    /// <summary>
+    /// Allocate and draw a bullet list where each item can wrap.
+    /// </summary>
+    public void NextBulletList(IEnumerable<TaggedString> items, GameFont font = GameFont.Small, float padding = 0f, float bulletIndent = 18f, float bulletGap = 4f, UIRectTag tag = UIRectTag.Text_Bullet, string labelPrefix = "Bullet")
+        => NextBulletList(_ctx, items, font, padding, bulletIndent, bulletGap, tag, labelPrefix);
+
+    /// <inheritdoc cref="NextBulletList(IEnumerable{TaggedString},GameFont,float,float,float,UIRectTag,string)"/>
+    [System.Obsolete("Pass ctx is redundant — the VStack already holds it. Use NextBulletList(items, ...) instead.")]
     public void NextBulletList(UIContext ctx, IEnumerable<TaggedString> items, GameFont font = GameFont.Small, float padding = 0f, float bulletIndent = 18f, float bulletGap = 4f, UIRectTag tag = UIRectTag.Text_Bullet, string labelPrefix = "Bullet")
     {
         if (items == null) return;
@@ -213,6 +244,15 @@ public struct VStack
     /// Standard single-row selector group with equal-width options.
     /// Returns the new selected index (or the old one if unchanged).
     /// </summary>
+    /// <summary>
+    /// Standard single-row selector group with equal-width options.
+    /// Returns the new selected index (or the old one if unchanged).
+    /// </summary>
+    public int NextSelectorRow(string groupId, IList<string> options, int selectedIndex, out bool changed, bool allowDeselect = false, UIRectTag tag = UIRectTag.Control_Selector)
+        => NextSelectorRow(_ctx, groupId, options, selectedIndex, out changed, allowDeselect, tag);
+
+    /// <inheritdoc cref="NextSelectorRow(string,IList{string},int,out bool,bool,UIRectTag)"/>
+    [System.Obsolete("Pass ctx is redundant — the VStack already holds it. Use NextSelectorRow(groupId, options, ...) instead.")]
     public int NextSelectorRow(UIContext ctx, string groupId, IList<string> options, int selectedIndex, out bool changed, bool allowDeselect = false, UIRectTag tag = UIRectTag.Control_Selector)
     {
         changed = false;

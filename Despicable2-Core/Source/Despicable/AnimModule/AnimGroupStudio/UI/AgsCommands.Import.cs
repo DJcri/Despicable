@@ -222,8 +222,7 @@ public partial class Dialog_AnimGroupStudio
                     StopAuthorPreview(resetTick: true);
     
                     // Switch to authoring
-                    preview.Stop();
-                    sourceMode = SourceMode.AuthorProject;
+                    ActivateAuthorSourceMode();
     
                     EnsureRoles(project);
                     EnsureAuthorRoleKeyValid(project);

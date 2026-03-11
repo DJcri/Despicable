@@ -93,7 +93,9 @@ public partial class Dialog_AnimGroupStudio
                                 authorTrackIndex = clip.tracks.Count - 1;
                                 authorKeyIndex = -1;
                                 EnsureTrackDefaults(clip.tracks[authorTrackIndex], stage.durationTicks);
-                                TrySaveProjects();
+                                RecalculateStageDurationFromKeys(stage);
+                                QueueAuthorSave();
+                                MarkAuthorPreviewStageDirty(authorStageIndex);
                             }));
                         }
                     }
@@ -113,7 +115,10 @@ public partial class Dialog_AnimGroupStudio
                         clip.tracks.RemoveAt(authorTrackIndex);
                         authorTrackIndex = Mathf.Clamp(authorTrackIndex, 0, clip.tracks.Count - 1);
                         authorKeyIndex = -1;
-                        TrySaveProjects();
+                        RecalculateStageDurationFromKeys(stage);
+                        QueueAuthorSave();
+                        MarkAuthorPreviewStageDirty(authorStageIndex);
+                        ShowAuthorStageAtTick(authorStageIndex, Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks)), seekIfPlaying: false);
                     }
                 }
                 else
@@ -198,10 +203,12 @@ public partial class Dialog_AnimGroupStudio
                     var nk = CloneKeyframe(seed) ?? CreateDefaultKeyframe(newTick);
                     nk.tick = newTick;
                     tr.keys.Add(nk);
-                    SortClampKeys(tr, stage.durationTicks);
+                    SortClampKeys(tr, Mathf.Max(1, stage.durationTicks));
+                    RecalculateStageDurationFromKeys(stage);
                     authorKeyIndex = tr.keys.IndexOf(nk);
                     InspectSelectedAuthorKeyframe(tr, stage);
-                    TrySaveProjects();
+                    QueueAuthorSave();
+                    MarkAuthorPreviewStageDirty(authorStageIndex);
                 }
 
                 Rect removeRect = footerH.NextFixed(ctx.Style.RowHeight, UIRectTag.Button, "KeyframeList/Remove");
@@ -212,7 +219,10 @@ public partial class Dialog_AnimGroupStudio
                     {
                         tr.keys.RemoveAt(authorKeyIndex);
                         authorKeyIndex = Mathf.Clamp(authorKeyIndex, 0, tr.keys.Count - 1);
-                        TrySaveProjects();
+                        RecalculateStageDurationFromKeys(stage);
+                        QueueAuthorSave();
+                        MarkAuthorPreviewStageDirty(authorStageIndex);
+                        ShowAuthorStageAtTick(authorStageIndex, Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks)), seekIfPlaying: false);
                     }
                 }
                 else
@@ -225,9 +235,7 @@ public partial class Dialog_AnimGroupStudio
                 if (tr?.keys == null || stage == null || authorKeyIndex < 0 || authorKeyIndex >= tr.keys.Count)
                     return;
 
-                authorPreviewTick = Mathf.Clamp(tr.keys[authorKeyIndex].tick, 0, Mathf.Max(1, stage.durationTicks));
-                preview.SelectedStageIndex = authorStageIndex;
-                preview.ShowSelectedStageAtTick(authorPreviewTick);
+                ShowAuthorStageAtTick(authorStageIndex, Mathf.Clamp(tr.keys[authorKeyIndex].tick, 0, Mathf.Max(1, stage.durationTicks)), seekIfPlaying: false);
             }
 
             private void DrawKeyframeInspector(Rect rect, AgsModel.StageSpec stage)
@@ -247,11 +255,11 @@ public partial class Dialog_AnimGroupStudio
                 D2Section.DrawCaptionStrip(ctx, parts.Header, "Inspector", "KeyframeInspector/Header", GameFont.Medium);
 
                 var tr = GetSelectedTrack(stage, authorRoleKey);
-                bool hasSelection = tr != null && !tr.keys.NullOrEmpty() && authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count;
-                AgsModel.Keyframe previousKey = hasSelection ? GetPreviousKeyframe(tr, authorKeyIndex) : null;
-                bool canCopy = hasSelection;
-                bool canPaste = hasSelection && authorKeyClipboard != null;
-                bool canReset = hasSelection;
+                bool hasExplicitSelection = tr != null && !tr.keys.NullOrEmpty() && authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count;
+                AgsModel.Keyframe previousKey = hasExplicitSelection ? GetPreviousKeyframe(tr, authorKeyIndex) : null;
+                bool canCopy = hasExplicitSelection;
+                bool canPaste = hasExplicitSelection && authorKeyClipboard != null;
+                bool canReset = hasExplicitSelection;
 
                 var toolbarH = new HRow(ctx, parts.Toolbar);
                 float resetWidth = Mathf.Clamp(parts.Toolbar.width * 0.36f, 92f, 128f);
@@ -261,7 +269,7 @@ public partial class Dialog_AnimGroupStudio
                     if (D2Widgets.ButtonText(ctx, resetRect, "Reset", "KeyframeInspector/ToolbarReset"))
                     {
                         ResetKeyframeFromPreviousOrDefault(tr, authorKeyIndex);
-                        TrySaveProjects();
+                        CommitAuthorStageKeyEdit(stage, durationMayHaveChanged: false);
                     }
                     TooltipHandler.TipRegion(resetRect, previousKey != null
                         ? "Reset this keyframe to the previous keyframe's values."
@@ -296,223 +304,241 @@ public partial class Dialog_AnimGroupStudio
                         int keepTick = tr.keys[authorKeyIndex].tick;
                         CopyKeyframeData(authorKeyClipboard, tr.keys[authorKeyIndex], includeTick: false);
                         tr.keys[authorKeyIndex].tick = keepTick;
-                        TrySaveProjects();
+                        CommitAuthorStageKeyEdit(stage, durationMayHaveChanged: false);
                     }
                 }
                 else
                 {
-                    string disabledReason = hasSelection
+                    string disabledReason = hasExplicitSelection
                         ? "Copy a keyframe first."
                         : "Select a keyframe to paste onto it.";
                     DrawIconButton(ctx, pasteRect, D2VanillaTex.Paste, "Paste copied keyframe values", "KeyframeInspector/ToolbarPasteDisabled", enabled: false, disabledReason: disabledReason);
                 }
 
-                if (!hasSelection)
+                if (tr == null)
                 {
-                    D2Widgets.Label(ctx, parts.Body, tr == null ? "Select a track." : "Select a keyframe.", "KeyframeInspector/Empty");
+                    D2Widgets.Label(ctx, parts.Body, "Select a track.", "KeyframeInspector/Empty");
                     return;
                 }
 
-                var k = tr.keys[authorKeyIndex];
-                if (k == null) return;
+                bool isImplicitDisplay;
+                var displayKey = GetInspectorDisplayKeyframe(tr, stage, out isImplicitDisplay);
+                if (displayKey == null)
+                {
+                    D2Widgets.Label(ctx, parts.Body, "Select a track.", "KeyframeInspector/Empty");
+                    return;
+                }
+
+                var k = displayKey;
+                AgsModel.Keyframe EnsureEditKey()
+                {
+                    var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                    if (editKey != null)
+                        k = editKey;
+                    return editKey;
+                }
+
+                void CommitEdit(bool durationMayHaveChanged = false)
+                {
+                    CommitAuthorStageKeyEdit(stage, durationMayHaveChanged);
+                    k = GetInspectorDisplayKeyframe(tr, stage, out _) ?? k;
+                }
 
                 var authorInspectorScrollLocal = authorInspectorScroll;
                 var authorInspectorContentHeightLocal = authorInspectorContentHeight;
                 D2ScrollView.Draw(ctx, parts.Body, ref authorInspectorScrollLocal, ref authorInspectorContentHeightLocal, (UIContext scrollCtx, ref VStack v) =>
                 {
+                    if (isImplicitDisplay)
+                    {
+                        v.NextTextBlock(scrollCtx, "Editing here will create or reuse a keyframe at the current scrubber tick.", GameFont.Small, padding: 0f, label: "Inspector/ImplicitKeyHint");
+                    }
+
                     Rect tickRow = v.NextRow(UIRectTag.Input, "Inspector/TickRow");
                     var tickH = new HRow(scrollCtx, tickRow);
                     float tickLabelW = Mathf.Clamp(tickRow.width * 0.22f, 48f, 64f);
                     D2Widgets.Label(scrollCtx, tickH.NextFixed(tickLabelW, UIRectTag.Label, "Inspector/TickLabel"), "Tick", "Inspector/TickLabel");
-                    int tVal = k.tick;
-                    string tStr = tVal.ToString();
+                    int displayedTick = hasExplicitSelection ? k.tick : Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks));
+                    string tStr = displayedTick.ToString();
                     var tickRect = tickH.Remaining(UIRectTag.TextField, "Inspector/TickField");
                     scrollCtx.Record(tickRect, UIRectTag.TextField, "Inspector/TickField");
-                    if (scrollCtx.Pass == UIPass.Draw)
-                        Widgets.TextFieldNumeric(tickRect, ref tVal, ref tStr, 0, stage.durationTicks);
-                    if (tVal != k.tick)
+                    if (hasExplicitSelection)
                     {
-                        if (TrySetUniqueKeyframeTick(tr, k, tVal, stage.durationTicks, out var tickError))
+                        int tVal = displayedTick;
+                        if (scrollCtx.Pass == UIPass.Draw)
+                            Widgets.TextFieldNumeric(tickRect, ref tVal, ref tStr, 0, 60000);
+                        if (tVal != k.tick)
                         {
-                            authorKeyIndex = tr.keys.IndexOf(k);
-                            TrySaveProjects();
-                        }
-                        else if (!tickError.NullOrEmpty())
-                        {
-                            Messages.Message(tickError, MessageTypeDefOf.RejectInput, false);
+                            if (TrySetUniqueKeyframeTick(tr, k, tVal, stage, out var tickError))
+                            {
+                                authorKeyIndex = tr.keys.IndexOf(k);
+                                CommitEdit(durationMayHaveChanged: true);
+                            }
+                            else if (!tickError.NullOrEmpty())
+                            {
+                                Messages.Message(tickError, MessageTypeDefOf.RejectInput, false);
+                            }
                         }
                     }
-                    if (!authorPreviewPlaying && authorPreviewTick != k.tick)
+                    else if (scrollCtx.Pass == UIPass.Draw)
                     {
-                        authorPreviewTick = k.tick;
-                        preview.SelectedStageIndex = authorStageIndex;
-                        preview.ShowSelectedStageAtTick(authorPreviewTick);
+                        using (new GUIEnabledScope(false))
+                        {
+                            Widgets.TextFieldNumeric(tickRect, ref displayedTick, ref tStr, 0, 60000);
+                        }
+                    }
+
+                    if (hasExplicitSelection && !authorPreviewPlaying && authorPreviewTick != k.tick)
+                    {
+                        ShowAuthorStageAtTick(authorStageIndex, k.tick, seekIfPlaying: false);
                     }
 
                     DrawGroupedHeader(scrollCtx, ref v, "Inspector/Transform", "Transform");
 
                     Rect angleRow = v.NextRow(UIRectTag.Input, "Inspector/AngleRow");
                     var angleH = new HRow(scrollCtx, angleRow);
-                    D2Widgets.Label(
-                        scrollCtx,
-                        angleH.NextFixed(
-                            Mathf.Clamp(angleRow.width * 0.24f, 60f, 74f),
-                            UIRectTag.Label,
-                            "Inspector/AngleLabel"),
-                        "Angle",
-                        "Inspector/AngleLabel");
-                    float newAngle = D2Widgets.HorizontalSlider(
-                        scrollCtx,
-                        angleH.Remaining(UIRectTag.Slider, "Inspector/AngleSlider"),
-                        k.angle,
-                        -90f,
-                        90f,
-                        showValueLabel: true,
-                        label: "Inspector/AngleSlider");
-                    if (!Mathf.Approximately(newAngle, k.angle))
+                    float angleLabelW = Mathf.Clamp(angleRow.width * 0.18f, 56f, 72f);
+                    float angleValueW = Mathf.Clamp(angleRow.width * 0.18f, 78f, 110f);
+                    D2Widgets.Label(scrollCtx, angleH.NextFixed(angleLabelW, UIRectTag.Label, "Inspector/AngleLabel"), "Angle", "Inspector/AngleLabel");
+
+                    bool angleSliderSelectionChanged = authorAngleSliderTrackIndex != authorTrackIndex || authorAngleSliderKeyTick != k.tick;
+                    if (angleSliderSelectionChanged)
                     {
-                        k.angle = newAngle;
-                        TrySaveProjects();
+                        authorAngleSliderTrackIndex = authorTrackIndex;
+                        authorAngleSliderKeyTick = k.tick;
+                        authorAngleSliderDragging = false;
+                    }
+
+                    if (Event.current != null && Event.current.type == EventType.MouseUp && authorAngleSliderDragging)
+                        authorAngleSliderDragging = false;
+
+                    // Angles are normalised to (-180, 180] so the window is always
+                    // fixed at [-180, 180] with 0 at the centre.
+                    float angleSliderW = Mathf.Max(0f, angleH.RemainingWidth - angleValueW - scrollCtx.Style.Gap);
+                    Rect angleSliderRect = angleH.NextFixed(angleSliderW, UIRectTag.Slider, "Inspector/AngleSlider");
+                    Rect angleValueRect = angleH.Remaining(UIRectTag.Label, "Inspector/AngleValue");
+
+                    const float sliderMin = -180f;
+                    const float sliderMax = 180f;
+                    float newAngle = D2Widgets.HorizontalSlider(scrollCtx, angleSliderRect, k.angle, sliderMin, sliderMax, showValueLabel: false, label: "Inspector/AngleSlider");
+                    if (Event.current != null
+                        && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag)
+                        && Mouse.IsOver(angleSliderRect))
+                    {
+                        authorAngleSliderDragging = true;
+                    }
+
+                    string angleValue = FormatAuthorAngleRaw(newAngle);
+                    D2Widgets.LabelClippedAligned(
+                        scrollCtx,
+                        angleValueRect,
+                        angleValue,
+                        TextAnchor.MiddleRight,
+                        label: "Inspector/AngleValue",
+                        tooltipOverride: angleValue);
+
+                    if (Mathf.Abs(newAngle - k.angle) > 0.0001f)
+                    {
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
+                        {
+                            editKey.angle = NormalizeAngleDeg(newAngle);
+                            CommitEdit();
+                        }
                     }
 
                     Rect offXRow = v.NextRow(UIRectTag.Input, "Inspector/OffsetXRow");
                     var offXH = new HRow(scrollCtx, offXRow);
-                    D2Widgets.Label(
-                        scrollCtx,
-                        offXH.NextFixed(
-                            Mathf.Clamp(offXRow.width * 0.24f, 60f, 74f),
-                            UIRectTag.Label,
-                            "Inspector/OffsetXLabel"),
-                        "Offset X",
-                        "Inspector/OffsetXLabel");
-                    float newX = D2Widgets.HorizontalSlider(
-                        scrollCtx,
-                        offXH.Remaining(UIRectTag.Slider, "Inspector/OffsetXSlider"),
-                        k.offset.x,
-                        -0.6f,
-                        0.6f,
-                        showValueLabel: true,
-                        label: "Inspector/OffsetXSlider");
+                    D2Widgets.Label(scrollCtx, offXH.NextFixed(Mathf.Clamp(offXRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/OffsetXLabel"), "Offset X", "Inspector/OffsetXLabel");
+                    bool isOffsetPropNode = IsPropNodeTag(tr.nodeTag);
+                    float offXMin = isOffsetPropNode ? AuthorPropOffsetClampXMin : AuthorTrackOffsetClampXMin;
+                    float offXMax = isOffsetPropNode ? AuthorPropOffsetClampXMax : AuthorTrackOffsetClampXMax;
+                    float offZMin = isOffsetPropNode ? AuthorPropOffsetClampZMin : AuthorTrackOffsetClampZMin;
+                    float offZMax = isOffsetPropNode ? AuthorPropOffsetClampZMax : AuthorTrackOffsetClampZMax;
+                    float newX = D2Widgets.HorizontalSlider(scrollCtx, offXH.Remaining(UIRectTag.Slider, "Inspector/OffsetXSlider"), k.offset.x, offXMin, offXMax, showValueLabel: true, label: "Inspector/OffsetXSlider");
                     if (!Mathf.Approximately(newX, k.offset.x))
                     {
-                        k.offset.x = newX;
-                        TrySaveProjects();
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
+                        {
+                            editKey.offset.x = newX;
+                            CommitEdit();
+                        }
                     }
 
                     Rect offZRow = v.NextRow(UIRectTag.Input, "Inspector/OffsetZRow");
                     var offZH = new HRow(scrollCtx, offZRow);
-                    D2Widgets.Label(
-                        scrollCtx,
-                        offZH.NextFixed(
-                            Mathf.Clamp(offZRow.width * 0.24f, 60f, 74f),
-                            UIRectTag.Label,
-                            "Inspector/OffsetZLabel"),
-                        "Offset Z",
-                        "Inspector/OffsetZLabel");
-                    float newZ = D2Widgets.HorizontalSlider(
-                        scrollCtx,
-                        offZH.Remaining(UIRectTag.Slider, "Inspector/OffsetZSlider"),
-                        k.offset.z,
-                        -0.6f,
-                        0.6f,
-                        showValueLabel: true,
-                        label: "Inspector/OffsetZSlider");
+                    D2Widgets.Label(scrollCtx, offZH.NextFixed(Mathf.Clamp(offZRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/OffsetZLabel"), "Offset Z", "Inspector/OffsetZLabel");
+                    float newZ = D2Widgets.HorizontalSlider(scrollCtx, offZH.Remaining(UIRectTag.Slider, "Inspector/OffsetZSlider"), k.offset.z, offZMin, offZMax, showValueLabel: true, label: "Inspector/OffsetZSlider");
                     if (!Mathf.Approximately(newZ, k.offset.z))
                     {
-                        k.offset.z = newZ;
-                        TrySaveProjects();
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
+                        {
+                            editKey.offset.z = newZ;
+                            CommitEdit();
+                        }
                     }
 
                     if (IsPropNodeTag(tr.nodeTag))
                     {
                         DrawGroupedHeader(scrollCtx, ref v, "Inspector/Scale", "Scale (prop)", topPadding: true);
-                        bool lockVal = authorScaleLock;
-                        D2Widgets.CheckboxLabeled(scrollCtx, v.NextRow(UIRectTag.Checkbox, "Inspector/ScaleLock"), "Lock X/Z", ref lockVal, "Inspector/ScaleLock");
-                        authorScaleLock = lockVal;
+                    }
+                    else
+                    {
+                        DrawGroupedHeader(scrollCtx, ref v, "Inspector/Scale", "Scale", topPadding: true);
+                    }
+                    bool lockVal = authorScaleLock;
+                    D2Widgets.CheckboxLabeled(scrollCtx, v.NextRow(UIRectTag.Checkbox, "Inspector/ScaleLock"), "Lock X/Z", ref lockVal, "Inspector/ScaleLock");
+                    authorScaleLock = lockVal;
 
-                        const float sMin = 0.3f;
-                        const float sMax = 2.0f;
-                        if (k.scale == default(Vector3)) k.scale = Vector3.one;
-                        k.scale.y = 1f;
+                    const float sMin = 0.3f;
+                    const float sMax = 2.0f;
+                    if (k.scale == default(Vector3)) k.scale = Vector3.one;
+                    k.scale.y = 1f;
 
-                        Rect sxRow = v.NextRow(UIRectTag.Input, "Inspector/ScaleXRow");
-                        var sxH = new HRow(scrollCtx, sxRow);
-                        D2Widgets.Label(
-                            scrollCtx,
-                            sxH.NextFixed(
-                                Mathf.Clamp(sxRow.width * 0.24f, 60f, 74f),
-                                UIRectTag.Label,
-                                "Inspector/ScaleXLabel"),
-                            "Scale X",
-                            "Inspector/ScaleXLabel");
-                        float newSX = D2Widgets.HorizontalSlider(
-                            scrollCtx,
-                            sxH.Remaining(UIRectTag.Slider, "Inspector/ScaleXSlider"),
-                            k.scale.x,
-                            sMin,
-                            sMax,
-                            showValueLabel: true,
-                            label: "Inspector/ScaleXSlider");
-                        if (!Mathf.Approximately(newSX, k.scale.x))
+                    Rect sxRow = v.NextRow(UIRectTag.Input, "Inspector/ScaleXRow");
+                    var sxH = new HRow(scrollCtx, sxRow);
+                    D2Widgets.Label(scrollCtx, sxH.NextFixed(Mathf.Clamp(sxRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/ScaleXLabel"), "Scale X", "Inspector/ScaleXLabel");
+                    float newSX = D2Widgets.HorizontalSlider(scrollCtx, sxH.Remaining(UIRectTag.Slider, "Inspector/ScaleXSlider"), k.scale.x, sMin, sMax, showValueLabel: true, label: "Inspector/ScaleXSlider");
+                    if (!Mathf.Approximately(newSX, k.scale.x))
+                    {
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
                         {
-                            k.scale.x = newSX;
-                            if (authorScaleLock) k.scale.z = newSX;
-                            TrySaveProjects();
-                            MarkAuthorPreviewDirty();
-                        }
-
-                        Rect szRow = v.NextRow(UIRectTag.Input, "Inspector/ScaleZRow");
-                        var szH = new HRow(scrollCtx, szRow);
-                        D2Widgets.Label(
-                            scrollCtx,
-                            szH.NextFixed(
-                                Mathf.Clamp(szRow.width * 0.24f, 60f, 74f),
-                                UIRectTag.Label,
-                                "Inspector/ScaleZLabel"),
-                            "Scale Z",
-                            "Inspector/ScaleZLabel");
-                        float newSZ = D2Widgets.HorizontalSlider(
-                            scrollCtx,
-                            szH.Remaining(UIRectTag.Slider, "Inspector/ScaleZSlider"),
-                            k.scale.z,
-                            sMin,
-                            sMax,
-                            showValueLabel: true,
-                            label: "Inspector/ScaleZSlider");
-                        if (!Mathf.Approximately(newSZ, k.scale.z))
-                        {
-                            k.scale.z = newSZ;
-                            if (authorScaleLock) k.scale.x = newSZ;
-                            TrySaveProjects();
-                            MarkAuthorPreviewDirty();
+                            editKey.scale.x = newSX;
+                            if (authorScaleLock) editKey.scale.z = newSX;
+                            CommitEdit();
                         }
                     }
 
+                    Rect szRow = v.NextRow(UIRectTag.Input, "Inspector/ScaleZRow");
+                    var szH = new HRow(scrollCtx, szRow);
+                    D2Widgets.Label(scrollCtx, szH.NextFixed(Mathf.Clamp(szRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/ScaleZLabel"), "Scale Z", "Inspector/ScaleZLabel");
+                    float newSZ = D2Widgets.HorizontalSlider(scrollCtx, szH.Remaining(UIRectTag.Slider, "Inspector/ScaleZSlider"), k.scale.z, sMin, sMax, showValueLabel: true, label: "Inspector/ScaleZSlider");
+                    if (!Mathf.Approximately(newSZ, k.scale.z))
+                    {
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
+                        {
+                            editKey.scale.z = newSZ;
+                            if (authorScaleLock) editKey.scale.x = newSZ;
+                            CommitEdit();
+                        }
+                    }
+
+                    DrawGroupedHeader(scrollCtx, ref v, "Inspector/Orientation", "Facing", topPadding: true);
+
                     Rect faceRow = v.NextRow(UIRectTag.Input, "Inspector/FacingRow");
                     var faceH = new HRow(scrollCtx, faceRow);
-                    D2Widgets.Label(
-                        scrollCtx,
-                        faceH.NextFixed(
-                            Mathf.Clamp(faceRow.width * 0.24f, 60f, 74f),
-                            UIRectTag.Label,
-                            "Inspector/FacingLabel"),
-                        "Facing",
-                        "Inspector/FacingLabel");
-                    if (D2Widgets.ButtonText(
-                        scrollCtx,
-                        faceH.RemainingMin(
-                            Mathf.Clamp(faceRow.width * 0.34f, 96f, 136f),
-                            UIRectTag.Button,
-                            "Inspector/FacingButton"),
-                        k.rotation.ToStringHuman(),
-                        "Inspector/FacingButton"))
+                    D2Widgets.Label(scrollCtx, faceH.NextFixed(Mathf.Clamp(faceRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/FacingLabel"), "Direction", "Inspector/FacingLabel");
+                    if (D2Widgets.ButtonText(scrollCtx, faceH.RemainingMin(Mathf.Clamp(faceRow.width * 0.34f, 96f, 136f), UIRectTag.Button, "Inspector/FacingButton"), k.rotation.ToStringHuman(), "Inspector/FacingButton"))
                     {
                         Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>
                         {
-                            new FloatMenuOption("North", () => { k.rotation = Rot4.North; TrySaveProjects(); }),
-                            new FloatMenuOption("East",  () => { k.rotation = Rot4.East;  TrySaveProjects(); }),
-                            new FloatMenuOption("South", () => { k.rotation = Rot4.South; TrySaveProjects(); }),
-                            new FloatMenuOption("West",  () => { k.rotation = Rot4.West;  TrySaveProjects(); })
+                            new FloatMenuOption("North", () => { var editKey = EnsureInspectorEditKeyframe(tr, stage); if (editKey != null) { editKey.rotation = Rot4.North; CommitAuthorStageKeyEdit(stage); } }),
+                            new FloatMenuOption("East",  () => { var editKey = EnsureInspectorEditKeyframe(tr, stage); if (editKey != null) { editKey.rotation = Rot4.East; CommitAuthorStageKeyEdit(stage); } }),
+                            new FloatMenuOption("South", () => { var editKey = EnsureInspectorEditKeyframe(tr, stage); if (editKey != null) { editKey.rotation = Rot4.South; CommitAuthorStageKeyEdit(stage); } }),
+                            new FloatMenuOption("West",  () => { var editKey = EnsureInspectorEditKeyframe(tr, stage); if (editKey != null) { editKey.rotation = Rot4.West; CommitAuthorStageKeyEdit(stage); } })
                         }));
                     }
 
@@ -522,35 +548,29 @@ public partial class Dialog_AnimGroupStudio
                     D2Widgets.CheckboxLabeled(scrollCtx, v.NextRow(UIRectTag.Checkbox, "Inspector/Visible"), "Visible", ref visible, "Inspector/Visible");
                     if (visible != k.visible)
                     {
-                        k.visible = visible;
-                        TrySaveProjects();
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
+                        {
+                            editKey.visible = visible;
+                            CommitEdit();
+                        }
                     }
 
                     DrawGroupedHeader(scrollCtx, ref v, "Inspector/Advanced", "Advanced", topPadding: true);
 
                     Rect layerRow = v.NextRow(UIRectTag.Input, "Inspector/LayerBiasRow");
                     var layerH = new HRow(scrollCtx, layerRow);
-                    D2Widgets.Label(
-                        scrollCtx,
-                        layerH.NextFixed(
-                            Mathf.Clamp(layerRow.width * 0.24f, 60f, 74f),
-                            UIRectTag.Label,
-                            "Inspector/LayerBiasLabel"),
-                        "Layer",
-                        "Inspector/LayerBiasLabel");
-                    float newLayerF = D2Widgets.HorizontalSlider(
-                        scrollCtx,
-                        layerH.Remaining(UIRectTag.Slider, "Inspector/LayerBiasSlider"),
-                        k.layerBias,
-                        -3f,
-                        3f,
-                        showValueLabel: true,
-                        label: "Inspector/LayerBiasSlider");
+                    D2Widgets.Label(scrollCtx, layerH.NextFixed(Mathf.Clamp(layerRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/LayerBiasLabel"), "Layer", "Inspector/LayerBiasLabel");
+                    float newLayerF = D2Widgets.HorizontalSlider(scrollCtx, layerH.Remaining(UIRectTag.Slider, "Inspector/LayerBiasSlider"), k.layerBias, -3f, 3f, showValueLabel: true, label: "Inspector/LayerBiasSlider");
                     int newLayer = Mathf.Clamp(Mathf.RoundToInt(newLayerF), -3, 3);
                     if (newLayer != k.layerBias)
                     {
-                        k.layerBias = newLayer;
-                        TrySaveProjects();
+                        var editKey = EnsureEditKey();
+                        if (editKey != null)
+                        {
+                            editKey.layerBias = newLayer;
+                            CommitEdit();
+                        }
                     }
 
                     if (string.Equals(tr.nodeTag, "Root", StringComparison.Ordinal))
@@ -559,31 +579,21 @@ public partial class Dialog_AnimGroupStudio
 
                         Rect soundRow = v.NextRow(UIRectTag.Input, "Inspector/SoundRow");
                         var soundH = new HRow(scrollCtx, soundRow);
-                        D2Widgets.Label(
-                            scrollCtx,
-                            soundH.NextFixed(
-                                Mathf.Clamp(soundRow.width * 0.24f, 60f, 74f),
-                                UIRectTag.Label,
-                                "Inspector/SoundLabel"),
-                            "Sound",
-                            "Inspector/SoundLabel");
+                        D2Widgets.Label(scrollCtx, soundH.NextFixed(Mathf.Clamp(soundRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/SoundLabel"), "Sound", "Inspector/SoundLabel");
 
                         string soundLabel = k.soundDefName.NullOrEmpty() ? "(None)" : k.soundDefName;
-                        if (D2Widgets.ButtonText(
-                            scrollCtx,
-                            soundH.RemainingMin(
-                                Mathf.Clamp(soundRow.width * 0.34f, 120f, 180f),
-                                UIRectTag.Button,
-                                "Inspector/SoundButton"),
-                            soundLabel,
-                            "Inspector/SoundButton"))
+                        if (D2Widgets.ButtonText(scrollCtx, soundH.RemainingMin(Mathf.Clamp(soundRow.width * 0.34f, 120f, 180f), UIRectTag.Button, "Inspector/SoundButton"), soundLabel, "Inspector/SoundButton"))
                         {
                             var opts = new List<FloatMenuOption>
                             {
                                 new FloatMenuOption("(None)", () =>
                                 {
-                                    k.soundDefName = null;
-                                    TrySaveProjects();
+                                    var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                                    if (editKey != null)
+                                    {
+                                        editKey.soundDefName = null;
+                                        CommitAuthorStageKeyEdit(stage);
+                                    }
                                 })
                             };
 
@@ -598,8 +608,12 @@ public partial class Dialog_AnimGroupStudio
                                     string optionLabel = defName;
                                     opts.Add(new FloatMenuOption(optionLabel, () =>
                                     {
-                                        k.soundDefName = defName;
-                                        TrySaveProjects();
+                                        var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                                        if (editKey != null)
+                                        {
+                                            editKey.soundDefName = defName;
+                                            CommitAuthorStageKeyEdit(stage);
+                                        }
                                     }));
                                 }
                             }
@@ -609,31 +623,21 @@ public partial class Dialog_AnimGroupStudio
 
                         Rect facialRow = v.NextRow(UIRectTag.Input, "Inspector/FacialRow");
                         var facialH = new HRow(scrollCtx, facialRow);
-                        D2Widgets.Label(
-                            scrollCtx,
-                            facialH.NextFixed(
-                                Mathf.Clamp(facialRow.width * 0.24f, 60f, 74f),
-                                UIRectTag.Label,
-                                "Inspector/FacialLabel"),
-                            "Facial",
-                            "Inspector/FacialLabel");
+                        D2Widgets.Label(scrollCtx, facialH.NextFixed(Mathf.Clamp(facialRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/FacialLabel"), "Facial", "Inspector/FacialLabel");
 
                         string facialLabel = k.facialAnimDefName.NullOrEmpty() ? "(None)" : k.facialAnimDefName;
-                        if (D2Widgets.ButtonText(
-                            scrollCtx,
-                            facialH.RemainingMin(
-                                Mathf.Clamp(facialRow.width * 0.34f, 120f, 180f),
-                                UIRectTag.Button,
-                                "Inspector/FacialButton"),
-                            facialLabel,
-                            "Inspector/FacialButton"))
+                        if (D2Widgets.ButtonText(scrollCtx, facialH.RemainingMin(Mathf.Clamp(facialRow.width * 0.34f, 120f, 180f), UIRectTag.Button, "Inspector/FacialButton"), facialLabel, "Inspector/FacialButton"))
                         {
                             var opts = new List<FloatMenuOption>
                             {
                                 new FloatMenuOption("(None)", () =>
                                 {
-                                    k.facialAnimDefName = null;
-                                    TrySaveProjects();
+                                    var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                                    if (editKey != null)
+                                    {
+                                        editKey.facialAnimDefName = null;
+                                        CommitAuthorStageKeyEdit(stage);
+                                    }
                                 })
                             };
 
@@ -648,8 +652,12 @@ public partial class Dialog_AnimGroupStudio
                                     string optionLabel = def.label.NullOrEmpty() ? defName : $"{def.label} ({defName})";
                                     opts.Add(new FloatMenuOption(optionLabel, () =>
                                     {
-                                        k.facialAnimDefName = defName;
-                                        TrySaveProjects();
+                                        var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                                        if (editKey != null)
+                                        {
+                                            editKey.facialAnimDefName = defName;
+                                            CommitAuthorStageKeyEdit(stage);
+                                        }
                                     }));
                                 }
                             }
@@ -661,4 +669,11 @@ public partial class Dialog_AnimGroupStudio
                 authorInspectorScroll = authorInspectorScrollLocal;
                 authorInspectorContentHeight = authorInspectorContentHeightLocal;
             }
+
+    private static string FormatAuthorAngleRaw(float angle)
+    {
+        return angle.ToString("0.##") + "°";
+    }
+
+
 }

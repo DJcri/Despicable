@@ -105,6 +105,7 @@ public static partial class D2Widgets
             ctx?.Record(valueRect, UIRectTag.Label, (label ?? "Slider") + "/ValueLabel");
 
             float newVal = Widgets.HorizontalSlider(sliderRect, value, leftValue, rightValue, false);
+            valStr = newVal.ToString("0.##");
 
             var prevAnchor = Text.Anchor;
             Text.Anchor = TextAnchor.MiddleRight;

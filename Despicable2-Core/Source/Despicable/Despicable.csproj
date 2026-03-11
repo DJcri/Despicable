@@ -70,6 +70,7 @@
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPawnPool.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPlayback.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPlayback.Rendering.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewNodeCapture.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewSession.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewSession.Playback.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewSession.Viewport.cs" />
@@ -78,13 +79,13 @@
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsCommands.Import.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsCommands.Selection.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawInspector.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\UI\Dialog_AgsAddTag.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawInspector.Panels.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanel.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanelSections.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanelSections.Source.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawLeftPanelSections.Stages.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawPreviewPanel.cs" />
-    <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawPreviewPanel.Legacy.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsDrawPreviewPanel.Transport.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsEditorSessionState.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\UI\AgsLayout.cs" />

@@ -850,7 +850,15 @@ public partial class CompFaceParts : ThingComp
         animTicks = 0;
         curKeyframe = 0;
         animExpression = sampled;
-        RefreshFaceSoft(false);
+
+        // SetAllGraphicsDirty is required here even though PawnRenderNodeWorker_FacePart.OffsetFor
+        // reads animExpression directly (no cache). The *texture* is a different story: GraphicFor on
+        // PawnRenderNode_Mouth and PawnRenderNode_EyeAddon IS cached behind requestRecache. Without
+        // dirtying the tree the face sprite never updates during live playback — only at stage
+        // transitions (where ApplyStageAnimations → SetAnimation already triggers a tree dirty).
+        // This call happens before st.Renderer.Render() in RenderViewportSlots, so AppendRequests
+        // sees requestRecache=true and rebuilds GraphicFor in the same render pass. No frame lag.
+        pawn.Drawer?.renderer?.SetAllGraphicsDirty();
     }
 
     public void ClearPreviewFacialOverride()
@@ -862,7 +870,10 @@ public partial class CompFaceParts : ThingComp
         animTicks = 0;
         curKeyframe = 0;
         animExpression = null;
-        RefreshFaceSoft(false);
+
+        // Same reasoning as ApplyPreviewFacialAt: dirty the tree so face nodes rebuild
+        // GraphicFor back to the base/style expression on the next render pass.
+        pawn.Drawer?.renderer?.SetAllGraphicsDirty();
     }
 
     public void PlayFacialAnim(FacialAnimDef anim)

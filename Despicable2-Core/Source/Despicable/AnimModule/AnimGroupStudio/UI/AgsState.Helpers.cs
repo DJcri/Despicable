@@ -228,7 +228,7 @@ public partial class Dialog_AnimGroupStudio
         return extendedTick;
     }
 
-    private static bool TrySetUniqueKeyframeTick(AgsModel.Track tr, AgsModel.Keyframe key, int desiredTick, int stageDurationTicks, out string failureReason)
+    private static bool TrySetUniqueKeyframeTick(AgsModel.Track tr, AgsModel.Keyframe key, int desiredTick, AgsModel.StageSpec stage, out string failureReason)
     {
         failureReason = null;
         if (tr == null || key == null)
@@ -237,15 +237,20 @@ public partial class Dialog_AnimGroupStudio
             return false;
         }
 
-        int clamped = Mathf.Clamp(desiredTick, 0, Mathf.Max(1, stageDurationTicks));
-        if (TrackHasKeyAtTick(tr, clamped, key))
+        int normalized = Mathf.Max(0, desiredTick);
+        if (TrackHasKeyAtTick(tr, normalized, key))
         {
-            failureReason = "That track already has a keyframe at tick " + clamped + ".";
+            failureReason = "That track already has a keyframe at tick " + normalized + ".";
             return false;
         }
 
-        key.tick = clamped;
-        SortClampKeys(tr, stageDurationTicks);
+        if (stage != null)
+            stage.durationTicks = Mathf.Max(Mathf.Max(1, stage.durationTicks), normalized);
+
+        key.tick = normalized;
+        SortClampKeys(tr, Mathf.Max(1, stage?.durationTicks ?? normalized));
+        if (stage != null)
+            RecalculateStageDurationFromKeys(stage);
         return true;
     }
 
@@ -267,6 +272,260 @@ public partial class Dialog_AnimGroupStudio
         return AgsExportUtil.IsExactDefName(value) ? null : "Export will normalize this def name to: " + safe;
     }
 
+    private static AgsModel.Keyframe FindKeyframeAtTick(AgsModel.Track tr, int tick)
+    {
+        if (tr?.keys == null) return null;
+        for (int i = 0; i < tr.keys.Count; i++)
+        {
+            var key = tr.keys[i];
+            if (key != null && key.tick == tick)
+                return key;
+        }
+        return null;
+    }
+
+    private static AgsModel.Keyframe SampleTrackKeyframeAtTick(AgsModel.Track tr, int tick)
+    {
+        if (tr?.keys == null || tr.keys.Count == 0)
+            return CreateDefaultKeyframe(tick);
+
+        SortClampKeys(tr, int.MaxValue);
+
+        AgsModel.Keyframe prev = null;
+        AgsModel.Keyframe next = null;
+        for (int i = 0; i < tr.keys.Count; i++)
+        {
+            var key = tr.keys[i];
+            if (key == null) continue;
+            if (key.tick <= tick)
+                prev = key;
+            if (key.tick >= tick)
+            {
+                next = key;
+                break;
+            }
+        }
+
+        if (prev == null) prev = next;
+        if (next == null) next = prev;
+
+        var sampled = CloneKeyframe(prev ?? next) ?? CreateDefaultKeyframe(tick);
+        sampled.tick = Mathf.Max(0, tick);
+
+        if (prev != null && next != null && !ReferenceEquals(prev, next) && next.tick > prev.tick)
+        {
+            float t = Mathf.InverseLerp(prev.tick, next.tick, tick);
+            // AGS author angles are stored as cumulative degrees, not wrapped facings.
+            sampled.angle = Mathf.Lerp(prev.angle, next.angle, t);
+            sampled.offset = Vector3.Lerp(prev.offset, next.offset, t);
+            Vector3 prevScale = prev.scale == default(Vector3) ? Vector3.one : prev.scale;
+            Vector3 nextScale = next.scale == default(Vector3) ? Vector3.one : next.scale;
+            sampled.scale = Vector3.Lerp(prevScale, nextScale, t);
+        }
+
+        return sampled;
+    }
+
+    private static int GetHighestAuthoredTick(AgsModel.StageSpec stage, int fallback = 1)
+    {
+        int highest = fallback;
+        if (stage?.variants == null)
+            return Mathf.Max(1, highest);
+
+        for (int vi = 0; vi < stage.variants.Count; vi++)
+        {
+            var variant = stage.variants[vi];
+            if (variant == null)
+                continue;
+
+            if (!variant.clips.NullOrEmpty())
+            {
+                for (int ci = 0; ci < variant.clips.Count; ci++)
+                {
+                    var roleClip = variant.clips[ci];
+                    var clip = roleClip?.clip;
+                    if (clip?.tracks == null)
+                        continue;
+
+                    for (int ti = 0; ti < clip.tracks.Count; ti++)
+                    {
+                        var track = clip.tracks[ti];
+                        if (track?.keys == null)
+                            continue;
+
+                        for (int ki = 0; ki < track.keys.Count; ki++)
+                        {
+                            var key = track.keys[ki];
+                            if (key != null)
+                                highest = Mathf.Max(highest, key.tick);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var legacyClips = new[] { variant.male, variant.female };
+                for (int l = 0; l < legacyClips.Length; l++)
+                {
+                    var clip = legacyClips[l];
+                    if (clip?.tracks == null)
+                        continue;
+                    for (int ti = 0; ti < clip.tracks.Count; ti++)
+                    {
+                        var track = clip.tracks[ti];
+                        if (track?.keys == null)
+                            continue;
+                        for (int ki = 0; ki < track.keys.Count; ki++)
+                        {
+                            var key = track.keys[ki];
+                            if (key != null)
+                                highest = Mathf.Max(highest, key.tick);
+                        }
+                    }
+                }
+            }
+        }
+
+        return Mathf.Max(1, highest);
+    }
+
+    private static bool RecalculateStageDurationFromKeys(AgsModel.StageSpec stage, int fallback = 1)
+    {
+        if (stage == null)
+            return false;
+
+        int newDuration = GetHighestAuthoredTick(stage, fallback);
+        bool changed = stage.durationTicks != newDuration;
+        stage.durationTicks = newDuration;
+
+        if (stage.variants != null)
+        {
+            for (int vi = 0; vi < stage.variants.Count; vi++)
+            {
+                var variant = stage.variants[vi];
+                if (variant == null)
+                    continue;
+
+                if (!variant.clips.NullOrEmpty())
+                {
+                    for (int ci = 0; ci < variant.clips.Count; ci++)
+                    {
+                        var clip = variant.clips[ci]?.clip;
+                        if (clip != null)
+                            clip.lengthTicks = newDuration;
+                    }
+                }
+                else
+                {
+                    if (variant.male != null) variant.male.lengthTicks = newDuration;
+                    if (variant.female != null) variant.female.lengthTicks = newDuration;
+                }
+            }
+        }
+
+        return changed;
+    }
+
+    private static AgsModel.ClipSpec CloneClipSeededFromTerminalKeys(AgsModel.ClipSpec clip, int durationTicks)
+    {
+        var seeded = new AgsModel.ClipSpec
+        {
+            lengthTicks = Mathf.Max(1, durationTicks),
+            tracks = new List<AgsModel.Track>()
+        };
+
+        if (clip?.tracks.NullOrEmpty() != false)
+            return seeded;
+
+        for (int ti = 0; ti < clip.tracks.Count; ti++)
+        {
+            var srcTrack = clip.tracks[ti];
+            if (srcTrack == null)
+                continue;
+
+            var dstTrack = new AgsModel.Track
+            {
+                nodeTag = srcTrack.nodeTag,
+                keys = new List<AgsModel.Keyframe>()
+            };
+
+            AgsModel.Keyframe terminal = null;
+            if (!srcTrack.keys.NullOrEmpty())
+            {
+                for (int ki = 0; ki < srcTrack.keys.Count; ki++)
+                {
+                    var key = srcTrack.keys[ki];
+                    if (key == null)
+                        continue;
+                    if (terminal == null || key.tick >= terminal.tick)
+                        terminal = key;
+                }
+            }
+
+            var seed = CloneKeyframe(terminal) ?? CreateDefaultKeyframe(0);
+            seed.tick = 0;
+            dstTrack.keys.Add(seed);
+            seeded.tracks.Add(dstTrack);
+        }
+
+        return seeded;
+    }
+
+    private static AgsModel.StageSpec CloneStageSeededFromTerminalKeys(AgsModel.StageSpec src)
+    {
+        if (src == null)
+        {
+            return new AgsModel.StageSpec
+            {
+                durationTicks = 60,
+                repeatCount = 1,
+                variants = new List<AgsModel.StageVariant>()
+            };
+        }
+
+        var dst = new AgsModel.StageSpec
+        {
+            stageIndex = src.stageIndex,
+            label = src.label,
+            durationTicks = Mathf.Max(1, src.durationTicks),
+            repeatCount = Mathf.Max(1, src.repeatCount),
+            loop = src.loop,
+            stageTags = src.stageTags != null ? new List<string>(src.stageTags) : null,
+            variants = new List<AgsModel.StageVariant>()
+        };
+
+        if (!src.variants.NullOrEmpty())
+        {
+            foreach (var variant in src.variants)
+            {
+                if (variant == null) continue;
+                var newVariant = new AgsModel.StageVariant { variantId = variant.variantId, clips = new List<AgsModel.RoleClip>() };
+
+                if (!variant.clips.NullOrEmpty())
+                {
+                    foreach (var roleClip in variant.clips)
+                    {
+                        if (roleClip == null || roleClip.roleKey.NullOrEmpty()) continue;
+                        newVariant.clips.Add(new AgsModel.RoleClip
+                        {
+                            roleKey = roleClip.roleKey,
+                            clip = CloneClipSeededFromTerminalKeys(roleClip.clip, dst.durationTicks)
+                        });
+                    }
+                }
+                else
+                {
+                    if (variant.male != null) newVariant.clips.Add(new AgsModel.RoleClip { roleKey = "male_1", clip = CloneClipSeededFromTerminalKeys(variant.male, dst.durationTicks) });
+                    if (variant.female != null) newVariant.clips.Add(new AgsModel.RoleClip { roleKey = "female_1", clip = CloneClipSeededFromTerminalKeys(variant.female, dst.durationTicks) });
+                }
+
+                dst.variants.Add(newVariant);
+            }
+        }
+
+        return dst;
+    }
+
     private static AgsModel.StageSpec DeepCloneStage(AgsModel.StageSpec src)
     {
         var dst = new AgsModel.StageSpec
@@ -276,6 +535,7 @@ public partial class Dialog_AnimGroupStudio
             durationTicks = src.durationTicks,
             repeatCount = src.repeatCount,
             loop = src.loop,
+            stageTags = src.stageTags != null ? new List<string>(src.stageTags) : null,
             variants = new List<AgsModel.StageVariant>()
         };
 

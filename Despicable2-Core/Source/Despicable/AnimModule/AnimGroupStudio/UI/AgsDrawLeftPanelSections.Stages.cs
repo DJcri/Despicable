@@ -127,13 +127,13 @@ public partial class Dialog_AnimGroupStudio
         authorStageIndex = clamped;
         authorTrackIndex = -1;
         authorKeyIndex = -1;
+        MarkAuthorPreviewSelectionDirty();
 
         if (sourceMode == SourceMode.AuthorProject)
         {
-            preview.SelectedStageIndex = clamped;
             var stage = GetStage(project, clamped);
             int previewTick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage?.durationTicks ?? 1));
-            preview.ShowSelectedStageAtTick(previewTick);
+            ShowAuthorStageAtTick(clamped, previewTick, seekIfPlaying: false);
         }
     }
 
@@ -146,7 +146,7 @@ public partial class Dialog_AnimGroupStudio
         {
             var src = project.stages[project.stages.Count - 1];
             newStage = src != null
-                ? DeepCloneStage(src)
+                ? CloneStageSeededFromTerminalKeys(src)
                 : new AgsModel.StageSpec { durationTicks = 60, repeatCount = 1, variants = new List<AgsModel.StageVariant>() };
         }
         else
@@ -154,11 +154,16 @@ public partial class Dialog_AnimGroupStudio
             newStage = new AgsModel.StageSpec { durationTicks = 60, repeatCount = 1, variants = new List<AgsModel.StageVariant>() };
         }
 
-        newStage.stageIndex = idx;
-        newStage.label = "Stage " + idx;
-        project.stages.Add(newStage);
-        SelectAuthorStage(idx);
-        TrySaveProjects();
+        ApplyAuthorEdit(() =>
+        {
+            newStage.stageIndex = idx;
+            newStage.label = "Stage " + idx;
+            project.stages.Add(newStage);
+            authorStageIndex = idx;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+        }, structureDirty: true, selectionDirty: true, dirtyStageIndex: idx);
+        ShowAuthorStageAtTick(idx, 0, seekIfPlaying: false);
     }
 
     private void DuplicateAuthorStage()
@@ -168,12 +173,18 @@ public partial class Dialog_AnimGroupStudio
         if (src == null)
             return;
 
+        int cloneIndex = project.stages.Count;
         var clone = DeepCloneStage(src);
-        clone.stageIndex = project.stages.Count;
-        clone.label = (src.label ?? ("Stage " + authorStageIndex)) + " Copy";
-        project.stages.Add(clone);
-        SelectAuthorStage(project.stages.Count - 1);
-        TrySaveProjects();
+        ApplyAuthorEdit(() =>
+        {
+            clone.stageIndex = cloneIndex;
+            clone.label = (src.label ?? ("Stage " + authorStageIndex)) + " Copy";
+            project.stages.Add(clone);
+            authorStageIndex = cloneIndex;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+        }, structureDirty: true, selectionDirty: true, dirtyStageIndex: cloneIndex);
+        ShowAuthorStageAtTick(cloneIndex, 0, seekIfPlaying: false);
     }
 
     private void DeleteAuthorStage()
@@ -182,12 +193,17 @@ public partial class Dialog_AnimGroupStudio
         if (project.stages.Count <= 1 || authorStageIndex < 0 || authorStageIndex >= project.stages.Count)
             return;
 
-        project.stages.RemoveAt(authorStageIndex);
-        for (int i = 0; i < project.stages.Count; i++)
-            if (project.stages[i] != null) project.stages[i].stageIndex = i;
-
-        SelectAuthorStage(Mathf.Clamp(authorStageIndex, 0, project.stages.Count - 1));
-        TrySaveProjects();
+        int nextIndex = Mathf.Clamp(authorStageIndex, 0, project.stages.Count - 2);
+        ApplyAuthorEdit(() =>
+        {
+            project.stages.RemoveAt(authorStageIndex);
+            for (int i = 0; i < project.stages.Count; i++)
+                if (project.stages[i] != null) project.stages[i].stageIndex = i;
+            authorStageIndex = nextIndex;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+        }, structureDirty: true, selectionDirty: true, dirtyStageIndex: nextIndex);
+        ShowAuthorStageAtTick(nextIndex, 0, seekIfPlaying: false);
     }
 
     private void MoveAuthorStageUp()
@@ -196,14 +212,20 @@ public partial class Dialog_AnimGroupStudio
         if (authorStageIndex <= 0 || authorStageIndex >= project.stages.Count)
             return;
 
-        var tmp = project.stages[authorStageIndex - 1];
-        project.stages[authorStageIndex - 1] = project.stages[authorStageIndex];
-        project.stages[authorStageIndex] = tmp;
-        for (int i = 0; i < project.stages.Count; i++)
-            if (project.stages[i] != null) project.stages[i].stageIndex = i;
-
-        SelectAuthorStage(authorStageIndex - 1);
-        TrySaveProjects();
+        int oldIndex = authorStageIndex;
+        int newIndex = authorStageIndex - 1;
+        ApplyAuthorEdit(() =>
+        {
+            var tmp = project.stages[newIndex];
+            project.stages[newIndex] = project.stages[oldIndex];
+            project.stages[oldIndex] = tmp;
+            for (int i = 0; i < project.stages.Count; i++)
+                if (project.stages[i] != null) project.stages[i].stageIndex = i;
+            authorStageIndex = newIndex;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+        }, structureDirty: true, selectionDirty: true, dirtyStageIndex: newIndex);
+        ShowAuthorStageAtTick(newIndex, 0, seekIfPlaying: false);
     }
 
     private void MoveAuthorStageDown()
@@ -212,13 +234,19 @@ public partial class Dialog_AnimGroupStudio
         if (authorStageIndex < 0 || authorStageIndex >= project.stages.Count - 1)
             return;
 
-        var tmp = project.stages[authorStageIndex + 1];
-        project.stages[authorStageIndex + 1] = project.stages[authorStageIndex];
-        project.stages[authorStageIndex] = tmp;
-        for (int i = 0; i < project.stages.Count; i++)
-            if (project.stages[i] != null) project.stages[i].stageIndex = i;
-
-        SelectAuthorStage(authorStageIndex + 1);
-        TrySaveProjects();
+        int oldIndex = authorStageIndex;
+        int newIndex = authorStageIndex + 1;
+        ApplyAuthorEdit(() =>
+        {
+            var tmp = project.stages[newIndex];
+            project.stages[newIndex] = project.stages[oldIndex];
+            project.stages[oldIndex] = tmp;
+            for (int i = 0; i < project.stages.Count; i++)
+                if (project.stages[i] != null) project.stages[i].stageIndex = i;
+            authorStageIndex = newIndex;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+        }, structureDirty: true, selectionDirty: true, dirtyStageIndex: newIndex);
+        ShowAuthorStageAtTick(newIndex, 0, seekIfPlaying: false);
     }
 }

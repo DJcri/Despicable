@@ -87,15 +87,17 @@ public struct HRow
         => Remaining(tag, label);
 
     /// <summary>
-    /// Convenience: allocate at least minWidth, otherwise take the remaining width.
-    /// If remaining is below minWidth, returns the remaining (clamped) width.
+    /// Allocate at least <paramref name="minWidth"/> pixels, or more if the remaining
+    /// space is larger. The returned rect may extend past <see cref="Bounds"/> when
+    /// remaining space is less than minWidth — this is intentional so the control
+    /// renders at its declared minimum rather than silently collapsing.
     /// </summary>
     public Rect RemainingMin(float minWidth, UIRectTag tag = UIRectTag.None, string label = null)
     {
-        float w = Mathf.Max(0f, _bounds.xMax - _x);
-        // If the remaining width is already larger than minWidth, keep it as-is.
+        float remaining = Mathf.Max(0f, _bounds.xMax - _x);
+        float w = Mathf.Max(minWidth, remaining);
         var r = new Rect(_x, _bounds.yMin, w, _bounds.height);
-        _x = _bounds.xMax;
+        _x = _bounds.xMax;   // always advance to the logical end of the row
         _ctx.Record(r, tag, label);
         return r;
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 using Verse;
+using Despicable.AnimGroupStudio.Preview;
 
 namespace Despicable;
 // Guardrail-Reason: Single render-tree Harmony seam kept together to minimize fragile patch choreography.
@@ -155,6 +156,7 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
         // Absolute-transform props already rebuild their matrix in Prefix (and should remain isolated).
         if (node.Props is PawnRenderNodeProperties_GraphicVariants gv && gv.absoluteTransform)
         {
+            AgsPreviewNodeCapture.CaptureNode(node, __instance.pawn, matrix);
             return;
         }
 
@@ -163,8 +165,11 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
         // (We still force recache in workshop preview so changes apply immediately.)
 
         // The rest of this Postfix is the portrait-only offset/angle inheritance fix.
+        // The AGS author preview renders with portrait:false, so capture the already-computed
+        // runtime matrix there before exiting.
         if (!parms.Portrait)
         {
+            AgsPreviewNodeCapture.CaptureNode(node, __instance.pawn, matrix);
             return;
         }
 
@@ -344,6 +349,8 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
                 matrix = Matrix4x4.Translate(pivotWorld) * Matrix4x4.Rotate(q) * Matrix4x4.Translate(-pivotWorld) * matrix;
             }
         }
+
+        AgsPreviewNodeCapture.CaptureNode(node, __instance.pawn, matrix);
     }
 }
 

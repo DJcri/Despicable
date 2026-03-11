@@ -35,6 +35,13 @@ public sealed class ExtendedAnimatorEffectController
         return true;
     }
 
+    // Last animation tick at which we checked for facial triggers.
+    // Lets us scan a range instead of a single exact tick, so we never miss a
+    // trigger when the render tree advances by more than one tick between calls
+    // (game speed multiplier, frame drops, or sync drift between CompTick and
+    // the render tree AnimationTick getter).
+    private int lastCheckedFacialTick = -1;
+
     public void CheckAndPlayFacialAnim(Pawn pawn)
     {
         if (pawn == null || ModMain.IsNlFacialInstalled)
@@ -43,12 +50,41 @@ public sealed class ExtendedAnimatorEffectController
         if (!TryGetExtendedKeyframeContext(pawn, out AnimationWorker_ExtendedKeyframes animWorker, out AnimationPart animPart, out int animationTick))
             return;
 
-        FacialAnimDef facialAnim = animWorker.FacialAnimAtTick(animationTick, animPart);
+        // Detect animation loop or reset: if the current tick went backwards,
+        // restart the scan window from the beginning of the animation.
+        if (animationTick < lastCheckedFacialTick)
+            lastCheckedFacialTick = -1;
+
+        FacialAnimDef facialAnim = ScanFacialAnimInRange(lastCheckedFacialTick, animationTick, animPart);
+        lastCheckedFacialTick = animationTick;
+
         if (facialAnim == null)
             return;
 
         CompFaceParts facePartsComp = pawn.TryGetComp<CompFaceParts>();
         facePartsComp?.PlayFacialAnim(facialAnim);
+    }
+
+    // Returns the last FacialAnimDef whose keyframe tick falls in (fromExclusive, toInclusive].
+    // If multiple triggers land in the same scan window (e.g. after a large tick skip) we fire
+    // the latest one — same as seeing them arrive in sequence.
+    private static FacialAnimDef ScanFacialAnimInRange(int fromExclusive, int toInclusive, AnimationPart part)
+    {
+        if (!(part is KeyframeAnimationPart kap) || kap.keyframes.NullOrEmpty())
+            return null;
+
+        FacialAnimDef result = null;
+        for (int i = 0; i < kap.keyframes.Count; i++)
+        {
+            int kTick = kap.keyframes[i].tick;
+            if (kTick > fromExclusive && kTick <= toInclusive)
+            {
+                FacialAnimDef candidate = (kap.keyframes[i] as ExtendedKeyframe)?.facialAnim;
+                if (candidate != null)
+                    result = candidate;
+            }
+        }
+        return result;
     }
 
     public void CheckAndPlaySounds(Pawn pawn)

@@ -1,5 +1,8 @@
 using RimWorld;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Despicable.AnimGroupStudio.Preview;
 using UnityEngine;
 using Verse;
 
@@ -24,12 +27,14 @@ public static class UIUtil
         if (pawn == null || target == null) return;
 
         // RimWorld's PawnCacheRenderer uses an internal shared camera.
-        // In some setups that camera's rect/pixelRect can be left in a half-viewport state
-        // after other UI renders. Force a full target-sized viewport for preview renders.
+        // AGS non-portrait preview capture needs a handle to that camera for node projection,
+        // but forcing the camera viewport there can skew the workshop framing. Keep explicit
+        // camera handoff for capture, and only normalize rect/pixelRect for portrait renders.
         Camera cam = null;
         Rect oldRect = default;
         Rect oldPixelRect = default;
         bool hadCam = false;
+        bool adjustedViewport = false;
 
         try
         {
@@ -39,10 +44,16 @@ public static class UIUtil
             hadCam = cam != null;
             if (hadCam)
             {
-                oldRect = cam.rect;
-                oldPixelRect = cam.pixelRect;
-                cam.rect = new Rect(0f, 0f, 1f, 1f);
-                cam.pixelRect = new Rect(0f, 0f, target.width, target.height);
+                if (portrait)
+                {
+                    oldRect = cam.rect;
+                    oldPixelRect = cam.pixelRect;
+                    cam.rect = new Rect(0f, 0f, 1f, 1f);
+                    cam.pixelRect = new Rect(0f, 0f, target.width, target.height);
+                    adjustedViewport = true;
+                }
+
+                AgsPreviewNodeCapture.TryAttachActiveCamera(pawn, cam);
             }
 
             if (WorkshopRenderContext.Active)
@@ -85,7 +96,7 @@ public static class UIUtil
         }
         finally
         {
-            if (hadCam)
+            if (hadCam && adjustedViewport)
             {
                 try
                 {
@@ -103,6 +114,11 @@ public static class UIUtil
     // Guardrail-Allow-Static: Best-effort reflection cache for PawnCache camera handle, reused across portrait renders.
     private static Camera cachedPawnCacheCamera;
 
+    public static Camera GetPawnCacheCameraForPreview()
+    {
+        return TryGetPawnCacheCamera();
+    }
+
     private static Camera TryGetPawnCacheCamera()
     {
         if (cachedPawnCacheCamera != null) return cachedPawnCacheCamera;
@@ -111,26 +127,9 @@ public static class UIUtil
         {
             object renderer = PawnCacheCameraManager.PawnCacheRenderer;
             if (renderer == null) return null;
-            var t = renderer.GetType();
-            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
 
-            foreach (var f in t.GetFields(flags))
-            {
-                if (f.FieldType == typeof(Camera))
-                {
-                    cachedPawnCacheCamera = (Camera)f.GetValue(renderer);
-                    return cachedPawnCacheCamera;
-                }
-            }
-
-            foreach (var p in t.GetProperties(flags))
-            {
-                if (p.PropertyType == typeof(Camera) && p.GetIndexParameters().Length == 0)
-                {
-                    cachedPawnCacheCamera = (Camera)p.GetValue(renderer, null);
-                    return cachedPawnCacheCamera;
-                }
-            }
+            cachedPawnCacheCamera = FindCameraRecursive(renderer, 3, new HashSet<object>(ReferenceEqualityComparer.Instance));
+            return cachedPawnCacheCamera;
         }
         catch (Exception ex)
         {
@@ -139,4 +138,89 @@ public static class UIUtil
 
         return null;
     }
+
+    private static Camera FindCameraRecursive(object value, int depthRemaining, HashSet<object> visited)
+    {
+        if (value == null || depthRemaining < 0)
+            return null;
+
+        if (value is Camera directCamera)
+            return directCamera;
+
+        if (value is GameObject go)
+            return go.GetComponentInChildren<Camera>(true);
+
+        if (value is Component component)
+        {
+            Camera componentCamera = component.GetComponent<Camera>();
+            if (componentCamera != null)
+                return componentCamera;
+
+            return component.GetComponentInChildren<Camera>(true);
+        }
+
+        Type type = value.GetType();
+        if (type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(Type) || typeof(Delegate).IsAssignableFrom(type))
+            return null;
+
+        if (!visited.Add(value))
+            return null;
+
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        foreach (FieldInfo field in type.GetFields(Flags))
+        {
+            object fieldValue;
+            try
+            {
+                fieldValue = field.GetValue(value);
+            }
+            catch
+            {
+                continue;
+            }
+
+            Camera found = FindCameraRecursive(fieldValue, depthRemaining - 1, visited);
+            if (found != null)
+                return found;
+        }
+
+        foreach (PropertyInfo property in type.GetProperties(Flags))
+        {
+            if (!property.CanRead || property.GetIndexParameters().Length != 0)
+                continue;
+
+            object propertyValue;
+            try
+            {
+                propertyValue = property.GetValue(value, null);
+            }
+            catch
+            {
+                continue;
+            }
+
+            Camera found = FindCameraRecursive(propertyValue, depthRemaining - 1, visited);
+            if (found != null)
+                return found;
+        }
+
+        return null;
+    }
+
+    private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+    {
+        public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+
+        public new bool Equals(object x, object y)
+        {
+            return ReferenceEquals(x, y);
+        }
+
+        public int GetHashCode(object obj)
+        {
+            return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+        }
+    }
+
 }

@@ -14,9 +14,147 @@ public partial class Dialog_AnimGroupStudio
 {
     private void MarkAuthorPreviewDirty()
     {
-        // Force EnsureAuthorCompiled() to rebuild and re-apply compiled animations next draw.
-        authorPreviewStageHash = int.MinValue;
+        MarkAuthorPreviewStructureDirty();
             }
+
+    private void MarkAuthorPreviewStructureDirty()
+    {
+        authorRuntime.StructureDirty = true;
+        authorRuntime.SelectionDirty = true;
+        authorPreviewSourceHash = int.MinValue;
+            }
+
+    private void MarkAuthorPreviewStageDirty(int stageIndex)
+    {
+        if (stageIndex >= 0)
+            authorRuntime.DirtyStageIndices.Add(stageIndex);
+        authorRuntime.SelectionDirty = true;
+            }
+
+    private void MarkAuthorPreviewSelectionDirty()
+    {
+        authorRuntime.SelectionDirty = true;
+            }
+
+    private void QueueAuthorSave()
+    {
+        authorRuntime.SavePending = true;
+            }
+
+    private void NormalizeAuthorSelection()
+    {
+        if (project == null)
+        {
+            authorStageIndex = 0;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+            return;
+        }
+
+        EnsureRoles(project);
+        EnsureAuthorRoleKeyValid(project);
+        EnsureStages(project);
+
+        if (project.stages == null || project.stages.Count == 0)
+        {
+            authorStageIndex = 0;
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+            return;
+        }
+
+        authorStageIndex = Mathf.Clamp(authorStageIndex, 0, project.stages.Count - 1);
+        var stage = GetStage(project, authorStageIndex);
+        var clip = GetClip(stage, authorRoleKey);
+        EnsureClip(clip, stage?.durationTicks ?? 1);
+
+        if (clip?.tracks == null || clip.tracks.Count == 0)
+        {
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+            return;
+        }
+
+        if (authorTrackIndex < 0 || authorTrackIndex >= clip.tracks.Count)
+        {
+            authorTrackIndex = -1;
+            authorKeyIndex = -1;
+            return;
+        }
+
+        var track = clip.tracks[authorTrackIndex];
+        if (track?.keys == null || track.keys.Count == 0)
+        {
+            authorKeyIndex = -1;
+            return;
+        }
+
+        authorKeyIndex = Mathf.Clamp(authorKeyIndex, 0, track.keys.Count - 1);
+            }
+
+    private void ApplyAuthorEdit(Action edit, bool structureDirty = false, bool selectionDirty = false, int dirtyStageIndex = -1, bool queueSave = true)
+    {
+        edit?.Invoke();
+        NormalizeAuthorSelection();
+        if (structureDirty)
+            MarkAuthorPreviewStructureDirty();
+        if (dirtyStageIndex >= 0)
+            MarkAuthorPreviewStageDirty(dirtyStageIndex);
+        if (selectionDirty)
+            MarkAuthorPreviewSelectionDirty();
+        if (queueSave)
+            QueueAuthorSave();
+            }
+
+
+    private AgsModel.Keyframe GetInspectorDisplayKeyframe(AgsModel.Track tr, AgsModel.StageSpec stage, out bool isImplicitDisplay)
+    {
+        isImplicitDisplay = false;
+        if (tr == null || stage == null)
+            return null;
+
+        if (authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count)
+            return tr.keys[authorKeyIndex];
+
+        int tick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks));
+        isImplicitDisplay = true;
+        return SampleTrackKeyframeAtTick(tr, tick);
+    }
+
+    private AgsModel.Keyframe EnsureInspectorEditKeyframe(AgsModel.Track tr, AgsModel.StageSpec stage)
+    {
+        if (tr == null || stage == null)
+            return null;
+
+        if (authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count)
+            return tr.keys[authorKeyIndex];
+
+        int tick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks));
+        var existing = FindKeyframeAtTick(tr, tick);
+        if (existing == null)
+        {
+            existing = SampleTrackKeyframeAtTick(tr, tick);
+            existing.tick = tick;
+            tr.keys.Add(existing);
+            SortClampKeys(tr, Mathf.Max(1, stage.durationTicks));
+        }
+
+        authorKeyIndex = tr.keys.IndexOf(existing);
+        ShowAuthorStageAtTick(authorStageIndex, tick, seekIfPlaying: false);
+        return existing;
+    }
+
+    private void CommitAuthorStageKeyEdit(AgsModel.StageSpec stage, bool durationMayHaveChanged = false)
+    {
+        if (stage != null && durationMayHaveChanged)
+            RecalculateStageDurationFromKeys(stage);
+
+        QueueAuthorSave();
+        MarkAuthorPreviewStageDirty(authorStageIndex);
+
+        if (stage != null)
+            ShowAuthorStageAtTick(authorStageIndex, Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks)), seekIfPlaying: false);
+    }
 
     private static void EnsureRoles(AgsModel.Project p)
     {
@@ -182,8 +320,9 @@ public partial class Dialog_AnimGroupStudio
             authorRoleKey = roleKey;
             authorTrackIndex = -1;
             authorKeyIndex = -1;
-    
-            TrySaveProjects();
+
+            MarkAuthorPreviewStructureDirty();
+            QueueAuthorSave();
         }, validator: (s) => s.NullOrEmpty() ? "Name cannot be empty." : null));
             }
 
@@ -223,6 +362,9 @@ public partial class Dialog_AnimGroupStudio
             try { slot?.Renderer?.Dispose(); } catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("AgsState:1", "AgsState ignored a non-fatal editor exception.", ex); }
             authorSlotsByKey.Remove(roleKey);
         }
+
+        MarkAuthorPreviewStructureDirty();
+        QueueAuthorSave();
             }
 
     private static AgsModel.StageVariant CreateBaseVariantForProject(AgsModel.Project p)

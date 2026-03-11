@@ -41,6 +41,36 @@ public sealed class AgsPreviewPawnPool : IDisposable
         {
             owned.Add(gen);
             assigned[key] = gen;
+
+            // Baseline pawns are unspawned, so CompFaceParts.CompTick's warmup gate
+            // (pawn.Spawned == true) never fires. Eye/mouth styles stay null, which
+            // silently blocks the facial animation preview path in ApplyPreviewFacial.
+            // Fix: manually assign random styles and run init so the comp is ready before
+            // the first render. Best-effort — facial preview degrades gracefully if this fails.
+            try
+            {
+                var faceParts = gen.TryGetComp<CompFaceParts>();
+                if (faceParts != null)
+                {
+                    // AssignStylesRandomByWeight must run first so styles are set before the
+                    // render tree rebuild — otherwise CompRenderNodes returns early on null styles.
+                    faceParts.AssignStylesRandomByWeight();
+
+                    // RefreshFaceHard (unlike TryInitActions + SetAllGraphicsDirty) calls
+                    // renderer.renderTree?.SetDirty() and renderer.EnsureGraphicsInitialized(),
+                    // which triggers CompRenderNodes and injects face part nodes into the
+                    // render tree. Without this, face nodes are never registered and nothing
+                    // renders regardless of whether expression state is correctly set.
+                    faceParts.RefreshFaceHard(false);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce(
+                    "AgsPreviewPawnPool.EmptyCatch:5",
+                    "AGS preview pawn pool best-effort face init failed.",
+                    e);
+            }
         }
         return gen;
     }

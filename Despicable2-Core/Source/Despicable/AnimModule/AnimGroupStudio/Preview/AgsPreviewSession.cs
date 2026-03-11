@@ -53,6 +53,10 @@ public sealed partial class AgsPreviewSession : IDisposable
 
     private readonly AgsPreviewPawnPool pawnPool;
     private readonly List<SlotState> slots = new();
+    private readonly Dictionary<string, List<AgsPreviewNodeCapture.RawNodeSample>> lastNodeSamplesBySlot =
+        new Dictionary<string, List<AgsPreviewNodeCapture.RawNodeSample>>(StringComparer.Ordinal);
+    private readonly Dictionary<string, AgsPreviewNodeCapture.SlotDebugStats> lastNodeStatsBySlot =
+        new Dictionary<string, AgsPreviewNodeCapture.SlotDebugStats>(StringComparer.Ordinal);
 
     private AnimGroupDef currentGroup;
     private string runtimeSourceName;
@@ -88,6 +92,8 @@ public sealed partial class AgsPreviewSession : IDisposable
     public int StageCount => stageCount;
     public int SelectedStageIndex { get => selectedStageIndex; set => selectedStageIndex = Mathf.Clamp(value, 0, Mathf.Max(0, stageCount - 1)); }
     public bool LoopCurrentStage { get => loopCurrentStage; set => loopCurrentStage = value; }
+    public bool NodeCaptureEnabled { get; set; }
+    public Rect LastViewportTextureRect { get; private set; }
 
     public AgsPreviewSession()
     {
@@ -97,8 +103,27 @@ public sealed partial class AgsPreviewSession : IDisposable
     public void Dispose()
     {
         ResetSlots();
+        lastNodeSamplesBySlot.Clear();
+        lastNodeStatsBySlot.Clear();
         try { pawnPool?.Dispose(); } catch (System.Exception e) { Despicable.Core.DebugLogger.WarnExceptionOnce("AgsPreviewSession.EmptyCatch:1", "AGS preview session best-effort step failed.", e); }
     }
 
+    internal bool TryGetLastNodeSamples(string slotKey, out List<AgsPreviewNodeCapture.RawNodeSample> samples)
+    {
+        if (!slotKey.NullOrEmpty() && lastNodeSamplesBySlot.TryGetValue(slotKey, out samples) && samples != null)
+            return true;
 
+        samples = null;
+        return false;
+    }
+
+    internal bool TryGetLastNodeStats(string slotKey, out AgsPreviewNodeCapture.SlotDebugStats stats)
+    {
+        if (!slotKey.NullOrEmpty() && lastNodeStatsBySlot.TryGetValue(slotKey, out stats) && stats != null)
+            return true;
+
+        stats = null;
+        return false;
+    }
 }
+

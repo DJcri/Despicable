@@ -51,6 +51,10 @@ public partial class Dialog_AnimGroupStudio : Window
     private float authorLeftContentHeight { get => session.AuthorLeftContentHeight; set => session.AuthorLeftContentHeight = value; }
     private float authorInspectorContentHeight { get => session.AuthorInspectorContentHeight; set => session.AuthorInspectorContentHeight = value; }
     private int authorRightPaneTab { get => session.AuthorRightPaneTab; set => session.AuthorRightPaneTab = value; }
+    private float authorAngleSliderWindowCenter { get => session.AuthorAngleSliderWindowCenter; set => session.AuthorAngleSliderWindowCenter = value; }
+    private int authorAngleSliderTrackIndex { get => session.AuthorAngleSliderTrackIndex; set => session.AuthorAngleSliderTrackIndex = value; }
+    private int authorAngleSliderKeyTick { get => session.AuthorAngleSliderKeyTick; set => session.AuthorAngleSliderKeyTick = value; }
+    private bool authorAngleSliderDragging { get => session.AuthorAngleSliderDragging; set => session.AuthorAngleSliderDragging = value; }
 
     private UIContext frameworkCtx;
 
@@ -87,7 +91,7 @@ public partial class Dialog_AnimGroupStudio : Window
     private float authorPreviewSpeed { get => authorRuntime.Speed; set => authorRuntime.Speed = value; }
     private float authorPreviewTickAcc { get => authorRuntime.TickAccumulator; set => authorRuntime.TickAccumulator = value; }
     private int authorPreviewTick { get => authorRuntime.CurrentTick; set => authorRuntime.CurrentTick = value; }
-    private int authorPreviewStageHash { get => authorRuntime.StageHash; set => authorRuntime.StageHash = value; }
+    private int authorPreviewSourceHash { get => authorRuntime.SourceHash; set => authorRuntime.SourceHash = value; }
 
     // Preview Existing state
     private Dictionary<string, AgsModel.ExistingFamily> families { get => session.Families; set => session.Families = value; }
@@ -98,6 +102,9 @@ public partial class Dialog_AnimGroupStudio : Window
     private bool loopCurrentStage { get => session.LoopCurrentStage; set => session.LoopCurrentStage = value; }
 
     private readonly AgsPreviewSession preview;
+    private Texture2D authorGizmoDiscTexture;
+    private Texture2D authorGizmoRingTexture;
+    private bool authorPreviewGizmosEnabled = true;
 
     public override Vector2 InitialSize => new Vector2(1480f, 800f);
 
@@ -145,14 +152,19 @@ public partial class Dialog_AnimGroupStudio : Window
         // Build family index once for this window instance.
         RebuildFamilies();
 
-        authorPreviewStageHash = int.MinValue;
+        authorPreviewSourceHash = int.MinValue;
     }
 
     public override void PreClose()
     {
+        FlushQueuedSaveIfNeeded(force: true);
         base.PreClose();
         try { preview?.Dispose(); } catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:2", "Dialog_AnimGroupStudio ignored a non-fatal editor exception.", ex); }
         try { authorPawnPool?.Dispose(); } catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:3", "Dialog_AnimGroupStudio ignored a non-fatal editor exception.", ex); }
+        try { if (authorGizmoDiscTexture != null) UnityEngine.Object.Destroy(authorGizmoDiscTexture); } catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:GizmoTex", "Dialog_AnimGroupStudio failed to release the AGS gizmo texture cleanly.", ex); }
+        finally { authorGizmoDiscTexture = null; }
+        try { if (authorGizmoRingTexture != null) UnityEngine.Object.Destroy(authorGizmoRingTexture); } catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("Dialog_AnimGroupStudio:GizmoRingTex", "Dialog_AnimGroupStudio failed to release the AGS gizmo ring texture cleanly.", ex); }
+        finally { authorGizmoRingTexture = null; }
 
         for (int i = 0; i < authorSlots.Count; i++)
         {
@@ -168,8 +180,11 @@ public partial class Dialog_AnimGroupStudio : Window
         {
             preview.Update(Time.deltaTime);
             SyncExistingStageSelectionToPlayback();
-            authorPreviewPlaying = preview.IsPlaying;
-            authorPreviewTick = preview.CurrentTick;
+            if (sourceMode == SourceMode.AuthorProject)
+            {
+                authorPreviewPlaying = preview.IsPlaying;
+                authorPreviewTick = preview.CurrentTick;
+            }
         }
 
         frameworkCtx = new UIContext(StudioUiStyle, null, nameof(Dialog_AnimGroupStudio), UIPass.Draw);
@@ -200,19 +215,70 @@ public partial class Dialog_AnimGroupStudio : Window
 
         if (selectedSource == 0 && sourceMode != SourceMode.AuthorProject)
         {
-            preview.Stop();
-            sourceMode = SourceMode.AuthorProject;
+            ActivateAuthorSourceMode();
         }
         else if (selectedSource == 1 && sourceMode != SourceMode.ExistingDef)
         {
-            StopAuthorPreview(resetTick: true);
-            sourceMode = SourceMode.ExistingDef;
+            ActivateExistingSourceMode();
         }
+
+        if (sourceMode == SourceMode.AuthorProject)
+            RefreshAuthorPreviewIfNeeded();
 
         using (frameworkCtx.PushScope("Body"))
         {
             DrawAuthor(attached.InnerRect);
         }
+
+        if (Event.current == null || Event.current.type == EventType.Repaint)
+            FlushQueuedSaveIfNeeded();
+    }
+
+    private void ActivateAuthorSourceMode()
+    {
+        preview.Stop();
+        sourceMode = SourceMode.AuthorProject;
+        MarkAuthorPreviewStructureDirty();
+        authorRuntime.SelectionDirty = true;
+        RebindAuthorPreviewFromState();
+    }
+
+    private void ActivateExistingSourceMode()
+    {
+        bool dragChangedData = authorRuntime.GizmoDragChangedData;
+        ClearAuthorPreviewGizmoPointerState(preserveCycleState: false);
+        if (dragChangedData)
+            QueueAuthorSave();
+
+        int preservedAuthorTick = authorPreviewTick;
+        preview.Stop();
+        authorPreviewPlaying = false;
+        authorPreviewTickAcc = 0f;
+        authorPreviewTick = preservedAuthorTick;
+        sourceMode = SourceMode.ExistingDef;
+        RebindExistingPreviewFromSelection();
+    }
+
+    private void RebindExistingPreviewFromSelection()
+    {
+        preview.ConfigureFor(selectedGroup);
+        int stageCount = preview.StageCount;
+        selectedStageIndex = Mathf.Clamp(selectedStageIndex, 0, Mathf.Max(0, stageCount - 1));
+        preview.SelectedStageIndex = selectedStageIndex;
+        if (selectedGroup != null && stageCount > 0)
+            preview.ShowSelectedStageAtTick(0);
+    }
+
+    private void RebindAuthorPreviewFromState()
+    {
+        if (project == null)
+            return;
+
+        RefreshAuthorPreviewIfNeeded();
+
+        var stage = GetStage(project, authorStageIndex);
+        int tick = Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage?.durationTicks ?? 1));
+        ShowAuthorStageAtTick(authorStageIndex, tick, seekIfPlaying: false);
     }
 
     private void DrawAuthor(Rect rect)
@@ -227,7 +293,7 @@ public partial class Dialog_AnimGroupStudio : Window
                 new[]
                 {
                     new D2PaneLayout.PaneSpec("Left", 332f, 372f, 0.2f, canCollapse: false, priority: 0),
-                    new D2PaneLayout.PaneSpec("Center", 588f, 760f, 1.75f, canCollapse: false, priority: 0),
+                    new D2PaneLayout.PaneSpec("Center", 620f, 900f, 2.0f, canCollapse: false, priority: 0),
                     new D2PaneLayout.PaneSpec("Right", 260f, 320f, 0.3f, canCollapse: false, priority: 0),
                 },
                 gap: ctx.Style.Gap * 1.5f,
@@ -249,9 +315,9 @@ public partial class Dialog_AnimGroupStudio : Window
             new[]
             {
                 new D2PaneLayout.PaneSpec("Left", 300f, 330f, 0f, canCollapse: false, priority: 0),
-                new D2PaneLayout.PaneSpec("Center", 430f, 560f, 1.25f, canCollapse: false, priority: 0),
-                new D2PaneLayout.PaneSpec("Data", 260f, 300f, 0.55f, canCollapse: false, priority: 0),
-                new D2PaneLayout.PaneSpec("Inspector", 320f, 360f, 0.75f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Center", 500f, 700f, 2.0f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Data", 260f, 300f, 0.45f, canCollapse: false, priority: 0),
+                new D2PaneLayout.PaneSpec("Inspector", 300f, 360f, 0.6f, canCollapse: false, priority: 0),
             },
             gap: ctx.Style.Gap * 1.5f,
             fallback: D2PaneLayout.FallbackMode.Stack,

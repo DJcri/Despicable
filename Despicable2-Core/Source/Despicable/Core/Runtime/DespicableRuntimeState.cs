@@ -1,3 +1,4 @@
+using Despicable.AnimGroupStudio.Preview;
 using Despicable.FacePartsModule.Compatibility.PawnEditorCompat;
 using Despicable.AnimModule.Runtime.Graphics;
 using Despicable.Core;
@@ -21,6 +22,7 @@ public static class DespicableRuntimeState
         HarmonyPatch_PawnRenderTree_TryGetMatrix.ResetRuntimeState();
         GraphicStateResolver.ResetRuntimeState();
         WorkshopRenderContext.ResetRuntimeState();
+        AgsPreviewNodeCapture.ResetRuntimeState();
         PreviewPawnIdAllocator.ResetRuntimeState();
         ReentryGuard.ResetRuntimeState();
         SingleFrameDialogGate.ResetRuntimeState();

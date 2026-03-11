@@ -1,7 +1,0 @@
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\Source\obj\Debug\DespicableNSFW.csproj.AssemblyReference.cache
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\Source\obj\Debug\DespicableNSFW.csproj.CoreCompileInputs.cache
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\1.6\Assemblies\DespicableNSFW.dll
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\1.6\Assemblies\DespicableNSFW.pdb
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\Source\obj\Debug\Despicab.3406F815.Up2Date
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\Source\obj\Debug\DespicableNSFW.dll
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Despicable2-NSFW\Source\obj\Debug\DespicableNSFW.pdb

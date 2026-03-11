@@ -223,7 +223,7 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
 
         float t = Mathf.InverseLerp(a.tick, b.tick, tick);
         offset = Vector3.Lerp(a.offset, b.offset, t);
-        angle = Mathf.LerpAngle(a.angle, b.angle, t);
+        angle = Mathf.Lerp(a.angle, b.angle, t);
         return true;
     }
 }
