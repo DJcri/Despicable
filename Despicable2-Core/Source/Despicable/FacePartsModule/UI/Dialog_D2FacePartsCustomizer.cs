@@ -12,6 +12,13 @@ namespace Despicable.FacePartsModule.UI;
 
 public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 {
+    public enum PreviewRenderMode
+    {
+        Live,
+        LiveSquareSandbox,
+        IsolatedComposite,
+    }
+
     private static readonly D2UIStyle FaceUiStyle = D2UIStyle.Default.With(s =>
     {
         s.HeaderHeight = 58f;
@@ -29,6 +36,7 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     private readonly Pawn _pawn;
     private readonly CompFaceParts _comp;
+    private readonly PreviewRenderMode _previewRenderMode;
 
     private Vector2 _eyesScroll;
     private float _eyesContentHeight;
@@ -37,11 +45,13 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
     private RenderTexture _previewTexture;
     private int _previewWidth;
     private int _previewHeight;
+    private bool _livePreviewPrepared;
 
-    public Dialog_D2FacePartsCustomizer(Pawn pawn)
+    public Dialog_D2FacePartsCustomizer(Pawn pawn, PreviewRenderMode previewRenderMode = PreviewRenderMode.Live)
     {
         _pawn = pawn;
         _comp = pawn?.TryGetComp<CompFaceParts>();
+        _previewRenderMode = previewRenderMode;
 
         draggable = true;
         doCloseX = true;
@@ -103,16 +113,90 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
             return;
         }
 
-        if (Ctx.Pass == UIPass.Draw)
+        if (_previewRenderMode == PreviewRenderMode.IsolatedComposite)
         {
-            EnsurePreviewTexture(panel.Inner);
-            if (_previewTexture != null)
-                UIUtil.RenderPawnToTexture(_pawn, _previewTexture, Rot4.South, 0f, Vector3.zero, renderHeadgear: false, portrait: true, scale: 1.2f);
+            DrawIsolatedFaceCompositePreview(panel.Inner);
+            return;
         }
 
-        Ctx.RecordRect(panel.Inner, UIRectTag.Icon, "PreviewPanel/Image", null);
+        Rect livePreviewRect = ResolveLivePreviewRect(panel.Inner);
+        if (livePreviewRect.width <= 0f || livePreviewRect.height <= 0f)
+            return;
+
+        if (Ctx.Pass == UIPass.Draw)
+        {
+            PrepareLivePreview();
+            EnsurePreviewTexture(livePreviewRect);
+            if (_previewTexture != null)
+            {
+                UIUtil.RenderPawnToTexture(
+                    _pawn,
+                    _previewTexture,
+                    Rot4.South,
+                    0f,
+                    Vector3.zero,
+                    renderHeadgear: false,
+                    portrait: true,
+                    scale: 1.2f);
+            }
+        }
+
+        Ctx.RecordRect(livePreviewRect, UIRectTag.Icon, "PreviewPanel/Image", null);
         if (Ctx.Pass == UIPass.Draw && _previewTexture != null)
-            GUI.DrawTexture(panel.Inner, _previewTexture, ScaleMode.ScaleToFit, true);
+            GUI.DrawTexture(livePreviewRect, _previewTexture, ScaleMode.ScaleToFit, true);
+    }
+
+    private Rect ResolveLivePreviewRect(Rect rect)
+    {
+        if (_previewRenderMode != PreviewRenderMode.LiveSquareSandbox)
+            return rect;
+
+        float size = Mathf.Min(rect.width, rect.height);
+        float x = rect.x + ((rect.width - size) * 0.5f);
+        float y = rect.y + ((rect.height - size) * 0.5f);
+        return new Rect(x, y, size, size);
+    }
+
+    private void PrepareLivePreview()
+    {
+        if (_livePreviewPrepared || _pawn == null)
+            return;
+
+        try
+        {
+            _pawn.Drawer?.renderer?.EnsureGraphicsInitialized();
+            AutoEyePatchRuntime.PrewarmForPawn(_pawn);
+            _comp?.InvalidateFaceStructure();
+            _comp?.RefreshFaceHard(false);
+        }
+        catch (Exception ex)
+        {
+            Despicable.Core.DebugLogger.WarnExceptionOnce(
+                "Dialog_D2FacePartsCustomizer.PrepareLivePreview",
+                "Face parts customizer failed to prewarm its live preview state cleanly.",
+                ex);
+        }
+
+        _livePreviewPrepared = true;
+    }
+
+    private void DrawIsolatedFaceCompositePreview(Rect rect)
+    {
+        Texture2D headTexture = FacePreviewCache.ResolveHeadTexture(_pawn?.story?.headType);
+        Texture2D eyeTexture = FacePreviewCache.ResolveFacePartTexture(_pawn, _comp?.eyeStyleDef);
+        Texture2D mouthTexture = FacePreviewCache.ResolveFacePartTexture(_pawn, _comp?.mouthStyleDef);
+        Texture2D detailTexture = FacePreviewCache.ResolveTexture(_comp?.GetBaseDetailTexPath(), "FacePreviewCache.ResolveDetailTexture");
+
+        FacePreviewCache.DrawAlignedTextureStack(
+            Ctx,
+            rect,
+            "PreviewPanel/CompositeImage",
+            FacePreviewCache.PreviewAnchor.Center,
+            padding: 8f,
+            headTexture,
+            detailTexture,
+            eyeTexture,
+            mouthTexture);
     }
 
     private void DrawSelectorsPane(Rect rect)

@@ -76,11 +76,16 @@
     <Compile Include="Integrations\Intimacy\IntimacyValidationBridge.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyCompatModule.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyReflectionUtil.cs" />
+    <Compile Include="LovinModule\Anatomy\AnatomyBootstrapper.cs" />
+    <Compile Include="LovinModule\Anatomy\AnatomyQuery.cs" />
+    <Compile Include="LovinModule\Anatomy\Comp\CompAnatomyBootstrap.cs" />
+    <Compile Include="LovinModule\Anatomy\Comp\CompProperties_AnatomyBootstrap.cs" />
     <Compile Include="LovinModule\Comp\CompLovinParts.cs" />
     <Compile Include="LovinModule\Comp\CompProperties_LovinParts.cs" />
     <Compile Include="LovinModule\Patches\HarmonyPatch_LovinVisualEvents.cs" />
     <Compile Include="LovinModule\Runtime\LovinVisualRuntime.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_FacialAnimDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_AnatomyDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_GenitalDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_InteractionDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_JobDefOf.cs" />

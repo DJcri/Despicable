@@ -110,7 +110,7 @@ internal static class HarmonyPatch_PawnEditor_AppearanceEditor
 
         TooltipHandler.TipRegion(buttonRect, "D2C_CODE_97865B7F".Translate());
         if (Widgets.ButtonText(buttonRect, "D2C_CODE_D5D334BD".Translate()))
-            Find.WindowStack.Add(new Dialog_D2FacePartsCustomizer(pawn));
+            Find.WindowStack.Add(new Dialog_D2FacePartsCustomizer(pawn, Dialog_D2FacePartsCustomizer.PreviewRenderMode.LiveSquareSandbox));
     }
 
     private static Rect BuildFacePartsButtonRect(Rect inRect)

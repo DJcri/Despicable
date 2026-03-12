@@ -97,6 +97,79 @@ internal static class FacePreviewCache
         return null;
     }
 
+    public static Texture2D ResolveTexture(string path, string warnOnceKey = "FacePreviewCache.ResolveTexture")
+    {
+        if (path.NullOrEmpty())
+            return null;
+
+        try
+        {
+            return ContentFinder<Texture2D>.Get(path, false);
+        }
+        catch (Exception ex)
+        {
+            Despicable.Core.DebugLogger.WarnExceptionOnce(
+                warnOnceKey,
+                "Face preview cache failed to resolve a texture.",
+                ex);
+        }
+
+        return null;
+    }
+
+    public static void DrawAlignedTextureStack(UIContext ctx, Rect rect, string label, PreviewAnchor anchor = PreviewAnchor.Center, float padding = 0f, params Texture2D[] textures)
+    {
+        Rect recordedRect = rect;
+        ctx?.RecordRect(recordedRect, UIRectTag.Icon, label, null);
+        if (ctx != null && ctx.Pass == UIPass.Measure)
+            return;
+
+        Texture2D reference = null;
+        if (textures != null)
+        {
+            for (int i = 0; i < textures.Length; i++)
+            {
+                if (textures[i] != null)
+                {
+                    reference = textures[i];
+                    break;
+                }
+            }
+        }
+
+        reference ??= BaseContent.BadTex;
+        if (reference == null)
+            return;
+
+        Rect targetRect = padding > 0f ? rect.ContractedBy(padding) : rect;
+        if (targetRect.width <= 1f || targetRect.height <= 1f)
+            return;
+
+        Rect drawRect = FitRect(targetRect, reference.width, reference.height, anchor);
+        if (drawRect.width <= 1f || drawRect.height <= 1f)
+            return;
+
+        if (textures == null || textures.Length == 0)
+        {
+            GUI.DrawTexture(drawRect, reference, ScaleMode.StretchToFill, true);
+            return;
+        }
+
+        bool drewAny = false;
+        for (int i = 0; i < textures.Length; i++)
+        {
+            Texture2D texture = textures[i];
+            if (texture == null)
+                continue;
+
+            GUI.DrawTexture(drawRect, texture, ScaleMode.StretchToFill, true);
+            drewAny = true;
+        }
+
+        if (!drewAny)
+            GUI.DrawTexture(drawRect, reference, ScaleMode.StretchToFill, true);
+    }
+
     public static void DrawCroppedTexture(UIContext ctx, Rect rect, Texture2D texture, string label, float padding = 0f, PreviewAnchor anchor = PreviewAnchor.Center)
     {
         Rect recordedRect = rect;

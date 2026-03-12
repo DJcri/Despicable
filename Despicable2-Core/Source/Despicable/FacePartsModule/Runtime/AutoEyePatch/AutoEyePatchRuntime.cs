@@ -128,6 +128,14 @@ internal static class AutoEyePatchRuntime
         return TryGetHeadResult(headType, out result);
     }
 
+    public static void PrewarmForPawn(Pawn pawn)
+    {
+        if (pawn == null || !IsGenerationEnabled())
+            return;
+
+        EnsureGeneratedForHead(pawn.story?.headType);
+    }
+
     public static bool TryGetHeadResult(HeadTypeDef headType, out AutoEyePatchHeadResult result)
     {
         result = null;

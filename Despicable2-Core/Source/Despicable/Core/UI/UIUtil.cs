@@ -22,73 +22,45 @@ public static class UIUtil
         Vector3 positionOffset,
         bool renderHeadgear = true,
         bool portrait = true,
-        float scale = 1f)
+        float scale = 1f,
+        bool isolateCameraState = false)
     {
         if (pawn == null || target == null) return;
 
-        // RimWorld's PawnCacheRenderer uses an internal shared camera.
-        // AGS non-portrait preview capture needs a handle to that camera for node projection,
-        // but forcing the camera viewport there can skew the workshop framing. Keep explicit
-        // camera handoff for capture, and only normalize rect/pixelRect for portrait renders.
         Camera cam = null;
-        Rect oldRect = default;
-        Rect oldPixelRect = default;
-        bool hadCam = false;
-        bool adjustedViewport = false;
+        PawnCacheCameraState? capturedCameraState = null;
 
         try
         {
             pawn.Drawer?.renderer?.EnsureGraphicsInitialized();
 
-            cam = TryGetPawnCacheCamera();
-            hadCam = cam != null;
-            if (hadCam)
-            {
-                if (portrait)
-                {
-                    oldRect = cam.rect;
-                    oldPixelRect = cam.pixelRect;
-                    cam.rect = new Rect(0f, 0f, 1f, 1f);
-                    cam.pixelRect = new Rect(0f, 0f, target.width, target.height);
-                    adjustedViewport = true;
-                }
+            if (isolateCameraState)
+                ClearRenderTexture(target);
 
+            // Any live preview render can mutate the shared pawn-cache camera to match
+            // the caller's target aspect/rect. Capture and restore around every render so
+            // non-square preview surfaces (for example animation workshop panes) do not
+            // poison later vanilla portraits.
+            cam = GetPawnCacheCameraForPreview(forceRefresh: true);
+            if (cam != null)
+            {
+                capturedCameraState = PawnCacheCameraState.Capture(cam);
+                ConfigurePreviewCamera(cam, target);
                 AgsPreviewNodeCapture.TryAttachActiveCamera(pawn, cam);
             }
 
-            if (WorkshopRenderContext.Active)
-            {
-                PawnCacheCameraManager.PawnCacheRenderer.RenderPawn(
-                    pawn,
-                    target,
-                    Vector3.zero,
-                    scale,
-                    angle,
-                    rot,
-                    renderHead: true,
-                    renderHeadgear: renderHeadgear,
-                    renderClothes: true,
-                    portrait: portrait,
-                    positionOffset: positionOffset);
-            }
-            else
-            {
-                using (new WorkshopRenderContext.Scope(active: true))
-                {
-                    PawnCacheCameraManager.PawnCacheRenderer.RenderPawn(
-                        pawn,
-                        target,
-                        Vector3.zero,
-                        scale,
-                        angle,
-                        rot,
-                        renderHead: true,
-                        renderHeadgear: renderHeadgear,
-                        renderClothes: true,
-                        portrait: portrait,
-                        positionOffset: positionOffset);
-                }
-            }
+            PawnCacheCameraManager.PawnCacheRenderer.RenderPawn(
+                pawn,
+                target,
+                Vector3.zero,
+                scale,
+                angle,
+                rot,
+                renderHead: true,
+                renderHeadgear: renderHeadgear,
+                renderClothes: true,
+                portrait: portrait,
+                positionOffset: positionOffset);
         }
         catch (Exception e)
         {
@@ -96,40 +68,53 @@ public static class UIUtil
         }
         finally
         {
-            if (hadCam && adjustedViewport)
-            {
-                try
-                {
-                    cam.rect = oldRect;
-                    cam.pixelRect = oldPixelRect;
-                }
-                catch (Exception ex)
-                {
-                    Despicable.Core.DebugLogger.WarnExceptionOnce("UIUtil.RenderPawnToTexture.RestoreCamera", "UIUtil failed to restore the pawn cache camera viewport after rendering.", ex);
-                }
-            }
+            if (capturedCameraState.HasValue && cam != null)
+                capturedCameraState.Value.Restore(cam);
         }
     }
 
     // Guardrail-Allow-Static: Best-effort reflection cache for PawnCache camera handle, reused across portrait renders.
     private static Camera cachedPawnCacheCamera;
 
-    public static Camera GetPawnCacheCameraForPreview()
+    public static void ResetRuntimeState()
     {
-        return TryGetPawnCacheCamera();
+        cachedPawnCacheCamera = null;
     }
 
-    private static Camera TryGetPawnCacheCamera()
+    public static Camera GetPawnCacheCameraForPreview(bool forceRefresh = false)
     {
-        if (cachedPawnCacheCamera != null) return cachedPawnCacheCamera;
+        return TryGetPawnCacheCamera(forceRefresh);
+    }
+
+    private static Camera TryGetPawnCacheCamera(bool forceRefresh = false)
+    {
+        if (!forceRefresh && IsUsableCachedCamera(cachedPawnCacheCamera))
+            return cachedPawnCacheCamera;
+
+        if (!forceRefresh)
+            cachedPawnCacheCamera = null;
 
         try
         {
             object renderer = PawnCacheCameraManager.PawnCacheRenderer;
             if (renderer == null) return null;
 
-            cachedPawnCacheCamera = FindCameraRecursive(renderer, 3, new HashSet<object>(ReferenceEqualityComparer.Instance));
-            return cachedPawnCacheCamera;
+            // Face-parts preview renders use forceRefresh so they can resolve the
+            // live pawn-cache camera without poisoning the shared cache for other
+            // preview UIs. Prefer direct Camera members on the renderer before any
+            // broad recursive scan so compat layers do not accidentally hand us an
+            // unrelated nested camera from another editor surface.
+            Camera resolved = FindPreferredRendererCamera(renderer);
+            if (!IsUsableCachedCamera(resolved))
+                resolved = FindCameraRecursive(renderer, 3, new HashSet<object>(ReferenceEqualityComparer.Instance));
+
+            if (!IsUsableCachedCamera(resolved))
+                return null;
+
+            if (!forceRefresh)
+                cachedPawnCacheCamera = resolved;
+
+            return resolved;
         }
         catch (Exception ex)
         {
@@ -137,6 +122,170 @@ public static class UIUtil
         }
 
         return null;
+    }
+
+    private static bool IsUsableCachedCamera(Camera cam)
+    {
+        return cam != null && cam.gameObject != null;
+    }
+
+
+    private static Camera FindPreferredRendererCamera(object renderer)
+    {
+        if (renderer == null)
+            return null;
+
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        Type rendererType = renderer.GetType();
+
+        foreach (FieldInfo field in rendererType.GetFields(Flags))
+        {
+            if (field.FieldType != typeof(Camera))
+                continue;
+
+            try
+            {
+                Camera camera = field.GetValue(renderer) as Camera;
+                if (IsUsableCachedCamera(camera))
+                    return camera;
+            }
+            catch
+            {
+            }
+        }
+
+        foreach (PropertyInfo property in rendererType.GetProperties(Flags))
+        {
+            if (property.PropertyType != typeof(Camera) || !property.CanRead || property.GetIndexParameters().Length != 0)
+                continue;
+
+            try
+            {
+                Camera camera = property.GetValue(renderer, null) as Camera;
+                if (IsUsableCachedCamera(camera))
+                    return camera;
+            }
+            catch
+            {
+            }
+        }
+
+        if (renderer is Component component)
+        {
+            Camera componentCamera = component.GetComponent<Camera>();
+            if (IsUsableCachedCamera(componentCamera))
+                return componentCamera;
+
+            Camera childCamera = component.GetComponentInChildren<Camera>(true);
+            if (IsUsableCachedCamera(childCamera))
+                return childCamera;
+        }
+
+        if (renderer is GameObject gameObject)
+        {
+            Camera objectCamera = gameObject.GetComponent<Camera>();
+            if (IsUsableCachedCamera(objectCamera))
+                return objectCamera;
+
+            Camera childCamera = gameObject.GetComponentInChildren<Camera>(true);
+            if (IsUsableCachedCamera(childCamera))
+                return childCamera;
+        }
+
+        return null;
+    }
+
+    private static void ClearRenderTexture(RenderTexture target)
+    {
+        RenderTexture previous = RenderTexture.active;
+        try
+        {
+            RenderTexture.active = target;
+            GL.Clear(true, true, new Color(0f, 0f, 0f, 0f));
+        }
+        finally
+        {
+            RenderTexture.active = previous;
+        }
+    }
+
+
+    private static void ConfigurePreviewCamera(Camera cam, RenderTexture target)
+    {
+        if (cam == null || target == null)
+            return;
+
+        cam.targetTexture = target;
+        cam.rect = new Rect(0f, 0f, 1f, 1f);
+        cam.pixelRect = new Rect(0f, 0f, target.width, target.height);
+        if (target.height > 0)
+            cam.aspect = target.width / (float)target.height;
+        cam.ResetProjectionMatrix();
+    }
+
+    private readonly struct PawnCacheCameraState
+    {
+        private readonly Rect rect;
+        private readonly Rect pixelRect;
+        private readonly RenderTexture targetTexture;
+        private readonly float aspect;
+        private readonly Matrix4x4 projectionMatrix;
+        private readonly CameraClearFlags clearFlags;
+        private readonly Color backgroundColor;
+        private readonly bool orthographic;
+        private readonly float orthographicSize;
+        private readonly float fieldOfView;
+        private readonly float nearClipPlane;
+        private readonly float farClipPlane;
+        private readonly int cullingMask;
+        private readonly bool useOcclusionCulling;
+        private readonly bool allowHDR;
+        private readonly bool allowMSAA;
+
+        private PawnCacheCameraState(Camera cam)
+        {
+            rect = cam.rect;
+            pixelRect = cam.pixelRect;
+            targetTexture = cam.targetTexture;
+            aspect = cam.aspect;
+            projectionMatrix = cam.projectionMatrix;
+            clearFlags = cam.clearFlags;
+            backgroundColor = cam.backgroundColor;
+            orthographic = cam.orthographic;
+            orthographicSize = cam.orthographicSize;
+            fieldOfView = cam.fieldOfView;
+            nearClipPlane = cam.nearClipPlane;
+            farClipPlane = cam.farClipPlane;
+            cullingMask = cam.cullingMask;
+            useOcclusionCulling = cam.useOcclusionCulling;
+            allowHDR = cam.allowHDR;
+            allowMSAA = cam.allowMSAA;
+        }
+
+        public static PawnCacheCameraState Capture(Camera cam)
+        {
+            return new PawnCacheCameraState(cam);
+        }
+
+        public void Restore(Camera cam)
+        {
+            cam.rect = rect;
+            cam.pixelRect = pixelRect;
+            cam.targetTexture = targetTexture;
+            cam.aspect = aspect;
+            cam.projectionMatrix = projectionMatrix;
+            cam.clearFlags = clearFlags;
+            cam.backgroundColor = backgroundColor;
+            cam.orthographic = orthographic;
+            cam.orthographicSize = orthographicSize;
+            cam.fieldOfView = fieldOfView;
+            cam.nearClipPlane = nearClipPlane;
+            cam.farClipPlane = farClipPlane;
+            cam.cullingMask = cullingMask;
+            cam.useOcclusionCulling = useOcclusionCulling;
+            cam.allowHDR = allowHDR;
+            cam.allowMSAA = allowMSAA;
+        }
     }
 
     private static Camera FindCameraRecursive(object value, int depthRemaining, HashSet<object> visited)

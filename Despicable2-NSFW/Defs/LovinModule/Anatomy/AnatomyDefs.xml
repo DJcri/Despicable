@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <BodyPartGroupDef>
+    <defName>D2_Genitals</defName>
+    <label>genitals</label>
+    <listOrder>49</listOrder>
+  </BodyPartGroupDef>
+
+  <BodyPartDef>
+    <defName>D2_ExternalGenitals</defName>
+    <label>external genitals</label>
+    <hitPoints>10</hitPoints>
+    <skinCovered>true</skinCovered>
+    <canScarify>true</canScarify>
+  </BodyPartDef>
+
+  <HediffDef>
+    <defName>D2_Genital_Penis</defName>
+    <label>penis</label>
+    <labelNoun>a penis</labelNoun>
+    <description>Natural external genital anatomy.</description>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <tags>
+      <li>D2_GenitalAnatomy</li>
+      <li>D2_Penis</li>
+    </tags>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>D2_Genital_Vagina</defName>
+    <label>vagina</label>
+    <labelNoun>a vagina</labelNoun>
+    <description>Natural external genital anatomy.</description>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <tags>
+      <li>D2_GenitalAnatomy</li>
+      <li>D2_Vagina</li>
+    </tags>
+  </HediffDef>
+
+</Defs>

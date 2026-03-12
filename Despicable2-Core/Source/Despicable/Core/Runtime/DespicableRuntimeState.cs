@@ -37,6 +37,7 @@ public static class DespicableRuntimeState
         HKDiagnostics.ResetRuntimeState();
         UIRectRegistry.ResetRuntimeState();
         DebugLogger.ResetRuntimeState();
+        UIUtil.ResetRuntimeState();
         HarmonyPatch_PawnEditor_AppearanceEditor.ResetRuntimeState();
         AutoEyePatchRuntime.ResetRuntimeState();
         FacePartsEventRuntime.ResetRuntimeState();

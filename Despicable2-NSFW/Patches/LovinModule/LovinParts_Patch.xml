@@ -18,6 +18,13 @@
 			</li>
 			
 			<li Class="PatchOperationAdd">
+				<xpath>Defs/ThingDef[defName="Human" or defName="CreepJoiner"]/comps[not(li[@Class="Despicable.CompProperties_AnatomyBootstrap"])]</xpath>
+				<value>
+					<li Class="Despicable.CompProperties_AnatomyBootstrap"/>
+				</value>
+			</li>
+			
+			<li Class="PatchOperationAdd">
 				<xpath>Defs/ThingDef[defName="Human" or defName="CreepJoiner"]/comps[not(li[@Class="Despicable.CompProperties_LovinParts"])]</xpath>
 				<value>
 					<li Class="Despicable.CompProperties_LovinParts"/>

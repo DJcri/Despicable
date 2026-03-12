@@ -85,10 +85,7 @@ public class CompLovinParts : ThingComp
         if (pawn == null || pawn.RaceProps?.Humanlike != true)
             return false;
 
-        if (Despicable.NSFW.Integrations.IntegrationGuards.IsGenderWorksLoaded())
-            return Despicable.NSFW.Integrations.GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(pawn);
-
-        return PawnStateUtil.ComparePawnGenderToByte(pawn, (byte)Gender.Male);
+        return AnatomyQuery.HasPenis(pawn);
     }
 
     private static bool HasPants(Pawn pawn)

@@ -29,49 +29,20 @@ internal static class ReproCompatibilityUtil
     {
         if (a == null || b == null) return false;
 
-        // If nothing is required, always allow.
         if (!requiresMale && !requiresFemale) return true;
 
-        // Defensive checks.
         if (a.RaceProps == null || b.RaceProps == null) return false;
         if (!a.RaceProps.Humanlike || !b.RaceProps.Humanlike) return false;
 
-        bool malePresent = false;
-        bool femalePresent = false;
+        bool aHasSlot = AnatomyQuery.HasExternalGenitalsSlot(a);
+        bool bHasSlot = AnatomyQuery.HasExternalGenitalsSlot(b);
 
-        if (IntegrationGuards.IsGenderWorksLoaded())
-        {
-            bool aMale = GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(a);
-            bool bMale = GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(b);
-            bool aFem = GenderWorks.GenderWorksUtil.HasFemaleReproductiveOrganTag(a);
-            bool bFem = GenderWorks.GenderWorksUtil.HasFemaleReproductiveOrganTag(b);
-
-            // If neither pawn exposes ANY repro tags, we don't know. Don't hard-block alien frameworks.
-            if (aMale || bMale || aFem || bFem)
-            {
-                malePresent = aMale || bMale;
-                femalePresent = aFem || bFem;
-            }
-            else
-            {
-                // Unknown: allow.
-                return true;
-            }
-        }
-        else if (a.def == ThingDefOf.Human && b.def == ThingDefOf.Human)
-        {
-            bool aMale = a.gender == Gender.Male;
-            bool bMale = b.gender == Gender.Male;
-            bool aFem = a.gender == Gender.Female;
-            bool bFem = b.gender == Gender.Female;
-            malePresent = aMale || bMale;
-            femalePresent = aFem || bFem;
-        }
-        else
-        {
-            // Unknown anatomy system: don't block.
+        // Preserve tolerant behavior for unknown frameworks / unpatched bodies.
+        if (!aHasSlot || !bHasSlot)
             return true;
-        }
+
+        bool malePresent = AnatomyQuery.HasPenis(a) || AnatomyQuery.HasPenis(b);
+        bool femalePresent = AnatomyQuery.HasVagina(a) || AnatomyQuery.HasVagina(b);
 
         if (requiresMale && !malePresent) return false;
         if (requiresFemale && !femalePresent) return false;
@@ -80,50 +51,28 @@ internal static class ReproCompatibilityUtil
 
     /// <summary>
     /// Returns true if the pair appears capable of "vaginal" style intercourse.
-    /// This is intentionally conservative:
-    ///  - If GenderWorks is loaded, prefer its organ tags.
-    ///  - Otherwise, fall back to vanilla gender heuristic for vanilla humans only.
-    ///  - For unknown alien frameworks, return true (do not block) unless we are confident it is impossible.
+    /// This is intentionally conservative and remains permissive for unknown alien frameworks.
     /// </summary>
     internal static bool CanDoVaginal(Pawn a, Pawn b)
     {
         if (a == null || b == null) return false;
 
-        // We only use this for humanlike flesh pairs, but keep the check defensive.
         if (a.RaceProps == null || b.RaceProps == null) return false;
         if (!a.RaceProps.Humanlike || !b.RaceProps.Humanlike) return false;
         if (!a.RaceProps.IsFlesh || !b.RaceProps.IsFlesh) return false;
 
-        // If GenderWorks is loaded, use its tags when present.
-        if (IntegrationGuards.IsGenderWorksLoaded())
-        {
-            bool aMale = GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(a);
-            bool bMale = GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(b);
-            bool aFem = GenderWorks.GenderWorksUtil.HasFemaleReproductiveOrganTag(a);
-            bool bFem = GenderWorks.GenderWorksUtil.HasFemaleReproductiveOrganTag(b);
+        bool aHasSlot = AnatomyQuery.HasExternalGenitalsSlot(a);
+        bool bHasSlot = AnatomyQuery.HasExternalGenitalsSlot(b);
 
-            // If neither pawn exposes ANY repro tags, we don't know. Don't hard-block alien frameworks.
-            if (!(aMale || bMale || aFem || bFem))
-                return true;
+        // Preserve the old permissive philosophy for unknown systems.
+        if (!aHasSlot || !bHasSlot)
+            return true;
 
-            // Otherwise, require at least one "male" and at least one "female" signal across the pair.
-            return (aMale || bMale) && (aFem || bFem);
-        }
+        bool malePresent = AnatomyQuery.HasPenis(a) || AnatomyQuery.HasPenis(b);
+        bool femalePresent = AnatomyQuery.HasVagina(a) || AnatomyQuery.HasVagina(b);
 
-        // Without GenderWorks: keep it strict for vanilla humans only; do not guess for aliens.
-        if (a.def == ThingDefOf.Human && b.def == ThingDefOf.Human)
-        {
-            bool aMale = a.gender == Gender.Male;
-            bool bMale = b.gender == Gender.Male;
-            bool aFem = a.gender == Gender.Female;
-            bool bFem = b.gender == Gender.Female;
-            return (aMale || bMale) && (aFem || bFem);
-        }
-
-        // Unknown anatomy system: don't block.
-        return true;
+        return malePresent && femalePresent;
     }
-
 
     /// <summary>
     /// Returns true if a single pawn appears to satisfy the sex requirements of a solo LovinTypeDef.
@@ -138,42 +87,16 @@ internal static class ReproCompatibilityUtil
     internal static bool PawnSatisfiesSexRequirements(Pawn pawn, bool requiresMale, bool requiresFemale)
     {
         if (pawn == null) return false;
-
         if (!requiresMale && !requiresFemale) return true;
 
         if (pawn.RaceProps == null || !pawn.RaceProps.Humanlike) return false;
+        if (!AnatomyQuery.HasExternalGenitalsSlot(pawn)) return true;
 
-        bool malePresent = false;
-        bool femalePresent = false;
-
-        if (IntegrationGuards.IsGenderWorksLoaded())
-        {
-            bool pawnMale = GenderWorks.GenderWorksUtil.HasMaleReproductiveOrganTag(pawn);
-            bool pawnFemale = GenderWorks.GenderWorksUtil.HasFemaleReproductiveOrganTag(pawn);
-
-            if (pawnMale || pawnFemale)
-            {
-                malePresent = pawnMale;
-                femalePresent = pawnFemale;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else if (pawn.def == ThingDefOf.Human)
-        {
-            malePresent = pawn.gender == Gender.Male;
-            femalePresent = pawn.gender == Gender.Female;
-        }
-        else
-        {
-            return true;
-        }
+        bool malePresent = AnatomyQuery.HasPenis(pawn);
+        bool femalePresent = AnatomyQuery.HasVagina(pawn);
 
         if (requiresMale && !malePresent) return false;
         if (requiresFemale && !femalePresent) return false;
         return true;
     }
-
 }
