@@ -139,9 +139,9 @@ public static class D2Table
             else
             {
                 if (isSortedColumn)
-                    text += state.SortDescending ? " ▼" : " ▲";
+                    text += state.SortDescending ? " ▼" : " ▲"; // loc-ignore: symbolic sort-state suffix
 
-                clicked = D2Widgets.ButtonText(ctx, cell, text, label + "/Col[" + i + "]");
+                clicked = D2Widgets.ButtonText(ctx, cell, text, label + "/Col[" + i + "]"); // loc-allow-internal: generated column button id
             }
 
             if (clicked)
@@ -160,7 +160,7 @@ public static class D2Table
                 string tooltip = columns[i].Tooltip;
                 if (useVanillaSortIcons && isSortedColumn)
                 {
-                    string sortState = state.SortDescending ? "Sorted descending" : "Sorted ascending";
+                    string sortState = state.SortDescending ? "D2C_UI_SortedDescending".Translate().ToString() : "D2C_UI_SortedAscending".Translate().ToString();
                     tooltip = tooltip.NullOrEmpty() ? sortState : tooltip + "\n" + sortState;
                 }
 
@@ -212,7 +212,7 @@ public static class D2Table
             if (col.Draw != null)
                 col.Draw(ctx, cell, item);
             else
-                D2Widgets.LabelClipped(ctx, cell, col.Text != null ? col.Text(item) : string.Empty, label + "/Cell[" + i + "]");
+                D2Widgets.LabelClipped(ctx, cell, col.Text != null ? col.Text(item) : string.Empty, label + "/Cell[" + i + "]"); // loc-allow-internal: generated cell label id
         }
     }
 

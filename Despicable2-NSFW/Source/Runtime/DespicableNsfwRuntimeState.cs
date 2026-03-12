@@ -15,9 +15,4 @@ internal static class DespicableNsfwRuntimeState
         IntimacyApplyUtil.ResetRuntimeState();
         IntimacyValidationBridge.ResetRuntimeState();
     }
-
-    internal static void ResetAll()
-    {
-        ResetRuntimeState();
-    }
 }

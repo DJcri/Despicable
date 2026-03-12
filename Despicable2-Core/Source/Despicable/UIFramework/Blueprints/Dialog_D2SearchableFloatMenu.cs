@@ -38,7 +38,7 @@ public sealed class Dialog_D2SearchableFloatMenu : D2WindowBlueprint
     {
         var ctx = Ctx;
 
-            var v = new Despicable.UIFramework.Layout.VStack(ctx, rect);
+            var v = new Despicable.UIFramework.Layout.D2VStack(ctx, rect);
             v.NextSpace(2f);
 
         // Title

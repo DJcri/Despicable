@@ -7,7 +7,7 @@ namespace Despicable.UIFramework.Layout;
 /// <summary>
 /// Compact adaptive form layout for inspector-style rows.
 ///
-/// Keeps label/control alignment stable and removes a lot of hand-written HRow boilerplate.
+/// Keeps label/control alignment stable and removes a lot of hand-written D2HRow boilerplate.
 /// </summary>
 public static class D2AdaptiveForm
 {

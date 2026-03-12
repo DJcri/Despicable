@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <LanguageData>
   <D2C_CODE_2C24A061>La resolución de aprobación de Karma heroico no pudo leer una etiqueta de precepto.</D2C_CODE_2C24A061>
   <D2C_CODE_45DCE70A>{0}: No se encontró PawnEditor.Dialog_AppearanceEditor. No se inyectó el botón de Partes faciales.</D2C_CODE_45DCE70A>
@@ -6,4 +6,13 @@
   <D2C_CODE_97865B7F>Abrir la selección de partes faciales de Despicable.</D2C_CODE_97865B7F>
   <D2C_CODE_AF6C0280>Las Partes faciales no están disponibles para este tipo de personaje ({0}).</D2C_CODE_AF6C0280>
   <D2C_CODE_D5D334BD>Partes faciales</D2C_CODE_D5D334BD>
-</LanguageData>
+  <D2C_UI_MoreOptions>More options</D2C_UI_MoreOptions>
+  <D2C_UI_OK>OK</D2C_UI_OK>
+  <D2C_UI_Clear>Clear</D2C_UI_Clear>
+  <D2C_UI_Decrease>Decrease</D2C_UI_Decrease>
+  <D2C_UI_Increase>Increase</D2C_UI_Increase>
+  <D2C_UI_Any>Any</D2C_UI_Any>
+<D2C_UI_Search>Search</D2C_UI_Search><D2C_UI_ShowFilters>Show Filters</D2C_UI_ShowFilters><D2C_UI_HideFilters>Hide Filters</D2C_UI_HideFilters><D2C_UI_SortedDescending>Sorted descending</D2C_UI_SortedDescending><D2C_UI_SortedAscending>Sorted ascending</D2C_UI_SortedAscending><D2C_DEMO_Controls>Controls</D2C_DEMO_Controls><D2C_DEMO_Scenario>Scenario</D2C_DEMO_Scenario><D2C_DEMO_CoreWidgets>Core widgets</D2C_DEMO_CoreWidgets><D2C_DEMO_Enabled>Enabled</D2C_DEMO_Enabled><D2C_DEMO_Intensity>Intensity</D2C_DEMO_Intensity><D2C_DEMO_Filter>Filter</D2C_DEMO_Filter><D2C_DEMO_Mode>Mode</D2C_DEMO_Mode><D2C_DEMO_Size>Size</D2C_DEMO_Size><D2C_DEMO_Menus>Menus</D2C_DEMO_Menus><D2C_DEMO_OpenSearchableMenu>Open searchable menu</D2C_DEMO_OpenSearchableMenu><D2C_DEMO_UIFrameworkMenu>UI Framework Menu</D2C_DEMO_UIFrameworkMenu><D2C_DEMO_CommandBar>Command bar</D2C_DEMO_CommandBar><D2C_DEMO_Apply>Apply</D2C_DEMO_Apply><D2C_DEMO_RunPrimaryAction>Run the primary action.</D2C_DEMO_RunPrimaryAction><D2C_DEMO_Randomize>Randomize</D2C_DEMO_Randomize><D2C_DEMO_RunRandomizationFlavor>Run or choose a randomization flavor.</D2C_DEMO_RunRandomizationFlavor><D2C_DEMO_RandomizeSoft>Randomize: Soft</D2C_DEMO_RandomizeSoft><D2C_DEMO_RandomizeLoud>Randomize: Loud</D2C_DEMO_RandomizeLoud><D2C_DEMO_RepeatLast>Repeat Last</D2C_DEMO_RepeatLast><D2C_DEMO_ReplayLastRemembered>Replay the last remembered command.</D2C_DEMO_ReplayLastRemembered><D2C_DEMO_NoRememberedCommandYet>No remembered command yet.</D2C_DEMO_NoRememberedCommandYet><D2C_DEMO_LastFmt>Last: {0}</D2C_DEMO_LastFmt><D2C_DEMO_Icons>Icons</D2C_DEMO_Icons><D2C_DEMO_EnableOverlapSandbox>Enable overlap sandbox</D2C_DEMO_EnableOverlapSandbox><D2C_DEMO_OverlapA>Overlap A</D2C_DEMO_OverlapA><D2C_DEMO_OverlapB>Overlap B</D2C_DEMO_OverlapB><D2C_DEMO_ValidIcon>Valid icon</D2C_DEMO_ValidIcon><D2C_DEMO_EmptyIconStable>Empty icon (null texture)
+Layout must remain stable.</D2C_DEMO_EmptyIconStable><D2C_DEMO_DisabledIconTooltip>Disabled icon
+Disabled controls should still have tooltips.</D2C_DEMO_DisabledIconTooltip><D2C_DEMO_HoverIconsHint>(hover icons for tooltips)</D2C_DEMO_HoverIconsHint><D2C_DEMO_Disabled>Disabled</D2C_DEMO_Disabled><D2C_DEMO_CmdFmt>Cmd {0}</D2C_DEMO_CmdFmt><D2C_DEMO_ClickedGizmoFmt>Clicked gizmo {0}</D2C_DEMO_ClickedGizmoFmt><D2C_DEMO_DemoGizmoFmt>Demo gizmo {0}</D2C_DEMO_DemoGizmoFmt><D2C_DEMO_DisabledGizmo>Disabled gizmo (demo)</D2C_DEMO_DisabledGizmo><D2C_DEMO_DisabledRow>Disabled row (demo)
+Disabled controls should still have tooltips.</D2C_DEMO_DisabledRow></LanguageData>

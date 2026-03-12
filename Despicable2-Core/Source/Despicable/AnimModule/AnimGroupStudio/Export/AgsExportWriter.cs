@@ -1,5 +1,6 @@
 using RimWorld;
 using System;
+// Guardrail-Reason: AGS export writing stays co-located because package merge decisions, emitted file layout, and fallback paths share one export pipeline.
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;

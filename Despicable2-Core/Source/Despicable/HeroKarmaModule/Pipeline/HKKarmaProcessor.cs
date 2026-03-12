@@ -27,9 +27,10 @@ public static partial class HKKarmaProcessor
             return;
         }
 
-        int cooldown = GetCooldownTicks(ev.eventKey);
-        int window = GetWindowTicks(ev.eventKey);
-        int maxInWindow = GetMaxPerWindow(ev.eventKey);
+        string canonicalEventKey = HKSettingsUtil.CanonicalizeEventKey(ev.eventKey);
+        int cooldown = GetCooldownTicks(canonicalEventKey);
+        int window = GetWindowTicks(canonicalEventKey);
+        int maxInWindow = GetMaxPerWindow(canonicalEventKey);
 
         string dropReason;
         if (!HKEventDebouncer.ShouldProcess(ev.eventKey, ev.actorPawnId, ev.targetPawnId, ev.targetFactionId,
@@ -46,10 +47,10 @@ public static partial class HKKarmaProcessor
         var display = HKServices.EventCatalog.Get(ev.eventKey);
         var outcome = ApprovalResolver.Resolve(ev);
 
-        var tokens = BuildTokens(ev);
+        var tokens = BuildTokens(ev, canonicalEventKey);
 
         string label = display.label;
-        string detail = BuildDetail(ev);
+        string detail = BuildDetail(ev, canonicalEventKey);
         string karmaReason = outcome.karmaReason;
         string standingReason = outcome.standingReason;
 
@@ -85,10 +86,9 @@ public static partial class HKKarmaProcessor
         return actorId == heroId;
     }
 
-    private static int GetCooldownTicks(string eventKey)
+    private static int GetCooldownTicks(string canonicalEventKey)
     {
-        eventKey = HKSettingsUtil.CanonicalizeEventKey(eventKey);
-        switch (eventKey)
+        switch (canonicalEventKey)
         {
             // Combat spam can be intense, but escalation should pass (handled by debouncer stage logic).
             case "AttackNeutral": return CooldownVeryShort;
@@ -116,10 +116,9 @@ public static partial class HKKarmaProcessor
         }
     }
 
-    private static int GetWindowTicks(string eventKey)
+    private static int GetWindowTicks(string canonicalEventKey)
     {
-        eventKey = HKSettingsUtil.CanonicalizeEventKey(eventKey);
-        switch (eventKey)
+        switch (canonicalEventKey)
         {
             case "CharityGift": return WindowDay;
 
@@ -141,10 +140,9 @@ public static partial class HKKarmaProcessor
         }
     }
 
-    private static int GetMaxPerWindow(string eventKey)
+    private static int GetMaxPerWindow(string canonicalEventKey)
     {
-        eventKey = HKSettingsUtil.CanonicalizeEventKey(eventKey);
-        switch (eventKey)
+        switch (canonicalEventKey)
         {
             case "CharityGift": return 4;      // per faction/target due to keying
 

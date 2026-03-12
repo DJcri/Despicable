@@ -51,7 +51,7 @@ public static class D2ToolbarRow
             Rect inner = panel.Inner;
             ctx?.RecordRect(inner, UIRectTag.Input, (spec.Id ?? "ToolbarRow") + "/Inner", null);
 
-            var row = new HRow(ctx, inner);
+            var row = new D2HRow(ctx, inner);
             float secondaryWidth = MeasureTextWidth(ctx, spec.SecondaryText, inner.width);
             Rect primaryRect;
             Rect secondaryRect = Rect.zero;
@@ -68,7 +68,7 @@ public static class D2ToolbarRow
             }
 
             if (!string.IsNullOrEmpty(spec.PrimaryText))
-                D2Widgets.LabelClipped(ctx, primaryRect, spec.PrimaryText, (spec.Id ?? "ToolbarRow") + "/PrimaryLabel", spec.PrimaryTooltip);
+                D2Widgets.LabelClipped(ctx, primaryRect, spec.PrimaryText, (spec.Id ?? "ToolbarRow") + "/PrimaryLabel", spec.PrimaryTooltip); // loc-allow-internal: fallback toolbar row id
 
             if (!string.IsNullOrEmpty(spec.SecondaryText))
                 DrawRightAlignedLabel(ctx, secondaryRect, spec.SecondaryText, (spec.Id ?? "ToolbarRow") + "/SecondaryLabel", spec.SecondaryTooltip);

@@ -68,7 +68,7 @@ public static class D2CatalogBrowser<T>
         List<ItemSpec> filtered = Filter(items, state.Search);
         ClampSelection(filtered.Count, ref state.SelectedIndex);
 
-        var v = new VStack(ctx, rect);
+        var v = new D2VStack(ctx, rect);
         if (showSearch)
         {
             Rect searchRect = v.Next(ctx != null && ctx.Style != null ? ctx.Style.RowHeight : 28f, UIRectTag.Input, (label ?? "CatalogBrowser") + "/Search");
@@ -165,7 +165,7 @@ public static class D2CatalogBrowser<T>
 
         using (new GUIEnabledScope(!item.Disabled))
         {
-            D2Widgets.LabelClipped(ctx, textRect, item.Label ?? string.Empty, label + "/RowLabel[" + index + "]", tooltipOverride: item.Tooltip);
+            D2Widgets.LabelClipped(ctx, textRect, item.Label ?? string.Empty, label + "/RowLabel[" + index + "]", tooltipOverride: item.Tooltip); // loc-allow-internal: generated row label id
         }
     }
 
@@ -195,7 +195,7 @@ public static class D2CatalogBrowser<T>
 
         using (new GUIEnabledScope(!item.Disabled))
         {
-            D2Widgets.LabelClipped(ctx, textRect, item.Label ?? string.Empty, label + "/TileLabel[" + index + "]", tooltipOverride: item.Tooltip);
+            D2Widgets.LabelClipped(ctx, textRect, item.Label ?? string.Empty, label + "/TileLabel[" + index + "]", tooltipOverride: item.Tooltip); // loc-allow-internal: generated tile label id
         }
 
         if (item.Disabled)

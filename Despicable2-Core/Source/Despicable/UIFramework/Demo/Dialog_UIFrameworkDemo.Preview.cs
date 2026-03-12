@@ -15,7 +15,7 @@ public sealed partial class Dialog_UIFrameworkDemo
     {
         using (var gp = ctx.GroupPanel("Preview", rect, soft: false, pad: true))
         {
-            var v = ctx.VStack(gp.Inner);
+            var v = ctx.D2VStack(gp.Inner);
 
             // Decide whether to stack everything or page via tabs.
             // Policy: if the list+details block can't meet its minimums after accounting for the preview card + bullets + gizmos,
@@ -65,7 +65,7 @@ public sealed partial class Dialog_UIFrameworkDemo
             // - Meter row
             // - Wrapped description
             // - Chips row
-            // plus the VStack gaps between those elements, plus panel padding.
+            // plus the D2VStack gaps between those elements, plus panel padding.
             float innerH = (ctx.Style.RowHeight * 3f) + descH + (ctx.Style.Gap * 3f);
             // pad already computed above
             float cardH = innerH + (pad * 2f);
@@ -73,15 +73,15 @@ public sealed partial class Dialog_UIFrameworkDemo
             Rect cardSlot = v.Next(cardH, UIRectTag.PanelSoft, "Preview/CardSlot");
             using (var card = ctx.GroupPanel("PreviewCard", cardSlot, soft: true, pad: true))
             {
-                var cv = ctx.VStack(card.Inner);
+                var cv = ctx.D2VStack(card.Inner);
 
                 Rect headerRow = cv.NextRow(UIRectTag.None, "Preview/CardHeaderRow");
-                var hh = new HRow(ctx, headerRow);
+                var hh = new D2HRow(ctx, headerRow);
                 DrawMaybeIcon(ctx, hh.NextFixed(28f), sel.HasIcon ? TexIcons.HeroGizmo : null, "Preview/CardIcon");
                 D2Widgets.LabelClipped(ctx, hh.Remaining(), sel.Label ?? "(none)", "Preview/CardTitle");
 
                 Rect meterRow = cv.NextRow(UIRectTag.None, "Preview/MeterRow");
-                var hm = new HRow(ctx, meterRow);
+                var hm = new D2HRow(ctx, meterRow);
                 D2Widgets.Label(ctx, hm.NextFixed(90f), "Meter", "Preview/MeterLabel");
                 D2Widgets.HorizontalSlider(ctx, hm.Remaining(), _intensity, 0f, 100f, showValueLabel: true, label: "Preview/MeterSlider");
 
@@ -117,7 +117,7 @@ public sealed partial class Dialog_UIFrameworkDemo
         }
     }
 
-    private void DrawBrowserBlock(UIContext ctx, ref VStack v, float pad)
+    private void DrawBrowserBlock(UIContext ctx, ref D2VStack v, float pad)
     {
         // Remaining split: list top, details bottom.
         // Policy:
@@ -138,7 +138,7 @@ public sealed partial class Dialog_UIFrameworkDemo
 
         using (var listPanel = ctx.GroupPanel("List", listRect, soft: true, pad: true))
         {
-            var lv = ctx.VStack(listPanel.Inner);
+            var lv = ctx.D2VStack(listPanel.Inner);
             DrawSectionTitle(ctx, lv.NextRow(UIRectTag.Label, "List/Title"), "List");
 
             Rect listBody = lv.Remaining(UIRectTag.Body, "List/Body");
@@ -170,7 +170,7 @@ public sealed partial class Dialog_UIFrameworkDemo
         }
     }
 
-    private void DrawDetailsContent(UIContext ctx, ref VStack dv)
+    private void DrawDetailsContent(UIContext ctx, ref D2VStack dv)
     {
         // Section title: allocate a slightly taller header row for Medium font.
         Rect titleRect = D2LayoutHelpers.NextSectionHeader(ctx, ref dv, "Details/Title");

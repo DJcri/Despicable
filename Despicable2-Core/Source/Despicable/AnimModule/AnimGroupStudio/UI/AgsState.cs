@@ -1,4 +1,5 @@
 using RimWorld;
+// Guardrail-Reason: Core AGS editor state stays together while dirtiness, selection, and save queue lifecycles remain one authoring surface.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -13,19 +13,19 @@ public static class D2MeterRow
 {
     public static void Draw(UIContext ctx, Rect rect, Texture2D icon, int value, int min, int max, string id, string tooltip = null, string labelText = null, float labelWidth = 0f, float valueWidth = 48f, float? iconSizeOverride = null)
     {
-        ctx?.Record(rect, UIRectTag.Input, id ?? "MeterRow");
+        ctx?.Record(rect, UIRectTag.Input, id ?? "MeterRow"); // loc-allow-internal: fallback meter row id
 
-        var row = new HRow(ctx, rect);
+        var row = new D2HRow(ctx, rect);
         float iconSize = Mathf.Min(rect.height, iconSizeOverride ?? 20f);
-        Rect iconRect = row.Next(iconSize, iconSize, UIRectTag.Icon, (id ?? "MeterRow") + "/Icon");
+        Rect iconRect = row.Next(iconSize, iconSize, UIRectTag.Icon, (id ?? "MeterRow") + "/Icon"); // loc-allow-internal: fallback meter row id
 
         Rect labelRect = default;
         bool drawLabel = !string.IsNullOrEmpty(labelText) && labelWidth > 0f;
         if (drawLabel)
-            labelRect = row.NextFixed(labelWidth, UIRectTag.Label, (id ?? "MeterRow") + "/Label");
+            labelRect = row.NextFixed(labelWidth, UIRectTag.Label, (id ?? "MeterRow") + "/Label"); // loc-allow-internal: fallback meter row id
 
-        Rect valueRect = row.NextFixed(valueWidth, UIRectTag.Label, (id ?? "MeterRow") + "/Value");
-        Rect barRect = row.Remaining(UIRectTag.Input, (id ?? "MeterRow") + "/Bar");
+        Rect valueRect = row.NextFixed(valueWidth, UIRectTag.Label, (id ?? "MeterRow") + "/Value"); // loc-allow-internal: fallback meter row id
+        Rect barRect = row.Remaining(UIRectTag.Input, (id ?? "MeterRow") + "/Bar"); // loc-allow-internal: fallback meter row id
 
         if (ctx != null && ctx.Pass == UIPass.Measure)
             return;
@@ -34,14 +34,14 @@ public static class D2MeterRow
             GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit, true);
 
         if (drawLabel)
-            D2Widgets.LabelClippedAligned(ctx, labelRect, labelText, TextAnchor.MiddleLeft, (id ?? "MeterRow") + "/LabelText", labelText);
-        D2Widgets.LabelClippedAligned(ctx, valueRect, value.ToString(), TextAnchor.MiddleRight, (id ?? "MeterRow") + "/ValueText", value.ToString());
+            D2Widgets.LabelClippedAligned(ctx, labelRect, labelText, TextAnchor.MiddleLeft, (id ?? "MeterRow") + "/LabelText", labelText); // loc-allow-internal: fallback meter row id
+        D2Widgets.LabelClippedAligned(ctx, valueRect, value.ToString(), TextAnchor.MiddleRight, (id ?? "MeterRow") + "/ValueText", value.ToString()); // loc-allow-internal: fallback meter row id
 
         Widgets.FillableBar(barRect, Mathf.InverseLerp(min, max, value));
 
         if (!string.IsNullOrEmpty(tooltip))
         {
-            D2Widgets.TooltipHotspot(ctx, rect, (id ?? "MeterRow") + "/Tooltip");
+            D2Widgets.TooltipHotspot(ctx, rect, (id ?? "MeterRow") + "/Tooltip"); // loc-allow-internal: fallback meter row id
             TooltipHandler.TipRegion(rect, tooltip);
         }
     }

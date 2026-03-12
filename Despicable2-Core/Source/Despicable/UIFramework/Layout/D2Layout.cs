@@ -6,7 +6,7 @@ namespace Despicable.UIFramework.Layout;
 /// Single entry point for the most common layout patterns.
 ///
 /// This is the recommended starting point when vibe-coding a new window or panel.
-/// It wraps D2PaneLayout, D2EditorShell, RectTake, and RectSplit so you don't need
+/// It wraps D2PaneLayout, D2EditorShell, D2RectTake, and D2RectSplit so you don't need
 /// to know which underlying system to reach for.
 ///
 /// Typical usage:
@@ -109,14 +109,14 @@ public static class D2Layout
 
         if (headerH > 0f)
         {
-            header    = RectTake.TakeTop(ref remaining, headerH);
-            RectTake.TakeTop(ref remaining, g);   // consume the gap
+            header    = D2RectTake.TakeTop(ref remaining, headerH);
+            D2RectTake.TakeTop(ref remaining, g);   // consume the gap
         }
 
         if (footerH > 0f)
         {
-            footer    = RectTake.TakeBottom(ref remaining, footerH);
-            RectTake.TakeBottom(ref remaining, g);
+            footer    = D2RectTake.TakeBottom(ref remaining, footerH);
+            D2RectTake.TakeBottom(ref remaining, g);
         }
 
         Rect body = remaining;
@@ -149,7 +149,7 @@ public static class D2Layout
         float? gap = null)
     {
         float g = gap ?? ctx?.Style?.Gap ?? 6f;
-        RectSplit.SplitVertical(outer, leftW, g, out Rect left, out Rect right);
+        D2RectSplit.SplitVertical(outer, leftW, g, out Rect left, out Rect right);
 
         if (ctx != null)
         {
@@ -175,8 +175,8 @@ public static class D2Layout
     {
         float g = gap ?? ctx?.Style?.Gap ?? 6f;
 
-        RectSplit.SplitVertical(outer, leftW, g, out Rect left, out Rect centerAndRight);
-        RectSplit.SplitVertical(centerAndRight, Mathf.Max(0f, centerAndRight.width - rightW - g), g, out Rect center, out Rect right);
+        D2RectSplit.SplitVertical(outer, leftW, g, out Rect left, out Rect centerAndRight);
+        D2RectSplit.SplitVertical(centerAndRight, Mathf.Max(0f, centerAndRight.width - rightW - g), g, out Rect center, out Rect right);
 
         if (ctx != null)
         {
@@ -196,7 +196,7 @@ public static class D2Layout
     ///   // => 25% | 50% | 25%
     ///
     /// Returns a stack-allocated-friendly array. If you're calling this every frame
-    /// and allocation matters, use RectSplit.Columns directly and cache the result.
+    /// and allocation matters, use D2RectSplit.Columns directly and cache the result.
     /// </summary>
     public static Rect[] WeightedColumns(
         UIContext ctx,
@@ -205,7 +205,7 @@ public static class D2Layout
         float? gap = null)
     {
         float g = gap ?? ctx?.Style?.Gap ?? 6f;
-        Rect[] cols = RectSplit.Columns(outer, g, weights);
+        Rect[] cols = D2RectSplit.Columns(outer, g, weights);
 
         if (ctx != null)
         {

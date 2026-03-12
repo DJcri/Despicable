@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using HarmonyLib;
 using RimWorld;
-using RimWorld.Planet;
 using Verse;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -53,7 +52,7 @@ public static class HarmonyPatch_SellCaptive
 
         try
         {
-            Pawn negotiator = TryGetPlayerNegotiator();
+            Pawn negotiator = HKTradeSessionUtil.TryGetPlayerNegotiator();
             if (negotiator == null || !HKHookUtilSafe.ActorIsHero(negotiator)) return;
 
             List<CaptiveSaleRecord> captivesSold = CaptureSoldCaptives(__instance);
@@ -63,8 +62,8 @@ public static class HarmonyPatch_SellCaptive
             {
                 actor = negotiator,
                 captivesSold = captivesSold,
-                settlementUniqueId = TryGetCurrentSettlementUniqueId(),
-                settlementLabel = TryGetCurrentSettlementLabel()
+                settlementUniqueId = HKTradeSessionUtil.TryGetCurrentSettlementUniqueId("HarmonyPatch_SellCaptive:3", "HarmonyPatch_SellCaptive failed to resolve the current trade settlement."),
+                settlementLabel = HKTradeSessionUtil.TryGetCurrentSettlementLabel("HarmonyPatch_SellCaptive:3", "HarmonyPatch_SellCaptive failed to resolve the current trade settlement.")
             };
         }
         catch (Exception ex)
@@ -146,100 +145,4 @@ public static class HarmonyPatch_SellCaptive
         return null;
     }
 
-    private static Pawn TryGetPlayerNegotiator()
-    {
-        Type tradeSession = AccessTools.TypeByName("RimWorld.TradeSession");
-        if (tradeSession == null) return null;
-
-        object value = AccessTools.Field(tradeSession, "playerNegotiator")?.GetValue(null);
-        if (value is Pawn fieldPawn) return fieldPawn;
-
-        PropertyInfo prop = AccessTools.Property(tradeSession, "playerNegotiator");
-        if (prop != null && prop.GetValue(null, null) is Pawn propPawn) return propPawn;
-
-        return null;
-    }
-
-    private static string TryGetCurrentSettlementUniqueId()
-    {
-        Settlement settlement = TryGetCurrentSettlement();
-        return settlement != null ? settlement.GetUniqueLoadID() : null;
-    }
-
-    private static string TryGetCurrentSettlementLabel()
-    {
-        Settlement settlement = TryGetCurrentSettlement();
-        return settlement != null ? settlement.LabelCap : null;
-    }
-
-    private static Settlement TryGetCurrentSettlement()
-    {
-        try
-        {
-            object trader = TryGetCurrentTrader();
-            if (trader == null) return null;
-
-            if (trader is Settlement settlement)
-                return IsUsableSettlement(settlement) ? settlement : null;
-
-            if (TryResolveSettlementFromMember(trader, "Settlement") is Settlement settlementFromProperty)
-                return IsUsableSettlement(settlementFromProperty) ? settlementFromProperty : null;
-
-            if (TryResolveSettlementFromMember(trader, "WorldObject") is Settlement settlementFromWorldObject)
-                return IsUsableSettlement(settlementFromWorldObject) ? settlementFromWorldObject : null;
-
-            if (TryResolveSettlementFromMethod(trader, "GetWorldObject") is Settlement settlementFromMethod)
-                return IsUsableSettlement(settlementFromMethod) ? settlementFromMethod : null;
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce("HarmonyPatch_SellCaptive:3", "HarmonyPatch_SellCaptive failed to resolve the current trade settlement.", ex);
-        }
-
-        return null;
-    }
-
-    private static object TryGetCurrentTrader()
-    {
-        Type tradeSession = AccessTools.TypeByName("RimWorld.TradeSession");
-        if (tradeSession == null) return null;
-
-        object trader = AccessTools.Field(tradeSession, "trader")?.GetValue(null);
-        if (trader != null) return trader;
-
-        PropertyInfo prop = AccessTools.Property(tradeSession, "Trader");
-        if (prop != null) return prop.GetValue(null, null);
-
-        return null;
-    }
-
-    private static object TryResolveSettlementFromMember(object instance, string memberName)
-    {
-        if (instance == null || memberName.NullOrEmpty()) return null;
-
-        PropertyInfo prop = AccessTools.Property(instance.GetType(), memberName);
-        if (prop != null)
-            return prop.GetValue(instance, null);
-
-        FieldInfo field = AccessTools.Field(instance.GetType(), memberName);
-        if (field != null)
-            return field.GetValue(instance);
-
-        return null;
-    }
-
-    private static object TryResolveSettlementFromMethod(object instance, string methodName)
-    {
-        if (instance == null || methodName.NullOrEmpty()) return null;
-
-        MethodInfo method = AccessTools.Method(instance.GetType(), methodName, Type.EmptyTypes);
-        if (method == null) return null;
-
-        return method.Invoke(instance, null);
-    }
-
-    private static bool IsUsableSettlement(Settlement settlement)
-    {
-        return settlement != null && settlement.Faction != null && !settlement.Faction.IsPlayer;
-    }
 }

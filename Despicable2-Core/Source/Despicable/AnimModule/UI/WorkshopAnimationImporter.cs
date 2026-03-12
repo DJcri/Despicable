@@ -17,34 +17,6 @@ namespace Despicable;
 /// </summary>
 public static class WorkshopAnimationImporter
 {
-    private static readonly System.Reflection.FieldInfo _kfScaleField =
-        typeof(VerseKeyframe).GetField("scale", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-
-    private static readonly System.Reflection.PropertyInfo _kfScaleProp =
-        typeof(VerseKeyframe).GetProperty("scale", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-
-    private static Vector3 ReadKeyframeScale(VerseKeyframe kf)
-    {
-        if (kf == null) return Vector3.one;
-        try
-        {
-            if (_kfScaleField != null)
-            {
-                object v = _kfScaleField.GetValue(kf);
-                // If the underlying member type is Nullable<Vector3>, boxing a non-null value yields
-                // a boxed Vector3 (not a boxed Nullable<Vector3>). So checking `is Vector3` is enough.
-                if (v is Vector3) return (Vector3)v;
-            }
-
-            if (_kfScaleProp != null)
-            {
-                object v = _kfScaleProp.GetValue(kf, null);
-                if (v is Vector3) return (Vector3)v;
-            }
-        }
-        catch (System.Exception e) { Despicable.Core.DebugLogger.WarnExceptionOnce("WorkshopAnimationImporter.EmptyCatch:1", "Workshop animation import fallback path failed.", e); }
-        return Vector3.one;
-    }
 
     public static WorkshopAnimation FromAnimationDef(AnimationDef def, string nameOverride = null)
     {
@@ -89,7 +61,7 @@ public static class WorkshopAnimationImporter
                                     angle = ek.angle,
                                     offset = ek.offset,
                                     rotation = ek.rotation,
-                                    scale = ReadKeyframeScale(ek),
+                                    scale = VerseKeyframeCompat.GetScaleOrDefault(ek),
                                     visible = ek.visible,
                                     graphicState = ek.graphicState,
                                     variant = ek.variant ?? -1,
@@ -107,7 +79,7 @@ public static class WorkshopAnimationImporter
                                     angle = kf.angle,
                                     offset = kf.offset,
                                     rotation = Rot4.South,
-                                    scale = ReadKeyframeScale(kf),
+                                    scale = VerseKeyframeCompat.GetScaleOrDefault(kf),
                                     visible = true
                                 });
                             }

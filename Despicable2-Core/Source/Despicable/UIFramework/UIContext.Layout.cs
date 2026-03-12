@@ -13,7 +13,7 @@ public sealed partial class UIContext
     /// Usage:
     /// using (var g = ctx.Group("LeftPanel", rect, UIRectTag.PanelSoft))
     /// {
-    ///     var v = ctx.VStack(g.Inner);
+    ///     var v = ctx.D2VStack(g.Inner);
     /// }
     /// </summary>
     public UIGroupScope Group(
@@ -48,7 +48,7 @@ public sealed partial class UIContext
     /// Typical use:
     /// using (var g = ctx.GroupPanel("LeftPanel", leftRect))
     /// {
-    ///     var v = ctx.VStack(g.Inner);
+    ///     var v = ctx.D2VStack(g.Inner);
     /// }
     /// </summary>
     public UIGroupScope GroupPanel(
@@ -64,16 +64,16 @@ public sealed partial class UIContext
         if (soft)
         {
             if (drawBackground)
-                D2Widgets.DrawPanelSoft(this, outer, label ?? name ?? "PanelSoft");
+                D2Widgets.DrawPanelSoft(this, outer, label ?? name ?? "PanelSoft"); // loc-allow-internal: fallback panel id
             else
-                Record(outer, UIRectTag.PanelSoft, label ?? name ?? "PanelSoft");
+                Record(outer, UIRectTag.PanelSoft, label ?? name ?? "PanelSoft"); // loc-allow-internal: fallback panel id
         }
         else
         {
             if (drawBackground)
-                D2Widgets.DrawPanel(this, outer, label ?? name ?? "Panel");
+                D2Widgets.DrawPanel(this, outer, label ?? name ?? "Panel"); // loc-allow-internal: fallback panel id
             else
-                Record(outer, UIRectTag.Panel, label ?? name ?? "Panel");
+                Record(outer, UIRectTag.Panel, label ?? name ?? "Panel"); // loc-allow-internal: fallback panel id
         }
 
         // Create the scope + inner rect without recording a second container.
@@ -114,7 +114,7 @@ public sealed partial class UIContext
     }
 
     /// <summary>
-    /// GroupPanel + VStack in one call.
+    /// GroupPanel + D2VStack in one call.
     /// Usage:
     /// using (var g = ctx.GroupPanel("Left", rect, out var v))
     /// {
@@ -124,7 +124,7 @@ public sealed partial class UIContext
     public UIGroupScope GroupPanel(
         string name,
         Rect outer,
-        out VStack stack,
+        out D2VStack stack,
         bool soft = true,
         bool pad = true,
         float? padOverride = null,
@@ -132,7 +132,7 @@ public sealed partial class UIContext
         string label = null)
     {
         var g = GroupPanel(name, outer, soft, pad, padOverride, drawBackground, label);
-        stack = VStack(g.Inner);
+        stack = D2VStack(g.Inner);
         return g;
     }
 
@@ -160,14 +160,14 @@ public sealed partial class UIContext
     /// Padding should be applied by containers (Group/GroupPanel) so spacing rules stay consistent.
     /// If you truly need a one-off padded stack, pass a padOverride explicitly.
     /// </summary>
-    public VStack VStack(Rect rect, float? padOverride = null, UIRectTag tag = UIRectTag.Panel, string label = null)
+    public D2VStack D2VStack(Rect rect, float? padOverride = null, UIRectTag tag = UIRectTag.Panel, string label = null)
     {
         // Allocator containers should not inflate auto-measure heights; only the children they allocate should.
         if (Pass == UIPass.Draw)
             Record(rect, tag, label);
 
         float pad = padOverride ?? 0f;
-        return pad > 0f ? new VStack(this, rect.ContractedBy(pad)) : new VStack(this, rect);
+        return pad > 0f ? new D2VStack(this, rect.ContractedBy(pad)) : new D2VStack(this, rect);
     }
 
     /// <summary>
@@ -176,14 +176,14 @@ public sealed partial class UIContext
     /// Padding should be applied by containers (Group/GroupPanel).
     /// If you truly need a one-off padded row, pass a padOverride explicitly.
     /// </summary>
-    public HRow HRow(Rect rect, float? padOverride = null, UIRectTag tag = UIRectTag.Panel, string label = null)
+    public D2HRow D2HRow(Rect rect, float? padOverride = null, UIRectTag tag = UIRectTag.Panel, string label = null)
     {
         // Allocator containers should not inflate auto-measure heights; only the children they allocate should.
         if (Pass == UIPass.Draw)
             Record(rect, tag, label);
 
         float pad = padOverride ?? 0f;
-        return pad > 0f ? new HRow(this, rect.ContractedBy(pad)) : new HRow(this, rect);
+        return pad > 0f ? new D2HRow(this, rect.ContractedBy(pad)) : new D2HRow(this, rect);
     }
 
     /// <summary>

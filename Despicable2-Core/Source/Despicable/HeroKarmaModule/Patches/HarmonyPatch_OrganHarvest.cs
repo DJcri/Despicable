@@ -34,20 +34,15 @@ public static partial class HarmonyPatch_OrganHarvest
 
     private static IEnumerable<MethodBase> FindTargets()
     {
-        var t = AccessTools.TypeByName("RimWorld.Recipe_RemoveBodyPart");
-        if (t != null)
-        {
-            var m = AccessTools.Method(t, "ApplyOnPawn");
-            if (m != null)
-                yield return m;
-        }
+        foreach (MethodBase method in HKPatchTargetUtil.FindFirstMethods(new[] { "RimWorld.Recipe_RemoveBodyPart" }, "ApplyOnPawn"))
+            yield return method;
 
         // Some versions route through Recipe_Surgery.ApplyOnPawn; we can optionally patch that later.
     }
 
-    public static void Prefix(object[] __args, ref bool __state)
+    private static void Prefix(object[] __args, ref HKGoodwillContext.Scope __state)
     {
-        __state = false;
+        __state = default;
         try
         {
             if (!TryGetPawnPair(__args, out var pawn, out var billDoer))
@@ -60,8 +55,7 @@ public static partial class HarmonyPatch_OrganHarvest
                 return;
             }
 
-            HKGoodwillContext.Begin(billDoer);
-            __state = true;
+            __state = HKGoodwillContext.Enter(billDoer);
         }
         catch (Exception ex)
         {
@@ -108,11 +102,9 @@ public static partial class HarmonyPatch_OrganHarvest
         }
     }
 
-    public static void Finalizer(Exception __exception, bool __state)
+    private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
     {
-        if (!__state) return;
-
-        try { HKGoodwillContext.End(); }
+        try { __state.Dispose(); }
         catch (Exception ex)
         {
             Despicable.Core.DebugLogger.WarnExceptionOnce(

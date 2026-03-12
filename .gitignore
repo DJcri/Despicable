@@ -1,0 +1,15 @@
+# Visual Studio local state
+**/.vs/
+
+# Python bytecache
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Build output (if building from source in repo)
+**/bin/
+**/obj/
+
+# OS artifacts
+.DS_Store
+Thumbs.db

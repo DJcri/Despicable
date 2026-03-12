@@ -13,6 +13,7 @@ public static class HKEventDebouncer
     }
 
     private static readonly Dictionary<string, DebounceState> stateByKey = new(2048);
+    private static readonly List<string> pruneBuffer = new();
 
     // Prevent slow-burn growth in long sessions.
     private const int MaxEntries = 5000;
@@ -89,15 +90,15 @@ public static class HKEventDebouncer
 
         try
         {
-            var toRemove = new List<string>();
+            pruneBuffer.Clear();
             foreach (var kv in stateByKey)
             {
                 if (now - kv.Value.lastTick > StaleTicks)
-                    toRemove.Add(kv.Key);
+                    pruneBuffer.Add(kv.Key);
             }
 
-            for (int i = 0; i < toRemove.Count; i++)
-                stateByKey.Remove(toRemove[i]);
+            for (int i = 0; i < pruneBuffer.Count; i++)
+                stateByKey.Remove(pruneBuffer[i]);
         }
         catch
         {
@@ -109,11 +110,6 @@ public static class HKEventDebouncer
     {
         stateByKey.Clear();
         PruneTracker.Reset();
-    }
-
-    public static void Clear()
-    {
-        ResetRuntimeState();
     }
 
     private static string BuildKey(string eventKey, string actorPawnId, string targetPawnId, int targetFactionId)

@@ -1,0 +1,14 @@
+# DefInjectedKeep.txt
+# Optional. One pattern per line. Lines starting with # are comments.
+#
+# This guardrail prunes/flags DefInjected nodes whose defName no longer exists in Defs.
+# If you intentionally keep a translation node for optional patches or future defs,
+# add a wildcard pattern here to silence the orphan check.
+#
+# Pattern formats:
+#   1) Node-only:          SomeDefName.*            (matches any DefType folder)
+#   2) DefType-qualified:  HediffDef/SomeDefName.*  (matches only in that DefType folder)
+#
+# Examples:
+#   HediffDef/D2_HK_LegacyHero.*
+#   D2_ExperimentalThing.*

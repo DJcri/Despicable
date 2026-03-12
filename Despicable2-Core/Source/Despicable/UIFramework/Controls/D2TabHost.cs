@@ -107,7 +107,7 @@ public static partial class D2TabHost
         if (activeTab == null)
             return null;
 
-        var v = new VStack(ctx, rect);
+        var v = new D2VStack(ctx, rect);
 
         if (visibleGroups.Count > 1)
         {
@@ -152,7 +152,7 @@ public static partial class D2TabHost
         }
 
         float gap = ctx != null && ctx.Style != null ? ctx.Style.Gap : 6f;
-        RectSplit.SplitHorizontal(rect, headerH, gap, out Rect top, out Rect body);
+        D2RectSplit.SplitHorizontal(rect, headerH, gap, out Rect top, out Rect body);
         DrawHeader(ctx, top, groups, ref state, label ?? "TabHost");
         DrawBody(ctx, body, groups, ref state, label ?? "TabHost");
     }

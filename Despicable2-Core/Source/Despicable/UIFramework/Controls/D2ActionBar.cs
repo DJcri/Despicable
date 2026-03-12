@@ -107,7 +107,7 @@ public static class D2ActionBar
         if (items == null || items.Count == 0)
             return new Result(false, null, new Dictionary<string, bool>());
 
-        var flow = new HFlow(ctx, rect, ctx != null && ctx.Style != null ? ctx.Style.RowHeight : 28f, ctx != null && ctx.Style != null ? ctx.Style.Gap : 6f);
+        var flow = new D2HFlow(ctx, rect, ctx != null && ctx.Style != null ? ctx.Style.RowHeight : 28f, ctx != null && ctx.Style != null ? ctx.Style.Gap : 6f);
         string activated = null;
         bool clicked = false;
         var checkboxValues = new Dictionary<string, bool>();
@@ -146,14 +146,14 @@ public static class D2ActionBar
                         using (new GUIEnabledScope(false))
                         {
                             itemClicked = iconOnly
-                                ? D2Widgets.ButtonIcon(ctx, slot, item.Icon, tooltip: item.Tooltip, label: item.Id ?? "ActionBarIcon")
+                                ? D2Widgets.ButtonIcon(ctx, slot, item.Icon, tooltip: item.Tooltip, label: item.Id ?? "ActionBarIcon") // loc-allow-internal: fallback icon-only button id
                                 : D2Widgets.ButtonText(ctx, slot, item.Label, item.Id ?? item.Label);
                         }
                     }
                     else
                     {
                         itemClicked = iconOnly
-                            ? D2Widgets.ButtonIcon(ctx, slot, item.Icon, tooltip: item.Tooltip, label: item.Id ?? "ActionBarIcon")
+                            ? D2Widgets.ButtonIcon(ctx, slot, item.Icon, tooltip: item.Tooltip, label: item.Id ?? "ActionBarIcon") // loc-allow-internal: fallback icon-only button id
                             : D2Widgets.ButtonText(ctx, slot, item.Label, item.Id ?? item.Label);
                     }
                     break;

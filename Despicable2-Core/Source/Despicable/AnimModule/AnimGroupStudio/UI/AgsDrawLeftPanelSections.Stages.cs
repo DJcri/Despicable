@@ -13,7 +13,7 @@ namespace Despicable.AnimModule.AnimGroupStudio.UI;
 public partial class Dialog_AnimGroupStudio
 {
 
-    private void DrawAuthorStagesSection(UIContext scrollCtx, ref VStack v)
+    private void DrawAuthorStagesSection(UIContext scrollCtx, ref D2VStack v)
     {
         DrawGroupedHeader(scrollCtx, ref v, "Left/Stages", "Stages", topPadding: true);
         EnsureStages(project);
@@ -29,7 +29,7 @@ public partial class Dialog_AnimGroupStudio
         var curStage = GetStage(project, authorStageIndex);
 
         Rect stageNameRow = v.NextRow(UIRectTag.Input, "Stages/NameRow");
-        var stageNameH = new HRow(scrollCtx, stageNameRow);
+        var stageNameH = new D2HRow(scrollCtx, stageNameRow);
         D2Widgets.Label(scrollCtx, stageNameH.NextFixed(60f, UIRectTag.Label, "Stages/NameLabel"), "Name", "Stages/NameLabel");
         if (curStage != null)
             curStage.label = D2Widgets.TextField(scrollCtx, stageNameH.Remaining(UIRectTag.TextField, "Stages/NameField"), curStage.label ?? "", 256, "Stages/NameField");
@@ -37,7 +37,7 @@ public partial class Dialog_AnimGroupStudio
             scrollCtx.Record(stageNameH.Remaining(UIRectTag.TextField, "Stages/NameFieldDisabled"), UIRectTag.TextField, "Stages/NameFieldDisabled");
 
         Rect actionsRow = v.NextRow(UIRectTag.Input, "Stages/Actions");
-        var actionsH = new HRow(scrollCtx, actionsRow);
+        var actionsH = new D2HRow(scrollCtx, actionsRow);
         float iconSize = scrollCtx.Style.RowHeight;
 
         if (DrawIconButton(scrollCtx, actionsH.NextFixed(iconSize, UIRectTag.Button, "Stages/Actions/Add"), D2VanillaTex.Plus, "Add stage", "Stages/Actions/Add"))

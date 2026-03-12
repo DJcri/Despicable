@@ -5,13 +5,13 @@ using Verse;
 namespace Despicable.UIFramework.Layout;
 /// <summary>
 /// Generic scroll view helper for "section content".
-/// - Caller provides a drawer that allocates/draws using a VStack.
+/// - Caller provides a drawer that allocates/draws using a D2VStack.
 /// - Helper measures content height in Measure pass using a large virtual bounds.
 /// - In Draw pass, begins a real scroll view and draws with a PushOffset.
 /// </summary>
 public static class D2ScrollView
 {
-    public delegate void ContentDrawer(UIContext ctx, ref VStack v);
+    public delegate void ContentDrawer(UIContext ctx, ref D2VStack v);
 
     public static void Draw(
         UIContext ctx,
@@ -31,7 +31,7 @@ public static class D2ScrollView
             float contentH;
             const float scrollbarW = 16f;
 
-            float MeasureUsedHeight(VStack stack)
+            float MeasureUsedHeight(D2VStack stack)
             {
                 // Keep the full consumed height, plus a tiny bottom breathing buffer.
                 // Without this, content that measures *exactly* to the viewport can still feel
@@ -49,7 +49,7 @@ public static class D2ScrollView
                 using (measureCtx.PushScope("Measure"))
                 {
                     Rect measureRect = new(0f, 0f, Mathf.Max(0f, width), 100000f);
-                    var mv = measureCtx.VStack(measureRect);
+                    var mv = measureCtx.D2VStack(measureRect);
                     drawer(measureCtx, ref mv);
                     return Mathf.Max(MeasureUsedHeight(mv), outRect.height);
                 }
@@ -92,7 +92,7 @@ public static class D2ScrollView
             {
                 using (ctx.PushOffset(outRect.position - scroll))
                 {
-                    var v = ctx.VStack(viewRect);
+                    var v = ctx.D2VStack(viewRect);
                     drawer(ctx, ref v);
                 }
             }

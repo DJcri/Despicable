@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using RimWorld.Planet;
 using Verse;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
@@ -40,14 +39,7 @@ public static class HarmonyPatch_EnslaveAttempt
             "RimWorld.InteractionWorker_Enslave"
         };
 
-        for (int i = 0; i < names.Length; i++)
-        {
-            var t = AccessTools.TypeByName(names[i]);
-            if (t == null) continue;
-
-            var m = AccessTools.Method(t, "Interacted");
-            if (m != null) yield return m;
-        }
+        return HKPatchTargetUtil.FindFirstMethods(names, "Interacted");
     }
 
     public static void Postfix(Pawn initiator, Pawn recipient)
@@ -62,13 +54,7 @@ public static class HarmonyPatch_EnslaveAttempt
             int factionId = HKHookUtil.GetFactionIdSafe(recipient);
             var ev = KarmaEvent.Create("EnslaveAttempt", initiator, recipient, factionId);
 
-            Settlement settlement = (initiator.MapHeld ?? initiator.Map)?.Parent as Settlement
-                ?? (recipient.MapHeld ?? recipient.Map)?.Parent as Settlement;
-            if (settlement != null && settlement.Faction != null && !settlement.Faction.IsPlayer)
-            {
-                ev.settlementUniqueId = settlement.GetUniqueLoadID();
-                ev.settlementLabel = settlement.LabelCap;
-            }
+            HKSettlementContextUtil.TryAssignFromPawns(ev, initiator, recipient);
 
             HKKarmaProcessor.Process(ev);
         }
@@ -78,16 +64,15 @@ public static class HarmonyPatch_EnslaveAttempt
         }
     }
 
-    public static void Prefix(Pawn initiator, Pawn recipient, ref bool __state)
+    private static void Prefix(Pawn initiator, Pawn recipient, ref HKGoodwillContext.Scope __state)
     {
-        __state = false;
+        __state = default;
         try
         {
             if (initiator == null || recipient == null) return;
             if (!HKHookUtilSafe.ActorIsHero(initiator)) return;
 
-            HKGoodwillContext.Begin(initiator);
-            __state = true;
+            __state = HKGoodwillContext.Enter(initiator);
         }
         catch (Exception ex)
         {
@@ -95,10 +80,9 @@ public static class HarmonyPatch_EnslaveAttempt
         }
     }
 
-    public static void Finalizer(Exception __exception, bool __state)
+    private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
     {
-        if (!__state) return;
-        try { HKGoodwillContext.End(); }
+        try { __state.Dispose(); }
         catch (Exception ex)
         {
             Despicable.Core.DebugLogger.WarnExceptionOnce("HarmonyPatch_EnslaveAttempt:3", "HarmonyPatch_EnslaveAttempt suppressed an exception.", ex);

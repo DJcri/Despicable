@@ -243,9 +243,4 @@ public sealed partial class UIRectRegistry
         lastLogTicksByWindowName.Clear();
     }
 
-    public static void Clear()
-    {
-        ResetRuntimeState();
-    }
-
 }

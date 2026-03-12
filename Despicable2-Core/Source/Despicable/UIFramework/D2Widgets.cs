@@ -8,7 +8,7 @@ namespace Despicable.UIFramework;
 /// - no-op during Measure pass (so measure doesn't mutate state or draw)
 ///
 /// Vibe-coding rules:
-/// - Allocate rects with VStack/HRow first.
+/// - Allocate rects with D2VStack/D2HRow first.
 /// - Then call D2Widgets to draw into those rects.
 /// - If you draw something manually, call ctx.RecordRect(...) so overlay/validation can still see it.
 /// </summary>

@@ -78,7 +78,7 @@ public sealed class Dialog_D2HeadtypeBlacklist : D2WindowBlueprint
         int total = DefDatabase<HeadTypeDef>.AllDefsListForReading.Count;
         string subtitle = total == 1 ? "1 headtype" : total + " headtypes";
 
-        var v = Ctx.VStack(rect, label: "Header/Stack");
+        var v = Ctx.D2VStack(rect, label: "Header/Stack");
         Rect titleRect = v.Next(HeaderLineHeight, UIRectTag.Label, "Header/Title");
         Rect subtitleRect = v.Next(HeaderSubtitleHeight, UIRectTag.Label, "Header/Subtitle");
 
@@ -88,7 +88,7 @@ public sealed class Dialog_D2HeadtypeBlacklist : D2WindowBlueprint
 
     protected override void DrawBody(Rect rect)
     {
-        var v = Ctx.VStack(rect, label: "Body/Stack");
+        var v = Ctx.D2VStack(rect, label: "Body/Stack");
         Rect controlsRect = v.NextRow(UIRectTag.Input, "Body/Controls");
         DrawControlsRow(controlsRect);
         v.NextSpace(Ctx.Style.GapS);
@@ -100,7 +100,7 @@ public sealed class Dialog_D2HeadtypeBlacklist : D2WindowBlueprint
 
     private void DrawControlsRow(Rect rect)
     {
-        var h = new HRow(Ctx, rect);
+        var h = new D2HRow(Ctx, rect);
         Rect filterRect = h.NextFixed(FilterWidth, UIRectTag.Control_Selector, "Controls/Filter");
         Rect searchRect = h.Remaining(UIRectTag.Control_Search, "Controls/Search");
 
@@ -122,7 +122,7 @@ public sealed class Dialog_D2HeadtypeBlacklist : D2WindowBlueprint
         D2Fields.SearchBoxVanilla(Ctx, searchRect, ref _search, "Search headtypes...", showSearchIcon: true, label: "Controls/SearchBox");
     }
 
-    private void DrawRows(UIContext ctx, ref VStack v)
+    private void DrawRows(UIContext ctx, ref D2VStack v)
     {
         List<HeadTypeDef> heads = BuildFilteredHeads();
         if (heads.Count == 0)

@@ -81,7 +81,7 @@ This file defines the house style for Despicable2. Every cleanup pass should mov
 - Prefer adding reusable UI patterns as small, measure-safe helpers/blueprints instead of copy-pasting, when the pattern is used in 2+ places.
 - New vanilla-style micro-actions should prefer `D2Widgets.ButtonIcon(...)` / `ButtonIconInvisible(...)` plus `D2VanillaTex`, not tiny `ButtonText(...)` labels.
 - Pages that want vanilla folder-tab attachment should prefer `D2Tabs.VanillaAttachedTabBody(...)` instead of hand-placing a tab strip above a nearby panel. Keep the panel as the owner of the tab chrome and let the helper handle multi-row reservation.
-- New header/body/footer layouts should prefer remainder-rect carving (`RectTake`) over reconstructing positions with hardcoded offsets.
+- New header/body/footer layouts should prefer remainder-rect carving (`D2RectTake`) over reconstructing positions with hardcoded offsets.
 - Prefer framework-measured header/body sizing and style tokens over hardcoded fit numbers. If a layout needs a different body inset, use a style-level override such as `BodyPadX` / `BodyPadY` or per-edge body insets like `BodyTopPadY` / `BodyBottomPadY` instead of page-local rect nudges.
 - If a layout fix seems to require hardcoded positioning/sizing, document the constraint first and do not land it silently.
 - Repeated status summaries should prefer shared helpers such as `D2MeterRow` instead of re-implementing icon/value/bar compositions in feature modules.

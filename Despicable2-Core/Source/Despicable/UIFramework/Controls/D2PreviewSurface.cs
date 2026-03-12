@@ -66,7 +66,7 @@ public static class D2PreviewSurface
 
     private static void DrawContent(UIContext ctx, Rect inner, Texture texture, Spec spec)
     {
-        ctx?.RecordRect(inner, UIRectTag.PanelSoft, (spec.Id ?? "PreviewSurface") + "/Content", null);
+        ctx?.RecordRect(inner, UIRectTag.PanelSoft, (spec.Id ?? "PreviewSurface") + "/Content", null); // loc-allow-internal: fallback preview surface id
 
         if (texture != null)
         {
@@ -76,6 +76,6 @@ public static class D2PreviewSurface
         }
 
         if (!string.IsNullOrEmpty(spec.EmptyLabel))
-            D2Widgets.LabelClipped(ctx, inner, spec.EmptyLabel, (spec.Id ?? "PreviewSurface") + "/Empty");
+            D2Widgets.LabelClipped(ctx, inner, spec.EmptyLabel, (spec.Id ?? "PreviewSurface") + "/Empty"); // loc-allow-internal: fallback preview surface id
     }
 }

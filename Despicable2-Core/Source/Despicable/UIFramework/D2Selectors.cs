@@ -124,7 +124,7 @@ namespace Despicable.UIFramework
 /// <summary>
 /// Small utility for single-select groups.
 /// This is intentionally minimal: it does not own layout, only selection logic.
-/// Pair it with VStack/HRow to allocate rects.
+/// Pair it with D2VStack/D2HRow to allocate rects.
 /// </summary>
 public readonly struct SelectorGroup<T>
 {

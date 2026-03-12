@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+// Guardrail-Reason: Hero Karma dialog keeps overview, reputation, and shared draw helpers together while the pre-release UI surface remains one coordinated window.
 using UnityEngine;
 using Verse;
 using Despicable.UIFramework;
@@ -90,7 +91,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
     protected override void DrawHeader(Rect rect)
     {
         Pawn hero = HKRuntime.GetHeroPawnSafe();
-        var v = Ctx.VStack(rect);
+        var v = Ctx.D2VStack(rect);
 
         Rect titleRect = v.Next(28f, UIRectTag.Label, "Title");
         Rect subtitleRect = v.Next(24f, UIRectTag.Label, "Subtitle");
@@ -133,7 +134,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
             rect,
             ref _overviewScroll,
             ref _overviewContentHeight,
-            delegate(UIContext ctx, ref VStack v)
+            delegate(UIContext ctx, ref D2VStack v)
             {
                 Pawn hero = HKRuntime.GetHeroPawnSafe();
                 if (hero == null)
@@ -175,7 +176,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
                 float rowHeight = Mathf.Max(effectsHeight, deedsHeight);
 
                 Rect rowRect = v.Next(rowHeight, UIRectTag.Group, "Overview/LowerRow");
-                var h = new HRow(ctx, rowRect);
+                var h = new D2HRow(ctx, rowRect);
                 Rect leftRect = h.NextFixed(leftWidth, UIRectTag.Panel, "Overview/LowerRow/Left");
                 Rect rightRect = h.Remaining(UIRectTag.Panel, "Overview/LowerRow/Right");
                 DrawEffectsPanel(leftRect, cards);
@@ -187,7 +188,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
     private void DrawReputationTab(Rect rect)
     {
         Pawn hero = HKRuntime.GetHeroPawnSafe();
-        var v = Ctx.VStack(rect);
+        var v = Ctx.D2VStack(rect);
 
         if (hero == null)
         {
@@ -213,7 +214,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
 
         float gap = Ctx.Style.Gap;
         float leftWidth = Mathf.Max(Ctx.Style.MinClickSize * 7f, Mathf.Floor((bodyRect.width - gap) * 0.44f));
-        var h = new HRow(Ctx, bodyRect);
+        var h = new D2HRow(Ctx, bodyRect);
         Rect listPanel = h.NextFixed(leftWidth, UIRectTag.Panel, "Reputation/ListPanel");
         Rect detailPanel = h.Remaining(UIRectTag.Panel, "Reputation/DetailPanel");
         DrawReputationListPanel(listPanel, hero);
@@ -230,7 +231,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
         };
 
         float selectorWidth = Mathf.Min(280f, Mathf.Max(rect.width * 0.46f, 220f));
-        var h = new HRow(Ctx, rect);
+        var h = new D2HRow(Ctx, rect);
         Rect selectorRect = h.NextFixed(selectorWidth, UIRectTag.Input, "Reputation/FilterSelector");
         Rect searchRect = h.Remaining(UIRectTag.Input, "Reputation/Search");
 
@@ -252,7 +253,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
             section.Body,
             ref _repListScroll,
             ref _repListContentHeight,
-            delegate(UIContext ctx, ref VStack inner)
+            delegate(UIContext ctx, ref D2VStack inner)
             {
                 if (filtered.Count == 0)
                 {
@@ -284,7 +285,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
         using var panel = Ctx.GroupPanel("ReputationDetailPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
         if (!selected.valid)
         {
-            var v = Ctx.VStack(panel.Inner);
+            var v = Ctx.D2VStack(panel.Inner);
             v.NextTextBlock(Ctx, "D2HK_UI_SelectReputationTarget".Translate(), GameFont.Small, 0f, "Empty");
             return;
         }
@@ -297,7 +298,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
             section.Body,
             ref _repDetailScroll,
             ref _repDetailContentHeight,
-            delegate(UIContext ctx, ref VStack inner)
+            delegate(UIContext ctx, ref D2VStack inner)
             {
                 DrawSubsectionLabel(ref inner, "D2HK_UI_Summary".Translate(), "ReputationDetail/SummaryLabel");
                 DrawDisplayLines(ref inner, HKUIData.BuildReputationSummaryLines(selected), "ReputationDetail/SummaryLines");
@@ -371,7 +372,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
     private void DrawStatusPanel(Rect rect, Pawn hero, int karma, int standing, bool showStanding)
     {
         using var panel = Ctx.GroupPanel("StatusPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
-        var v = Ctx.VStack(panel.Inner);
+        var v = Ctx.D2VStack(panel.Inner);
         DrawPanelTitle(ref v, "D2HK_UI_Status".Translate(), "Status/Title");
 
         Rect heroRow = v.NextRow(UIRectTag.Input, "Status/HeroRow");
@@ -421,7 +422,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
     private void DrawEffectsPanel(Rect rect, List<HKEffectCard> cards)
     {
         using var panel = Ctx.GroupPanel("EffectsPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
-        var v = Ctx.VStack(panel.Inner);
+        var v = Ctx.D2VStack(panel.Inner);
         DrawPanelTitle(ref v, "D2HK_UI_ActiveEffects".Translate(), "Effects/Title");
 
         if (cards == null || cards.Count == 0)
@@ -461,12 +462,12 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
         return height;
     }
 
-    private void DrawEffectBlock(ref VStack v, HKEffectCard card, string id)
+    private void DrawEffectBlock(ref D2VStack v, HKEffectCard card, string id)
     {
         Rect titleRect = v.Next(Ctx.Style.Line, UIRectTag.Label, id + "/Title");
         if (card.Icon != null)
         {
-            var row = new HRow(Ctx, titleRect);
+            var row = new D2HRow(Ctx, titleRect);
             Rect iconRect = row.Next(Ctx.Style.IconSize, Ctx.Style.IconSize, UIRectTag.Icon, id + "/Icon");
             Rect textRect = row.Remaining(UIRectTag.Label, id + "/TitleTextRect");
             D2Widgets.DrawTextureFitted(Ctx, iconRect.ContractedBy(Ctx.Style.IconInset), card.Icon, id + "/IconDraw");
@@ -516,7 +517,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
     private void DrawDeedsPanel(Rect rect, List<HKLedgerRow> deeds)
     {
         using var panel = Ctx.GroupPanel("DeedsPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
-        var v = Ctx.VStack(panel.Inner);
+        var v = Ctx.D2VStack(panel.Inner);
         DrawPanelTitle(ref v, "D2HK_UI_RecentDeeds".Translate(), "Deeds/Title");
 
         if (deeds == null || deeds.Count == 0)
@@ -582,13 +583,13 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
         return string.Join("\n", parts.Where(x => !x.NullOrEmpty()));
     }
 
-    private void DrawPanelTitle(ref VStack v, string title, string id)
+    private void DrawPanelTitle(ref D2VStack v, string title, string id)
     {
         Rect rect = v.Next(SectionHeaderHeight, UIRectTag.Label, id);
         D2Section.DrawCaptionStrip(Ctx, rect, title, id, GameFont.Medium);
     }
 
-    private void DrawSubsectionLabel(ref VStack v, string text, string id)
+    private void DrawSubsectionLabel(ref D2VStack v, string text, string id)
     {
         Rect rect = v.Next(SubsectionHeaderHeight, UIRectTag.Label, id);
         D2Section.DrawCaptionStrip(Ctx, rect, text, id, GameFont.Small);
@@ -614,7 +615,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
         return height;
     }
 
-    private void DrawDisplayLines(ref VStack v, List<HKDisplayLine> lines, string id)
+    private void DrawDisplayLines(ref D2VStack v, List<HKDisplayLine> lines, string id)
     {
         if (lines == null || lines.Count == 0)
             return;
@@ -668,7 +669,7 @@ public sealed class Dialog_HeroKarma : D2WindowBlueprint
         float valueWidth = Mathf.Clamp(MeasureTextWidth(valueText) + Ctx.Style.TextInsetX, 44f, rect.width * 0.35f);
         float leftWidth = Mathf.Clamp(rect.width * 0.46f, rect.width * 0.30f, rect.width - valueWidth - 36f);
 
-        var row = new HRow(Ctx, rect);
+        var row = new D2HRow(Ctx, rect);
         Rect leftRect = row.NextFixed(leftWidth, UIRectTag.Label, id + "/Left");
         Rect rightRect = row.Remaining(UIRectTag.Label, id + "/Right");
         Rect valueRect = new(Mathf.Max(rightRect.x, rightRect.xMax - valueWidth), rightRect.y, Mathf.Min(valueWidth, rightRect.width), rightRect.height);

@@ -105,13 +105,13 @@ public static class D2BandRulerRow
         float iconSlot = icon != null ? Mathf.Max(ctx.Style.IconSize, ctx.Style.IconVisualSize + (ctx.Style.IconInset * 2f)) : 0f;
         float summaryMaxWidth = Mathf.Max(80f, rect.width * 0.48f);
         float summaryWidth = Mathf.Clamp(MeasureTextWidth(summaryText) + ctx.Style.TextInsetX, Mathf.Min(110f, summaryMaxWidth), summaryMaxWidth);
-        var h = new HRow(ctx, rect);
+        var h = new D2HRow(ctx, rect);
         Rect leftRect = h.NextFixed(Mathf.Max(0f, rect.width - summaryWidth - ctx.Style.GapXS), UIRectTag.Label, id + "/Left");
         Rect rightRect = h.Remaining(UIRectTag.Label, id + "/Right");
 
         if (icon != null)
         {
-            var leftRow = new HRow(ctx, leftRect);
+            var leftRow = new D2HRow(ctx, leftRect);
             Rect iconRect = leftRow.Next(iconSlot, iconSlot, UIRectTag.Icon, id + "/Icon");
             Rect labelRect = leftRow.Remaining(UIRectTag.Label, id + "/Label");
             D2Widgets.DrawTextureFitted(ctx, iconRect.ContractedBy(ctx.Style.IconInset), icon, id + "/IconDraw");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+// Guardrail-Reason: Hero Karma UI data stays centralized because tier labels, effect cards, and reputation summaries share one presentation vocabulary.
 using System.Linq;
 using RimWorld;
 using UnityEngine;

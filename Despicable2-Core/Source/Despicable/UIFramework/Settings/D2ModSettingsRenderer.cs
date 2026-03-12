@@ -1,4 +1,5 @@
 using System;
+// Guardrail-Reason: Mod settings rendering stays together while tab visibility, section measurement, and cross-module refresh hooks remain one settings surface.
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
@@ -92,7 +93,7 @@ public sealed class D2ModSettingsRenderer
             TryRefreshAllLovinPartsForSettingsChange();
     }
 
-    private static void DrawHeader(UIContext ctx, ref VStack v)
+    private static void DrawHeader(UIContext ctx, ref D2VStack v)
     {
         Rect titleRect = v.Next(28f, UIRectTag.Label, "Header/Title");
         Rect subtitleRect = v.Next(24f, UIRectTag.Label, "Header/Subtitle");
@@ -176,29 +177,29 @@ public sealed class D2ModSettingsRenderer
         {
             case SettingsTab.FaceParts:
                 D2ScrollView.Draw(ctx, bodyRect, ref _facePartsScroll, ref _facePartsHeight,
-                    delegate (UIContext c, ref VStack v) { DrawFacePartsTab(c, settings, ref v); },
+                    delegate (UIContext c, ref D2VStack v) { DrawFacePartsTab(c, settings, ref v); },
                     "Settings/FacePartsScroll");
                 break;
             case SettingsTab.Content:
                 D2ScrollView.Draw(ctx, bodyRect, ref _contentScroll, ref _contentHeight,
-                    delegate (UIContext c, ref VStack v) { DrawContentTab(c, settings, ref v); },
+                    delegate (UIContext c, ref D2VStack v) { DrawContentTab(c, settings, ref v); },
                     "Settings/ContentScroll");
                 break;
             case SettingsTab.Developer:
                 D2ScrollView.Draw(ctx, bodyRect, ref _developerScroll, ref _developerHeight,
-                    delegate (UIContext c, ref VStack v) { DrawDeveloperTab(c, settings, ref v); },
+                    delegate (UIContext c, ref D2VStack v) { DrawDeveloperTab(c, settings, ref v); },
                     "Settings/DeveloperScroll");
                 break;
             case SettingsTab.Core:
             default:
                 D2ScrollView.Draw(ctx, bodyRect, ref _coreScroll, ref _coreHeight,
-                    delegate (UIContext c, ref VStack v) { DrawCoreTab(c, settings, ref v); },
+                    delegate (UIContext c, ref D2VStack v) { DrawCoreTab(c, settings, ref v); },
                     "Settings/CoreScroll");
                 break;
         }
     }
 
-    private static void DrawCoreTab(UIContext ctx, Settings settings, ref VStack v)
+    private static void DrawCoreTab(UIContext ctx, Settings settings, ref D2VStack v)
     {
         DrawSystemsSection(ctx, settings, ref v);
         if (Despicable.Core.ContentAvailability.NSFWActive)
@@ -210,14 +211,14 @@ public sealed class D2ModSettingsRenderer
         DrawToolsSection(ctx, ref v);
     }
 
-    private static void DrawFacePartsTab(UIContext ctx, Settings settings, ref VStack v)
+    private static void DrawFacePartsTab(UIContext ctx, Settings settings, ref D2VStack v)
     {
         DrawFacePartsOptionsSection(ctx, settings, ref v);
         v.NextSpace(ctx.Style.GapM);
         DrawFacePartsManagementSection(ctx, ref v);
     }
 
-    private static void DrawContentTab(UIContext ctx, Settings settings, ref VStack v)
+    private static void DrawContentTab(UIContext ctx, Settings settings, ref D2VStack v)
     {
         if (!Despicable.Core.ContentAvailability.NSFWActive)
             return;
@@ -229,7 +230,7 @@ public sealed class D2ModSettingsRenderer
         DrawAudioSection(ctx, settings, ref v);
     }
 
-    private static void DrawDeveloperTab(UIContext ctx, Settings settings, ref VStack v)
+    private static void DrawDeveloperTab(UIContext ctx, Settings settings, ref D2VStack v)
     {
         if (!Prefs.DevMode)
             return;
@@ -239,12 +240,12 @@ public sealed class D2ModSettingsRenderer
         DrawDeveloperHeroKarmaSection(ctx, settings, ref v);
     }
 
-    private static void DrawSystemsSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawSystemsSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 3);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Core/Systems/Outer");
         using var panel = ctx.GroupPanel("Core/Systems", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Core/Systems/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Core/Systems/Stack");
         DrawSectionHeader(ctx, ref v, "Systems", "Core/Systems/Header");
 
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Core/Systems/Animation"), "Animation Extension", ref settings.animationExtensionEnabled, id: "Core/Systems/AnimationToggle");
@@ -258,12 +259,12 @@ public sealed class D2ModSettingsRenderer
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Core/Systems/HeroModule"), "Hero Module", ref settings.heroModuleEnabled, id: "Core/Systems/HeroModuleToggle");
     }
 
-    private static void DrawIntegrationsSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawIntegrationsSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 1);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Core/Integrations/Outer");
         using var panel = ctx.GroupPanel("Core/Integrations", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Core/Integrations/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Core/Integrations/Stack");
         DrawSectionHeader(ctx, ref v, "Integrations", "Core/Integrations/Header");
 
         bool intimacyLoaded = false;
@@ -288,12 +289,12 @@ public sealed class D2ModSettingsRenderer
             id: "Core/Integrations/HideLovinOptionToggle");
     }
 
-    private static void DrawToolsSection(UIContext ctx, ref VStack outer)
+    private static void DrawToolsSection(UIContext ctx, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 1);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Core/Tools/Outer");
         using var panel = ctx.GroupPanel("Core/Tools", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Core/Tools/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Core/Tools/Stack");
         DrawSectionHeader(ctx, ref v, "Tools", "Core/Tools/Header");
 
         Rect buttonRect = v.NextButton(UIRectTag.Button, "Core/Tools/OpenAnimationStudioRow");
@@ -301,12 +302,12 @@ public sealed class D2ModSettingsRenderer
             Find.WindowStack.Add(new Dialog_AnimGroupStudio());
     }
 
-    private static void DrawFacePartsOptionsSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawFacePartsOptionsSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 1);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "FaceParts/Options/Outer");
         using var panel = ctx.GroupPanel("FaceParts/Options", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "FaceParts/Options/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "FaceParts/Options/Stack");
         DrawSectionHeader(ctx, ref v, "Options", "FaceParts/Options/Header");
 
         bool allowAutoPatch = settings.facialPartsExtensionEnabled && !ModMain.IsNlFacialInstalled;
@@ -314,12 +315,12 @@ public sealed class D2ModSettingsRenderer
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "FaceParts/Options/AutoEyePatch"), "Experimental Auto Eye Patch", ref settings.experimentalAutoEyePatchEnabled, enabled: allowAutoPatch, disabledReason: disabledReason, id: "FaceParts/Options/AutoEyePatchToggle");
     }
 
-    private static void DrawFacePartsManagementSection(UIContext ctx, ref VStack outer)
+    private static void DrawFacePartsManagementSection(UIContext ctx, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 1);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "FaceParts/Management/Outer");
         using var panel = ctx.GroupPanel("FaceParts/Management", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "FaceParts/Management/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "FaceParts/Management/Stack");
         DrawSectionHeader(ctx, ref v, "Management", "FaceParts/Management/Header");
 
         Rect buttonRect = v.NextButton(UIRectTag.Button, "FaceParts/Management/OpenBlacklistRow");
@@ -327,12 +328,12 @@ public sealed class D2ModSettingsRenderer
             Find.WindowStack.Add(new Dialog_D2HeadtypeBlacklist());
     }
 
-    private static void DrawLovinSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawLovinSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 3);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Content/Lovin/Outer");
         using var panel = ctx.GroupPanel("Content/Lovin", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Content/Lovin/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Content/Lovin/Stack");
         DrawSectionHeader(ctx, ref v, "Lovin", "Content/Lovin/Header");
 
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Content/Lovin/Enabled"), "Lovin Extension", ref settings.lovinExtensionEnabled, id: "Content/Lovin/EnabledToggle");
@@ -340,24 +341,24 @@ public sealed class D2ModSettingsRenderer
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Content/Lovin/RespectIdeology"), "Respect Ideology Restrictions", ref settings.lovinRespectIdeology, enabled: settings.lovinExtensionEnabled, disabledReason: "Lovin Extension must be enabled first.", id: "Content/Lovin/RespectIdeologyToggle");
     }
 
-    private static void DrawNuditySection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawNuditySection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 2);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Content/Nudity/Outer");
         using var panel = ctx.GroupPanel("Content/Nudity", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Content/Nudity/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Content/Nudity/Stack");
         DrawSectionHeader(ctx, ref v, "Nudity", "Content/Nudity/Header");
 
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Content/Nudity/Enabled"), "Nudity Enabled", ref settings.nudityEnabled, id: "Content/Nudity/EnabledToggle");
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Content/Nudity/RenderGenitals"), "Render Genitals", ref settings.renderGenitalsEnabled, enabled: settings.nudityEnabled, disabledReason: "Nudity Enabled must be on first.", id: "Content/Nudity/RenderGenitalsToggle");
     }
 
-    private static void DrawAudioSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawAudioSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 2);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Content/Audio/Outer");
         using var panel = ctx.GroupPanel("Content/Audio", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Content/Audio/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Content/Audio/Stack");
         DrawSectionHeader(ctx, ref v, "Audio", "Content/Audio/Header");
 
         using (new TextStateScope(GameFont.Small, TextAnchor.MiddleLeft, false))
@@ -365,24 +366,24 @@ public sealed class D2ModSettingsRenderer
         settings.soundVolume = D2Widgets.HorizontalSlider(ctx, v.NextRow(UIRectTag.Slider, "Content/Audio/VolumeSliderRow"), settings.soundVolume, 0f, 1f, showValueLabel: true, label: "Content/Audio/VolumeSlider");
     }
 
-    private static void DrawDeveloperGeneralSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawDeveloperGeneralSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 2);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Developer/General/Outer");
         using var panel = ctx.GroupPanel("Developer/General", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Developer/General/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Developer/General/Stack");
         DrawSectionHeader(ctx, ref v, "General", "Developer/General/Header");
 
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Developer/General/DebugUi"), "Hero Karma Debug UI", ref settings.heroKarmaDebugUI, id: "Developer/General/DebugUiToggle");
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Developer/General/Diagnostics"), "Echo Diagnostics To Log", ref settings.heroKarmaEchoDiagnosticsToLog, id: "Developer/General/DiagnosticsToggle");
     }
 
-    private static void DrawDeveloperHeroKarmaSection(UIContext ctx, Settings settings, ref VStack outer)
+    private static void DrawDeveloperHeroKarmaSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
         float height = MeasureSectionHeight(ctx, 23);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Developer/HeroKarma/Outer");
         using var panel = ctx.GroupPanel("Developer/HeroKarma", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
-        var v = ctx.VStack(panel.Inner, label: "Developer/HeroKarma/Stack");
+        var v = ctx.D2VStack(panel.Inner, label: "Developer/HeroKarma/Stack");
         DrawSectionHeader(ctx, ref v, "Hero Karma", "Developer/HeroKarma/Header");
 
         DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "Developer/HeroKarma/GlobalKarma"), "Enable Global Karma", ref settings.heroKarmaEnableGlobalKarma, id: "Developer/HeroKarma/GlobalKarmaToggle");
@@ -420,7 +421,7 @@ public sealed class D2ModSettingsRenderer
         return pad + title + gap + rowsHeight + rowGaps + (ctx.Style.Gap * 2f);
     }
 
-    private static void DrawSectionHeader(UIContext ctx, ref VStack v, string title, string id)
+    private static void DrawSectionHeader(UIContext ctx, ref D2VStack v, string title, string id)
     {
         D2Section.DrawCaptionStrip(ctx, v.Next(SectionHeaderHeight, UIRectTag.Label, id + "/Rect"), title, id, GameFont.Medium);
     }
@@ -447,8 +448,9 @@ public sealed class D2ModSettingsRenderer
             Type compType = AccessTools.TypeByName("Despicable.CompLovinParts");
             AccessTools.Method(compType, "RefreshAllLovinPartsForSettingsChange")?.Invoke(null, null);
         }
-        catch
+        catch (System.Exception ex)
         {
+            Despicable.Core.DebugLogger.WarnExceptionOnce("D2ModSettingsRenderer.TryRefreshLovinParts", "Mod settings refresh could not notify Lovin visuals about a settings change; continuing without the best-effort refresh.", ex);
         }
     }
 }

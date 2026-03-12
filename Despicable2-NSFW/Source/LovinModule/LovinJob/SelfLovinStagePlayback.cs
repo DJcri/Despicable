@@ -12,7 +12,7 @@ public static class SelfLovinStagePlayback
 {
     public static bool TryStartForJob(Job job, Pawn pawn, Thing anchorThing, List<Pawn> participants, out int durationTicks)
     {
-        durationTicks = LovinUtil.DefaultDurationTicks;
+        durationTicks = LovinUtil.SelfLovinDefaultDurationTicks;
 
         if (pawn == null) return false;
 
@@ -41,8 +41,7 @@ public static class SelfLovinStagePlayback
                 out var stagePlan,
                 out _))
         {
-            Despicable.Core.Staging.StagePlaybackBackends.TryPlay(stagePlan);
-            return true;
+            return Despicable.Core.Staging.StagePlaybackBackends.TryPlay(stagePlan);
         }
 
         return false;

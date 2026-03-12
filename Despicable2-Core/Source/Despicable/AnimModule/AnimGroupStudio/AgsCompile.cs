@@ -153,7 +153,7 @@ public static class AgsCompile
             };
 
             // Preserve authored scale (prop nodes use this heavily). Defaults to Vector3.one when unset.
-            TrySetVerseKeyframeScale(ek, k.scale);
+            VerseKeyframeCompat.TrySetScale(ek, k.scale);
 
             // AgsModel.KeySpec.variant uses -1 as "unset" (not nullable).
             if (k.variant != -1)
@@ -177,39 +177,6 @@ public static class AgsCompile
         if (tagDefName.NullOrEmpty()) return null;
         return DefDatabase<PawnRenderNodeTagDef>.GetNamedSilentFail(tagDefName);
     }
-
-    private static void TrySetVerseKeyframeScale(Verse.Keyframe keyframe, Vector3 scale)
-    {
-        if (keyframe == null) return;
-
-        // RimWorld/Verse versions may or may not expose scale on Keyframe.
-        // We set it via reflection when present so previews match runtime for authored clips,
-        // while keeping scale implicitly Vector3.one when absent.
-        try
-        {
-            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
-
-            var fi = typeof(Verse.Keyframe).GetField("scale", flags);
-            if (fi != null)
-            {
-                if (fi.FieldType == typeof(Vector3)) fi.SetValue(keyframe, scale);
-                else if (fi.FieldType == typeof(Vector3?)) fi.SetValue(keyframe, (Vector3?)scale);
-                return;
-            }
-
-            var pi = typeof(Verse.Keyframe).GetProperty("scale", flags);
-            if (pi != null && pi.CanWrite)
-            {
-                if (pi.PropertyType == typeof(Vector3)) pi.SetValue(keyframe, scale, null);
-                else if (pi.PropertyType == typeof(Vector3?)) pi.SetValue(keyframe, (Vector3?)scale, null);
-            }
-        }
-        catch
-        {
-            // Ignore: scale not supported or inaccessible in this runtime.
-        }
-    }
-
 
 
     private static string MakeSafeDefName(string hint)

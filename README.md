@@ -95,6 +95,11 @@ The repository currently includes language support for:
 ## Repository layout
 
 ```text
+AGENT.md
+AGENTS.md
+Docs/
+Tools/
+
 Despicable2-Core/
   1.6/
   About/
@@ -105,12 +110,12 @@ Despicable2-Core/
   Patches/
   Source/
   Textures/
-  Tools/
 
 Despicable2-NSFW/
   1.6/
   About/
   Defs/
+  Docs/
   Languages/
   Patches/
   Sounds/
@@ -122,7 +127,7 @@ Despicable2-NSFW/
 
 This repository is strongly oriented toward modular growth, additive changes, and documented guardrails.
 
-Some of the included development docs in `Despicable2-Core/Docs/` cover:
+Some of the included development docs in `Despicable2-Core/Docs/`, plus the shared repo-root `Tools/` guardrails, cover:
 - architecture and extension rules
 - consistency and maintenance guardrails
 - UI framework guidance and layout rules

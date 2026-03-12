@@ -1,4 +1,5 @@
 using RimWorld;
+// Guardrail-Reason: AGS preview orchestration stays together because hashing, compile prep, binding, and playback handoff share one author-preview seam.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

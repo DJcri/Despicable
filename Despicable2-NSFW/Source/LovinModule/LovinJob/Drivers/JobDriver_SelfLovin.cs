@@ -10,11 +10,19 @@ public class JobDriver_SelfLovin : JobDriver
     private const TargetIndex iCell = TargetIndex.B;
 
     private readonly List<Pawn> participants = new();
-    private int durationTicks = LovinUtil.DefaultDurationTicks;
+    private int durationTicks = LovinUtil.SelfLovinDefaultDurationTicks;
+    private bool hasStartedAnimation;
 
     public override bool TryMakePreToilReservations(bool errorOnFailed)
     {
         return true;
+    }
+
+    public override void ExposeData()
+    {
+        base.ExposeData();
+        Scribe_Values.Look(ref durationTicks, "durationTicks", LovinUtil.SelfLovinDefaultDurationTicks);
+        Scribe_Values.Look(ref hasStartedAnimation, "hasStartedAnimation", defaultValue: false);
     }
 
     protected override IEnumerable<Toil> MakeNewToils()
@@ -60,9 +68,10 @@ public class JobDriver_SelfLovin : JobDriver
             participants.Clear();
             participants.Add(pawn);
 
-            durationTicks = LovinUtil.DefaultDurationTicks;
+            durationTicks = LovinUtil.SelfLovinDefaultDurationTicks;
+            hasStartedAnimation = false;
             LovinVisualRuntime.SetLovinVisualActive(pawn, true);
-            TryStartSelfLovinAnimation();
+            hasStartedAnimation = TryStartSelfLovinAnimation();
         };
         toil.AddPreTickAction(delegate
         {
@@ -116,17 +125,19 @@ public class JobDriver_SelfLovin : JobDriver
             string channel = null;
             bool isManualSelf = store != null && store.TryGetChannel(jobId, out channel) && channel == Despicable.Core.Channels.ManualSelfLovin;
             if (!isManualSelf)
-                pawn.mindState.canLovinTick = Find.TickManager.TicksGame + LovinUtil.DefaultDurationTicks;
+                pawn.mindState.canLovinTick = Find.TickManager.TicksGame + LovinUtil.SelfLovinDefaultDurationTicks;
 
             store?.Clear(jobId);
         };
         return toil;
     }
 
-    private void TryStartSelfLovinAnimation()
+    private bool TryStartSelfLovinAnimation()
     {
-        if (CommonUtil.GetSettings().animationExtensionEnabled)
-            SelfLovinStagePlayback.TryStartForJob(job, pawn, pawn, participants, out durationTicks);
+        if (!CommonUtil.GetSettings().animationExtensionEnabled)
+            return false;
+
+        return SelfLovinStagePlayback.TryStartForJob(job, pawn, pawn, participants, out durationTicks);
     }
 
     private void TickParticipant()
@@ -140,16 +151,16 @@ public class JobDriver_SelfLovin : JobDriver
 
     private bool ShouldFinishSelfLovin()
     {
+        if (durationTicks <= 0)
+            return true;
+
+        if (!hasStartedAnimation)
+            return false;
+
         CompExtendedAnimator animator = pawn.TryGetComp<CompExtendedAnimator>();
         if (animator == null)
-            return durationTicks <= 0;
+            return false;
 
-        if ((animator.animQueue.Count <= 0 && !animator.hasAnimPlaying)
-            || (!animator.hasAnimPlaying && durationTicks <= 0))
-        {
-            return true;
-        }
-
-        return durationTicks <= 0;
+        return animator.animQueue.Count <= 0 && !animator.hasAnimPlaying;
     }
 }

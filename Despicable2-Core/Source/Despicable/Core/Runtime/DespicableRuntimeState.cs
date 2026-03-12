@@ -44,9 +44,4 @@ public static class DespicableRuntimeState
         HKBackendBridge.ResetRuntimeState();
         GameComponent_ExtendedAnimatorRuntime.ResetRuntimeState();
     }
-
-    public static void ResetAll()
-    {
-        ResetRuntimeState();
-    }
 }

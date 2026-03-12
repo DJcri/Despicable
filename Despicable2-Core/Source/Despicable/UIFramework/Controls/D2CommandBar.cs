@@ -64,7 +64,7 @@ public static class D2CommandBar
     {
         if (ctx != null)
         {
-            ctx.RecordRect(rect, UIRectTag.Input, label ?? "CommandBar", "Items=" + (commands != null ? commands.Count.ToString() : "0"));
+            ctx.RecordRect(rect, UIRectTag.Input, label ?? "CommandBar", "Items=" + (commands != null ? commands.Count.ToString() : "0")); // loc-allow-internal: fallback widget id
         }
 
         if (commands == null || commands.Count == 0)
@@ -72,7 +72,7 @@ public static class D2CommandBar
             return default(Result);
         }
 
-        var flow = new HFlow(ctx, rect, MeasureHeight(ctx), ctx != null && ctx.Style != null ? ctx.Style.Gap : 6f);
+        var flow = new D2HFlow(ctx, rect, MeasureHeight(ctx), ctx != null && ctx.Style != null ? ctx.Style.Gap : 6f);
         var result = new Result();
 
         for (int i = 0; i < commands.Count; i++)
@@ -90,9 +90,9 @@ public static class D2CommandBar
 
             if (hasMenu)
             {
-                RectSplit.SplitVertical(slot, Mathf.Max(0f, slot.width - 22f), 2f, out Rect main, out Rect arrow);
+                D2RectSplit.SplitVertical(slot, Mathf.Max(0f, slot.width - 22f), 2f, out Rect main, out Rect arrow);
                 clicked = DrawCommandButton(ctx, main, cmd, runAction: true, openMenuOnPrimaryIfNoAction: true);
-                bool menuClicked = DrawMenuButton(ctx, arrow, cmd, label ?? "CommandBar", i);
+                bool menuClicked = DrawMenuButton(ctx, arrow, cmd, label ?? "CommandBar", i); // loc-allow-internal: fallback widget id
                 clicked |= menuClicked;
             }
             else
@@ -144,11 +144,11 @@ public static class D2CommandBar
         {
             using (new GUIEnabledScope(false))
             {
-                return D2Widgets.ButtonText(ctx, rect, cmd.Label ?? string.Empty, cmd.Id ?? cmd.Label ?? "Command");
+                return D2Widgets.ButtonText(ctx, rect, cmd.Label ?? string.Empty, cmd.Id ?? cmd.Label ?? "Command"); // loc-allow-internal: fallback command id
             }
         }
 
-        bool clicked = D2Widgets.ButtonText(ctx, rect, cmd.Label ?? string.Empty, cmd.Id ?? cmd.Label ?? "Command");
+        bool clicked = D2Widgets.ButtonText(ctx, rect, cmd.Label ?? string.Empty, cmd.Id ?? cmd.Label ?? "Command"); // loc-allow-internal: fallback command id
         if (!clicked || !runAction)
         {
             return clicked;
@@ -184,7 +184,7 @@ public static class D2CommandBar
             return false;
         }
 
-        string tip = cmd.Disabled ? (cmd.DisabledReason ?? cmd.Tooltip) : (cmd.Tooltip ?? "More options");
+        string tip = cmd.Disabled ? (cmd.DisabledReason ?? cmd.Tooltip) : (cmd.Tooltip ?? "D2C_UI_MoreOptions".Translate().ToString());
         if (!string.IsNullOrEmpty(tip) && ctx != null && ctx.Pass == UIPass.Draw)
         {
             TooltipHandler.TipRegion(rect, tip);
@@ -194,11 +194,11 @@ public static class D2CommandBar
         {
             using (new GUIEnabledScope(false))
             {
-                return D2Widgets.ButtonText(ctx, rect, "▾", (label ?? "CommandBar") + "/Menu[" + index + "]");
+                return D2Widgets.ButtonText(ctx, rect, "▾", (label ?? "CommandBar") + "/Menu[" + index + "]"); // loc-ignore: symbolic menu arrow and internal widget id
             }
         }
 
-        if (!D2Widgets.ButtonText(ctx, rect, "▾", (label ?? "CommandBar") + "/Menu[" + index + "]"))
+        if (!D2Widgets.ButtonText(ctx, rect, "▾", (label ?? "CommandBar") + "/Menu[" + index + "]")) // loc-ignore: symbolic menu arrow and internal widget id
         {
             return false;
         }

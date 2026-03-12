@@ -92,7 +92,7 @@ public sealed class ITab_UIFrameworkDemo : ITab
 
     private void DrawHeader(UIContext ctx, Rect rect)
     {
-        var h = new HRow(ctx, rect);
+        var h = new D2HRow(ctx, rect);
         D2Widgets.LabelClipped(ctx, h.NextFixed(rect.width * 0.60f), "UI Framework ITab", "ITab/HeaderTitle");
 
         // Small status chip.
@@ -107,7 +107,7 @@ public sealed class ITab_UIFrameworkDemo : ITab
     private void DrawFooter(UIContext ctx, Rect rect)
     {
         // Footer is intentionally boring: one button that does something visible.
-        var h = new HRow(ctx, rect);
+        var h = new D2HRow(ctx, rect);
         Rect left = h.NextFixed(140f);
         Rect right = h.Remaining();
 
@@ -125,7 +125,7 @@ public sealed class ITab_UIFrameworkDemo : ITab
         D2Widgets.LabelClipped(ctx, right, "(Inspect tab demo)", "ITab/FooterHint");
     }
 
-    private void DrawBodyContent(UIContext ctx, ref VStack v)
+    private void DrawBodyContent(UIContext ctx, ref D2VStack v)
     {
         // Controls section
         Rect header = D2LayoutHelpers.NextSectionHeader(ctx, ref v, "ITab/ControlsHeader");
@@ -138,19 +138,19 @@ public sealed class ITab_UIFrameworkDemo : ITab
 
         // Slider
         Rect sliderRow = v.NextRow(UIRectTag.Input, "ITab/IntensityRow");
-        var hs = new HRow(ctx, sliderRow);
+        var hs = new D2HRow(ctx, sliderRow);
         D2Widgets.Label(ctx, hs.NextFixed(90f), "Intensity", "ITab/IntensityLabel");
         _intensity = D2Widgets.HorizontalSlider(ctx, hs.Remaining(), _intensity, 0f, 100f, showValueLabel: true, label: "ITab/Intensity");
 
         // Filter field
         Rect filterRow = v.NextRow(UIRectTag.Input, "ITab/FilterRow");
-        var hf = new HRow(ctx, filterRow);
+        var hf = new D2HRow(ctx, filterRow);
         D2Widgets.Label(ctx, hf.NextFixed(90f), "Filter", "ITab/FilterLabel");
         D2Fields.SearchBox(ctx, hf.Remaining(), ref _filter, placeholder: "type to filter...", tooltip: "Filters the demo list below.", label: "ITab/Search");
 
         // Numeric fields
         Rect numRow = v.NextRow(UIRectTag.Input, "ITab/NumericRow");
-        var hn = new HRow(ctx, numRow);
+        var hn = new D2HRow(ctx, numRow);
         D2Widgets.Label(ctx, hn.NextFixed(90f), "Count", "ITab/CountLabel");
         Rect countRect = hn.NextFixed(80f);
         D2Fields.IntField(ctx, countRect, ref _count, min: 0, max: 999, tooltip: "An int field with clamping.", label: "ITab/Count");
@@ -159,7 +159,7 @@ public sealed class ITab_UIFrameworkDemo : ITab
 
         // Enum dropdown
         Rect modeRow = v.NextRow(UIRectTag.Input, "ITab/ModeRow");
-        var hm = new HRow(ctx, modeRow);
+        var hm = new D2HRow(ctx, modeRow);
         D2Widgets.Label(ctx, hm.NextFixed(90f), "Mode", "ITab/ModeLabel");
         D2Fields.EnumDropdown(ctx, hm.Remaining(), _mode, v2 => _mode = v2, tooltip: "Choose a demo mode.");
 
@@ -207,7 +207,7 @@ public sealed class ITab_UIFrameworkDemo : ITab
             (c, row, item, index, selected) =>
             {
                 // Simple two-column row: label + small state chip
-                var hr = new HRow(c, row);
+                var hr = new D2HRow(c, row);
                 D2Widgets.LabelClipped(c, hr.Remaining(), item, "ITab/ListRowLabel");
             },
             rowGap: 0f,

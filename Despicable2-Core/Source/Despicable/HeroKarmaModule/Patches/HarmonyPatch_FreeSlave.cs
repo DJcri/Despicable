@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using HarmonyLib;
-using RimWorld.Planet;
 using Verse;
 using Verse.AI;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -50,16 +49,7 @@ public static class HarmonyPatch_FreeSlave
 
     private static IEnumerable<MethodBase> FindTargets()
     {
-        var seen = new HashSet<MethodBase>();
-        for (int i = 0; i < CandidateTypeNames.Length; i++)
-        {
-            Type t = AccessTools.TypeByName(CandidateTypeNames[i]);
-            if (t == null) continue;
-
-            MethodInfo m = AccessTools.Method(t, "TryMakePreToilReservations");
-            if (m != null && seen.Add(m))
-                yield return m;
-        }
+        return HKPatchTargetUtil.FindFirstMethods(CandidateTypeNames, "TryMakePreToilReservations");
     }
 
     public static void Postfix(object __instance, bool __result)
@@ -70,13 +60,10 @@ public static class HarmonyPatch_FreeSlave
         {
             if (__instance == null) return;
 
-            Pawn initiator = AccessTools.Field(__instance.GetType(), "pawn")?.GetValue(__instance) as Pawn;
-            Job job = AccessTools.Field(__instance.GetType(), "job")?.GetValue(__instance) as Job;
-
-            if (initiator == null || job == null) return;
+            if (!HKJobDriverUtil.TryGetActorAndJob(__instance, out Pawn initiator, out Job job)) return;
             if (!HKHookUtilSafe.ActorIsHero(initiator)) return;
 
-            Pawn target = job.GetTarget(TargetIndex.A).Thing as Pawn ?? job.GetTarget(TargetIndex.B).Thing as Pawn;
+            Pawn target = HKJobDriverUtil.TryGetPawnTarget(job, TargetIndex.A, TargetIndex.B);
             if (target == null) return;
             if (!HKHookUtil.IsSlaveLike(target)) return;
 
@@ -87,11 +74,7 @@ public static class HarmonyPatch_FreeSlave
             {
                 var ev = KarmaEvent.Create("FreeSlave", initiator, target, factionId);
 
-                if ((initiator.MapHeld ?? initiator.Map)?.Parent is Settlement settlement && settlement.Faction != null && !settlement.Faction.IsPlayer)
-                {
-                    ev.settlementUniqueId = settlement.GetUniqueLoadID();
-                    ev.settlementLabel = settlement.LabelCap;
-                }
+                HKSettlementContextUtil.TryAssignFromPawns(ev, initiator);
 
                 HKKarmaProcessor.Process(ev);
             }

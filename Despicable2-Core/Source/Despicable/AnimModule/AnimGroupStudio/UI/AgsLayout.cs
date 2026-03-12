@@ -51,7 +51,7 @@ public partial class Dialog_AnimGroupStudio
                 if (ctx == null)
                     return;
 
-                var v = ctx.VStack(rect, label: "Header/Stack");
+                var v = ctx.D2VStack(rect, label: "Header/Stack");
                 Rect titleRect = v.Next(28f, UIRectTag.Label, "Header/Title");
                 Rect subtitleRect = v.Next(24f, UIRectTag.Label, "Header/Subtitle");
 
@@ -70,7 +70,7 @@ public partial class Dialog_AnimGroupStudio
                 return "Author";
             }
 
-            private void DrawGroupedHeader(UIContext ctx, ref VStack v, string id, string text, bool topPadding = false)
+            private void DrawGroupedHeader(UIContext ctx, ref D2VStack v, string id, string text, bool topPadding = false)
             {
                 if (topPadding)
                     v.NextSpace(Mathf.Max(2f, ctx.Style.Gap * 0.35f));

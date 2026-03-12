@@ -20,7 +20,7 @@ public static partial class HarmonyPatch_AttackNeutral
 
     private struct AttackState
     {
-        public bool goodwillBegun;
+        public HKGoodwillContext.Scope goodwillScope;
         public bool victimWasDowned;
         public bool victimWasHostile;
         public bool victimWasGuestLike;
@@ -31,11 +31,6 @@ public static partial class HarmonyPatch_AttackNeutral
     {
         InitiatedTicksByInteractionKey.Clear();
         PruneTracker.Reset();
-    }
-
-    public static void ClearRuntimeState()
-    {
-        ResetRuntimeState();
     }
 
     // Prefix/Postfix signature binds by name/position on Pawn_HealthTracker.PostApplyDamage.
@@ -65,8 +60,7 @@ public static partial class HarmonyPatch_AttackNeutral
                 RememberInitiated(instigatorPawn, victim);
             }
 
-            HKGoodwillContext.Begin(instigatorPawn);
-            __state.goodwillBegun = true;
+            __state.goodwillScope = HKGoodwillContext.Enter(instigatorPawn);
         }
         catch (Exception ex)
         {
@@ -149,14 +143,9 @@ public static partial class HarmonyPatch_AttackNeutral
 
     private static void Finalizer(Exception __exception, AttackState __state)
     {
-        if (!__state.goodwillBegun)
-        {
-            return;
-        }
-
         try
         {
-            HKGoodwillContext.End();
+            __state.goodwillScope.Dispose();
         }
         catch (Exception ex)
         {

@@ -59,7 +59,7 @@ public sealed class Dialog_AssignHeroKarma : D2WindowBlueprint
         int standing = HKRuntime.GetGlobalStanding(currentHero);
         bool showStanding = HKIdeologyCompat.IsStandingEnabled;
 
-        var v = Ctx.VStack(rect);
+        var v = Ctx.D2VStack(rect);
         v.NextTextBlock(Ctx, "D2HK_UI_AssignHeroBody".Translate(), GameFont.Small, 0f, "Intro");
 
         DrawSummaryRow(ref v, "D2HK_UI_CurrentHero".Translate(), currentHero != null ? currentHero.LabelShortCap : "D2HK_UI_NoneAssigned".Translate(), "CurrentHero");
@@ -88,7 +88,7 @@ public sealed class Dialog_AssignHeroKarma : D2WindowBlueprint
             rect.y,
             Mathf.Min(buttonGroupWidth, rect.width),
             rect.height);
-        var h = new HRow(Ctx, buttonArea);
+        var h = new D2HRow(Ctx, buttonArea);
         Rect cancelRect = h.NextFixed(buttonWidth, UIRectTag.Button, "Cancel");
         Rect assignRect = h.NextFixed(buttonWidth, UIRectTag.Button, "Assign");
 
@@ -108,7 +108,7 @@ public sealed class Dialog_AssignHeroKarma : D2WindowBlueprint
         }
     }
 
-    private void DrawSummaryRow(ref VStack v, string left, string right, string id)
+    private void DrawSummaryRow(ref D2VStack v, string left, string right, string id)
     {
         Rect rowRect = v.NextRow(UIRectTag.Input, id + "/Row");
         D2TextPairRow.Draw(Ctx, rowRect, left, right, id: id + "/TextPair", leftWidthFraction: 0.34f);

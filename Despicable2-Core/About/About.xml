@@ -10,7 +10,6 @@ Despicable 2 (Core) is the necessary foundation of the Despicable suite. It adds
 		<li>1.6</li>
 	</supportedVersions>
 	<loadAfter>
-		<li>brrainz.harmony</li>
 		<li>LovelyDovey.Sex.WithEuterpe</li>
 		<li>LovelyDovey.Sex.WithRosaline</li>
 	</loadAfter>

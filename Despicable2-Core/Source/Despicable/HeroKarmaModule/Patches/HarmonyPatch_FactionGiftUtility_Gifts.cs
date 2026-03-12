@@ -167,12 +167,12 @@ public static class HarmonyPatch_FactionGiftUtility_GiveGift_Tradeables
     }
 
     // This matches: GiveGift(List<Tradeable> tradeables, Faction giveTo, GlobalTargetInfo lookTarget)
-    public static void Prefix(ref bool __state)
+    private static void Prefix(ref HKGoodwillContext.Scope __state)
     {
-        __state = false;
+        __state = default;
         try
         {
-            __state = HKGiftPatchHelpers.TryBeginHeroGoodwillForGift();
+            __state = HKGiftPatchHelpers.TryEnterHeroGoodwillForGift();
         }
         catch (Exception ex)
         {
@@ -198,16 +198,11 @@ public static class HarmonyPatch_FactionGiftUtility_GiveGift_Tradeables
         }
     }
 
-    public static void Finalizer(Exception __exception, bool __state)
+    private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
     {
-        if (!__state)
-        {
-            return;
-        }
-
         try
         {
-            HKGoodwillContext.End();
+            __state.Dispose();
         }
         catch (Exception ex)
         {
@@ -240,9 +235,9 @@ public static class HarmonyPatch_FactionGiftUtility_GiveGift_Pods
     }
 
     // This matches: GiveGift(List<ActiveTransporterInfo> pods, Settlement giveTo)
-public static void Prefix(ref bool __state)
+private static void Prefix(ref HKGoodwillContext.Scope __state)
 {
-    __state = false;
+    __state = default;
     try
     {
         if (!HKSettingsUtil.HookEnabled("CharityGift")) return;
@@ -251,8 +246,7 @@ public static void Prefix(ref bool __state)
         if (hero == null) return;
 
         // Treat pod gifting as hero-attributed player intent (no explicit instigator pawn is carried down).
-        HKGoodwillContext.Begin(hero);
-        __state = true;
+        __state = HKGoodwillContext.Enter(hero);
     }
     catch (Exception ex)
     {
@@ -279,16 +273,11 @@ public static void Postfix(List<ActiveTransporterInfo> pods, Settlement giveTo)
     }
 
 
-public static void Finalizer(Exception __exception, bool __state)
+private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
 {
-    if (!__state)
-    {
-        return;
-    }
-
     try
     {
-        HKGoodwillContext.End();
+        __state.Dispose();
     }
     catch (Exception ex)
     {

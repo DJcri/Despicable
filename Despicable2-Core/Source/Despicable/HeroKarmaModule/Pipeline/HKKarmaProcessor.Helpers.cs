@@ -10,17 +10,16 @@ using Verse;
 namespace Despicable.HeroKarma;
 public static partial class HKKarmaProcessor
 {
-    private static IEnumerable<IHKEffectToken> BuildTokens(KarmaEvent ev)
+    private static IEnumerable<IHKEffectToken> BuildTokens(KarmaEvent ev, string canonicalEventKey)
     {
         var list = new List<IHKEffectToken>();
-        string eventKey = HKSettingsUtil.CanonicalizeEventKey(ev?.eventKey);
 
         if (!HKSettingsUtil.EnableLocalRep)
             return list;
 
         try
         {
-            switch (eventKey)
+            switch (canonicalEventKey)
             {
                 case "TendOutsider":
                     AddPawnRep(list, ev, HKBalanceTuning.LocalRepEvents.TendOutsiderPawn, "Helped");
@@ -145,8 +144,6 @@ public static partial class HKKarmaProcessor
     private static void AddPawnRep(List<IHKEffectToken> list, string targetPawnId, int delta, string eventKey, string reason, int baseDelta = 0, string affectedByLabel = null)
     {
         if (list == null) return;
-        bool allow = IsLocalRepEnabled();
-        if (!allow) return;
         if (targetPawnId.NullOrEmpty()) return;
         if (delta == 0) return;
         list.Add(new HKToken_LocalRepPawn(targetPawnId, delta, eventKey, reason, baseDelta, affectedByLabel));
@@ -218,8 +215,6 @@ public static partial class HKKarmaProcessor
     private static void AddFactionRep(List<IHKEffectToken> list, int factionId, int delta, string eventKey, string reason)
     {
         if (list == null) return;
-        bool allow = IsLocalRepEnabled();
-        if (!allow) return;
         if (factionId <= 0) return;
         if (delta == 0) return;
         list.Add(new HKToken_LocalRepFaction(factionId, delta, eventKey, reason));
@@ -228,8 +223,6 @@ public static partial class HKKarmaProcessor
     private static void AddSettlementRepFromEventContext(List<IHKEffectToken> list, KarmaEvent ev, int delta, string eventKey, string reason)
     {
         if (list == null) return;
-        bool allow = IsLocalRepEnabled();
-        if (!allow) return;
         if (delta == 0) return;
         if (Mathf.Approximately(HKBalanceTuning.LocalRep.SettlementEchoToPawnFactor, 0f)) return;
 
@@ -250,8 +243,6 @@ public static partial class HKKarmaProcessor
     private static bool TryAddSettlementRepFromPawnContext(List<IHKEffectToken> list, KarmaEvent ev, Pawn pawn, int delta, string eventKey, string reason)
     {
         if (list == null) return false;
-        bool allow = IsLocalRepEnabled();
-        if (!allow) return false;
         if (pawn == null) return false;
         if (delta == 0) return false;
         if (Mathf.Approximately(HKBalanceTuning.LocalRep.SettlementEchoToPawnFactor, 0f)) return false;
@@ -263,10 +254,9 @@ public static partial class HKKarmaProcessor
         return true;
     }
 
-    private static string BuildDetail(KarmaEvent ev)
+    private static string BuildDetail(KarmaEvent ev, string canonicalEventKey)
     {
         string core = "";
-        string eventKey = HKSettingsUtil.CanonicalizeEventKey(ev?.eventKey);
         try
         {
             if (ev.targetPawn != null)
@@ -288,7 +278,7 @@ public static partial class HKKarmaProcessor
 
         try
         {
-            switch (eventKey)
+            switch (canonicalEventKey)
             {
                 case "CharityGift":
                 case "DonateToBeggars":
@@ -410,22 +400,6 @@ public static partial class HKKarmaProcessor
         }
 
         return null;
-    }
-
-    private static bool IsLocalRepEnabled()
-    {
-        try
-        {
-            return HKSettingsUtil.EnableLocalRep;
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HKKarmaProcessor.IsLocalRepEnabled",
-                "Hero Karma failed to read the local reputation setting; assuming it is enabled.",
-                ex);
-            return true;
-        }
     }
 
     private static string SafePawnName(Pawn p)

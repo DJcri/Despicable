@@ -1,9 +1,9 @@
 using System;
-using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using Verse;
 using Verse.AI;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -39,14 +39,11 @@ public static class HarmonyPatch_RescueOutsider
         {
             if (__instance == null) return;
 
-            Pawn initiator = AccessTools.Field(__instance.GetType(), "pawn")?.GetValue(__instance) as Pawn;
-            Job job = AccessTools.Field(__instance.GetType(), "job")?.GetValue(__instance) as Job;
-
-            if (initiator == null || job == null) return;
+            if (!HKJobDriverUtil.TryGetActorAndJob(__instance, out Pawn initiator, out Job job)) return;
             if (job.def != JobDefOf.Rescue) return;
             if (!HKHookUtilSafe.ActorIsHero(initiator)) return;
 
-            Pawn target = job.GetTarget(TargetIndex.A).Thing as Pawn;
+            Pawn target = HKJobDriverUtil.TryGetPawnTarget(job, TargetIndex.A);
             if (target == null) return;
 
             if (HKHookUtil.IsAnimal(target)) return;

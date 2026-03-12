@@ -6,9 +6,9 @@ namespace Despicable.HeroKarma.Patches.HeroKarma;
 [HarmonyPatch]
 public static partial class HarmonyPatch_ExecutePrisoner
 {
-    public static void Prefix(object[] __args, ref bool __state)
+    private static void Prefix(object[] __args, ref HKGoodwillContext.Scope __state)
     {
-        __state = false;
+        __state = default;
         try
         {
             if (!TryGetExecutionerAndVictim(__args, out Pawn executioner, out _))
@@ -21,8 +21,7 @@ public static partial class HarmonyPatch_ExecutePrisoner
                 return;
             }
 
-            HKGoodwillContext.Begin(executioner);
-            __state = true;
+            __state = HKGoodwillContext.Enter(executioner);
         }
         catch (Exception ex)
         {
@@ -69,16 +68,11 @@ public static partial class HarmonyPatch_ExecutePrisoner
         }
     }
 
-    public static void Finalizer(Exception __exception, bool __state)
+    private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
     {
-        if (!__state)
-        {
-            return;
-        }
-
         try
         {
-            HKGoodwillContext.End();
+            __state.Dispose();
         }
         catch (Exception ex)
         {

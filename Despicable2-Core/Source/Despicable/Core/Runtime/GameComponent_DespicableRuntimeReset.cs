@@ -11,14 +11,12 @@ public sealed class GameComponent_DespicableRuntimeReset : GameComponent
     {
         base.StartedNewGame();
         DespicableRuntimeState.ResetRuntimeState();
-        GameComponent_ExtendedAnimatorRuntime.ResetRuntimeState();
     }
 
     public override void LoadedGame()
     {
         base.LoadedGame();
         DespicableRuntimeState.ResetRuntimeState();
-        GameComponent_ExtendedAnimatorRuntime.ResetRuntimeState();
         LongEventHandler.ExecuteWhenFinished(GameComponent_ExtendedAnimatorRuntime.NotifyLoadedGame);
     }
 }

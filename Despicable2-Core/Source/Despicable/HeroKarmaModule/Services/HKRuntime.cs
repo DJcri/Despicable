@@ -23,7 +23,10 @@ public static class HKRuntime
         if (bridge != null)
         {
             try { return bridge.GetHeroPawnSafe(); }
-            catch { }
+            catch (System.Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce("HKRuntime.GetHeroPawnSafe", "Hero Karma bridge lookup for the hero pawn failed; falling back to the game component runtime.", ex);
+            }
         }
 
         var gc = Current.Game?.GetComponent<GameComponent_HeroKarma>();
@@ -39,7 +42,10 @@ public static class HKRuntime
         if (bridge != null)
         {
             try { return Mathf.Clamp(bridge.GetGlobalKarma(hero), KarmaMin, KarmaMax); }
-            catch { }
+            catch (System.Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce("HKRuntime.GetGlobalKarma", "Hero Karma bridge lookup for global karma failed; falling back to the game component runtime.", ex);
+            }
         }
 
         var gc = Current.Game?.GetComponent<GameComponent_HeroKarma>();
@@ -55,7 +61,10 @@ public static class HKRuntime
         if (bridge != null)
         {
             try { return Mathf.Clamp(bridge.GetGlobalStanding(hero), KarmaMin, KarmaMax); }
-            catch { }
+            catch (System.Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce("HKRuntime.GetGlobalStanding", "Hero Karma bridge lookup for global standing failed; falling back to the game component runtime.", ex);
+            }
         }
 
         var gc = Current.Game?.GetComponent<GameComponent_HeroKarma>();
@@ -108,7 +117,11 @@ public static class HKRuntime
         {
             IEnumerable<HKLedgerRow> rows = null;
             try { rows = bridge.GetLedgerRows(hero, cap); }
-            catch { rows = null; }
+            catch (System.Exception ex)
+            {
+                rows = null;
+                Despicable.Core.DebugLogger.WarnExceptionOnce("HKRuntime.GetLedgerRows", "Hero Karma bridge lookup for ledger rows failed; falling back to the game component ledger snapshot.", ex);
+            }
 
             if (rows != null)
             {
@@ -142,7 +155,10 @@ public static class HKRuntime
                 var perks = bridge.GetActivePerksFor(karma);
                 if (perks != null) return perks;
             }
-            catch { }
+            catch (System.Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce("HKRuntime.GetActivePerksFor", "Hero Karma bridge lookup for active perks failed; falling back to the local perk resolver.", ex);
+            }
         }
 
         return HKPerkCatalog.GetPerksFor(GetTierFor(karma));

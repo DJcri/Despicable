@@ -1,70 +1,11 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
+using System;
 
 namespace Despicable;
 public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
 {
-    private static Func<Verse.Keyframe, Vector3> ResolveKeyframeScaleGetter(Type keyframeType)
-    {
-        if (keyframeType == null)
-        {
-            return null;
-        }
-
-        const System.Reflection.BindingFlags BindingFlags =
-            System.Reflection.BindingFlags.Instance |
-            System.Reflection.BindingFlags.Public |
-            System.Reflection.BindingFlags.NonPublic;
-
-        string[] candidateNames = { "scale", "Scale", "drawScale", "DrawScale" };
-
-        foreach (string candidateName in candidateNames)
-        {
-            var fieldInfo = keyframeType.GetField(candidateName, BindingFlags);
-            if (fieldInfo != null)
-            {
-                Type fieldType = fieldInfo.FieldType;
-                if (fieldType == typeof(Vector3))
-                {
-                    return (Verse.Keyframe keyframe) => (Vector3)fieldInfo.GetValue(keyframe);
-                }
-
-                if (Nullable.GetUnderlyingType(fieldType) == typeof(Vector3))
-                {
-                    return (Verse.Keyframe keyframe) =>
-                    {
-                        object value = fieldInfo.GetValue(keyframe);
-                        return value is Vector3 vector ? vector : Vector3.one;
-                    };
-                }
-            }
-
-            var propertyInfo = keyframeType.GetProperty(candidateName, BindingFlags);
-            if (propertyInfo != null && propertyInfo.GetIndexParameters().Length == 0)
-            {
-                Type propertyType = propertyInfo.PropertyType;
-                if (propertyType == typeof(Vector3))
-                {
-                    return (Verse.Keyframe keyframe) => (Vector3)propertyInfo.GetValue(keyframe, null);
-                }
-
-                if (Nullable.GetUnderlyingType(propertyType) == typeof(Vector3))
-                {
-                    return (Verse.Keyframe keyframe) =>
-                    {
-                        object value = propertyInfo.GetValue(keyframe, null);
-                        return value is Vector3 vector ? vector : Vector3.one;
-                    };
-                }
-            }
-        }
-
-        // Some builds store scale inside another struct; we do not chase that here.
-        return null;
-    }
-
     private static bool TrySampleScaleInterpolated(KeyframeAnimationPart kap, int tick, out Vector3 scale)
     {
         scale = Vector3.one;
@@ -115,34 +56,7 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
 
     private static Vector3 ReadScaleFromVerseKeyframe(Verse.Keyframe kf)
     {
-        if (kf == null)
-        {
-            return Vector3.one;
-        }
-
-        try
-        {
-            Type t = kf.GetType();
-            if (!keyframeScaleGettersByType.TryGetValue(t, out Func<Verse.Keyframe, Vector3> getter))
-            {
-                getter = ResolveKeyframeScaleGetter(t) ?? ResolveKeyframeScaleGetter(t.BaseType);
-                keyframeScaleGettersByType[t] = getter; // may be null
-            }
-
-            if (getter != null)
-            {
-                return getter(kf);
-            }
-        }
-        catch (Exception e)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HarmonyPatch_PawnRenderTree.EmptyCatch:1",
-                "PawnRenderTree reflection fallback failed.",
-                e);
-        }
-
-        return Vector3.one;
+        return VerseKeyframeCompat.GetScaleOrDefault(kf);
     }
 
     private static bool TryGetVanillaMatrix(PawnRenderTree tree, PawnRenderNode n, ref PawnDrawParms parms, out Matrix4x4 m)

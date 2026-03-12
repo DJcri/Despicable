@@ -78,12 +78,12 @@ public static class D2ListingDialog
         Rect searchRect = header;
         if (hasFilters)
             searchRect.width = Mathf.Max(0f, header.width - filterToggleW - gap);
-        D2Fields.SearchBox(ctx, searchRect, ref state.Search, placeholder: title ?? "Search", label: label + "/SearchBox");
+        D2Fields.SearchBox(ctx, searchRect, ref state.Search, placeholder: title ?? "D2C_UI_Search".Translate().ToString(), label: label + "/SearchBox");
         if (hasFilters)
         {
             Rect toggleRect = new(searchRect.xMax + gap, header.y, Mathf.Min(filterToggleW, Mathf.Max(0f, header.xMax - (searchRect.xMax + gap))), header.height);
             ctx?.RecordRect(toggleRect, UIRectTag.Button, label + "/FiltersToggle", null);
-            string toggleLabel = state.ShowFilters ? "Hide Filters" : "Show Filters";
+            string toggleLabel = state.ShowFilters ? "D2C_UI_HideFilters".Translate().ToString() : "D2C_UI_ShowFilters".Translate().ToString();
             if (D2Widgets.ButtonText(ctx, toggleRect, toggleLabel, label + "/ToggleFilters"))
                 state.ShowFilters = !state.ShowFilters;
         }
@@ -253,7 +253,7 @@ public static class D2ListingDialog
 
         using (new GUIEnabledScope(!item.Disabled))
         {
-            D2Widgets.LabelClipped(ctx, textRect, item.Label ?? string.Empty, label + "/Text[" + index + "]", tooltipOverride: item.Tooltip);
+            D2Widgets.LabelClipped(ctx, textRect, item.Label ?? string.Empty, label + "/Text[" + index + "]", tooltipOverride: item.Tooltip); // loc-allow-internal: generated row text id
         }
     }
 }

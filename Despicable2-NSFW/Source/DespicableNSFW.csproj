@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -60,7 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DespicableNSFWBootstrap.cs" />
-    <Compile Include="HookBootstraps.cs" />
+    <Compile Include="LovinModule\Hooks\HookBootstraps.cs" />
     <Compile Include="Integrations\Common\IntegrationGuards.cs" />
     <Compile Include="Integrations\Common\LovinContextBridge.cs" />
     <Compile Include="Integrations\Common\LovinContextRuntimeState.cs" />
@@ -93,7 +93,7 @@
     <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNode_Genitals.cs" />
     <Compile Include="LovinModule\Hooks\LovinResolveHooks.cs" />
     <Compile Include="LovinModule\Patches\HarmonyPatch_InteractionMenu_SelfLovin.cs" />
-    <Compile Include="LovinModule\Hooks\NSFWHookBootstrap.cs" />
+    <Compile Include="LovinModule\Hooks\NsfwHookBootstrap.cs" />
     <Compile Include="LovinModule\Hooks\NsfwPawnTags.cs" />
     <Compile Include="LovinModule\LovinInteractions.cs" />
     <Compile Include="LovinModule\LovinJob\LovinPrivacyCellFinder.cs" />
@@ -133,8 +133,17 @@
     <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
     <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
   </PropertyGroup>
-  <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
+  <PropertyGroup>
+    <D2RepoAuditScript>$(MSBuildProjectDirectory)\..\..\..\Tools\LocalizationAudit.ps1</D2RepoAuditScript>
+    <D2LocalAuditScript>$(MSBuildProjectDirectory)\..\..\Tools\LocalizationAudit.ps1</D2LocalAuditScript>
+    <D2LocalizationAuditScript Condition="Exists('$(D2RepoAuditScript)')">$(D2RepoAuditScript)</D2LocalizationAuditScript>
+    <D2LocalizationAuditScript Condition="'$(D2LocalizationAuditScript)'=='' and Exists('$(D2LocalAuditScript)')">$(D2LocalAuditScript)</D2LocalizationAuditScript>
+  </PropertyGroup>
+  <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true' and '$(D2LocalizationAuditScript)'!=''">
+    <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(D2LocalizationAuditScript)&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
+  </Target>
+  <Target Name="D2LocalizationAuditMissing" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true' and '$(D2LocalizationAuditScript)'==''">
+    <Message Importance="high" Text="Skipping localization audit because LocalizationAudit.ps1 was not found in repo-root Tools or package-local Tools." />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

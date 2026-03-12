@@ -1,8 +1,8 @@
 using System;
-using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using Verse;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -15,8 +15,6 @@ internal static class HarmonyPatch_Standing_Opinion
 {
     private const string PatchId = "HKPatch.StandingOpinion";
 
-    // Guardrail-Allow-Static: Cached reflected pawn field for this standing patch; lazily re-resolved and reused as a reflection cache during the current load.
-    private static FieldInfo _pawnField;
     // Guardrail-Allow-Static: Cached Harmony target for this patch/helper; resolved during Prepare and reused for the current load.
     private static MethodBase _target;
 
@@ -84,7 +82,7 @@ internal static class HarmonyPatch_Standing_Opinion
             // Only adjust opinions of the hero.
             if (!HKHookUtilSafe.ActorIsHero(other)) return;
 
-            Pawn pawn = TryGetPawn(__instance);
+            Pawn pawn = PawnOwnerReflectionUtil.TryGetPawn(__instance);
             if (pawn == null) return;
             if (pawn == other) return;
 
@@ -110,31 +108,4 @@ internal static class HarmonyPatch_Standing_Opinion
         }
     }
 
-    private static Pawn TryGetPawn(object relations)
-    {
-        if (relations == null) return null;
-
-        try
-        {
-            if (_pawnField == null)
-            {
-                var fields = relations.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                for (int i = 0; i < fields.Length; i++)
-                {
-                    var f = fields[i];
-                    if (f != null && typeof(Pawn).IsAssignableFrom(f.FieldType))
-                    {
-                        _pawnField = f;
-                        break;
-                    }
-                }
-            }
-
-            return _pawnField?.GetValue(relations) as Pawn;
-        }
-        catch
-        {
-            return null;
-        }
-    }
 }

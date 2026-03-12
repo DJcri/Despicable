@@ -13,13 +13,13 @@ public enum UIPass
 /// <summary>
 /// UIContext is a per-pass helper that:
 /// - provides style metrics
-/// - offers layout allocators (VStack/HRow)
+/// - offers layout allocators (D2VStack/D2HRow)
 /// - records rects for validation/debug overlay (Draw pass)
 /// - can run a Measure pass where no widgets are emitted but layout can still be computed
 ///
 /// Quick start (vibe-coding friendly):
 ///
-/// - Allocate rects first (VStack/HRow).
+/// - Allocate rects first (D2VStack/D2HRow).
 /// - Draw second (D2Widgets or manual).
 /// - "Content" (wrapped text) should be measured and allocated exact height.
 /// - "Containers" (lists/details panels) usually get the leftover space via NextFill.
@@ -29,7 +29,7 @@ public enum UIPass
 ///   var ctx = new UIContext(D2UIStyle.Default, registry, "MyWindow", pass);
 ///   using (ctx.PushScope("Body"))
 ///   {
-///       var v = new VStack(ctx, outRect);
+///       var v = new D2VStack(ctx, outRect);
 ///       v.NextTextBlock(ctx, "Header", GameFont.Medium, padding: 2f);
 ///       v.NextTextBlock(ctx, "A wrapped paragraph that should not be squashed.", GameFont.Small);
 ///
@@ -37,7 +37,7 @@ public enum UIPass
 ///       Rect content = v.NextFill(UIRectTag.Body, "Content");
 ///       D2ScrollView.Draw(ctx, content, ref scroll, (inner) =>
 ///       {
-///           var innerV = new VStack(ctx, inner);
+///           var innerV = new D2VStack(ctx, inner);
 ///           // ... draw list/details/etc.
 ///       }, label: "MainScroll");
 ///   }

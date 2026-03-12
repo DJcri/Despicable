@@ -85,7 +85,7 @@ public sealed partial class Dialog_UIFrameworkDemo : D2WindowBlueprint
         var ctx = Ctx;
 
         // Compact controls left, preview + list right.
-        RectSplit.SplitVertical(rect, rect.width * 0.34f, ctx.Style.Gap, out Rect left, out Rect right);
+        D2RectSplit.SplitVertical(rect, rect.width * 0.34f, ctx.Style.Gap, out Rect left, out Rect right);
 
         DrawControlsColumn(ctx, left);
         DrawPreviewColumn(ctx, right);

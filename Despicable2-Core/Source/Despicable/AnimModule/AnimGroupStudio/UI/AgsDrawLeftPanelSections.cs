@@ -13,11 +13,11 @@ using Despicable.AnimModule.AnimGroupStudio.Model;
 namespace Despicable.AnimModule.AnimGroupStudio.UI;
 public partial class Dialog_AnimGroupStudio
 {
-    private bool DrawAuthorProjectSection(UIContext scrollCtx, ref VStack v)
+    private bool DrawAuthorProjectSection(UIContext scrollCtx, ref D2VStack v)
     {
         DrawGroupedHeader(scrollCtx, ref v, "Left/Project", "Project", topPadding: true);
         Rect projRow = v.NextRow(UIRectTag.Input, "Project/PickerRow");
-        var projH = new HRow(scrollCtx, projRow);
+        var projH = new D2HRow(scrollCtx, projRow);
         string projLabel = GetProjectDisplayName(project);
         if (D2Widgets.ButtonText(scrollCtx, projH.NextFixed(Mathf.Max(80f, projRow.width - (scrollCtx.Style.RowHeight + scrollCtx.Style.Gap)), UIRectTag.Button, "Project/Picker"), projLabel, "Project/Picker"))
         {
@@ -95,12 +95,12 @@ public partial class Dialog_AnimGroupStudio
         string oldBaseDef = project.export.baseDefName ?? string.Empty;
 
         Rect labelRow = v.NextRow(UIRectTag.Input, "Project/NameRow");
-        var labelH = new HRow(scrollCtx, labelRow);
+        var labelH = new D2HRow(scrollCtx, labelRow);
         D2Widgets.Label(scrollCtx, labelH.NextFixed(90f, UIRectTag.Label, "Project/NameLabel"), "Variation", "Project/NameLabel");
         project.label = D2Widgets.TextField(scrollCtx, labelH.Remaining(UIRectTag.TextField, "Project/NameField"), project.label ?? "", 256, "Project/NameField");
 
         Rect defRow = v.NextRow(UIRectTag.Input, "Project/BaseDefRow");
-        var defH = new HRow(scrollCtx, defRow);
+        var defH = new D2HRow(scrollCtx, defRow);
         D2Widgets.Label(scrollCtx, defH.NextFixed(90f, UIRectTag.Label, "Project/BaseDefLabel"), "Def prefix", "Project/BaseDefLabel");
         project.export.baseDefName = D2Widgets.TextField(scrollCtx, defH.Remaining(UIRectTag.TextField, "Project/BaseDefField"), project.export.baseDefName ?? "", 256, "Project/BaseDefField");
 
@@ -165,7 +165,7 @@ public partial class Dialog_AnimGroupStudio
             {
                 float closeW = chipLineH;
                 float chipPadX = 6f;
-                var flow = new HFlow(scrollCtx, chipAreaRect, chipLineH, chipGap);
+                var flow = new D2HFlow(scrollCtx, chipAreaRect, chipLineH, chipGap);
                 GameFont prevFont = Text.Font;
                 Text.Font = GameFont.Small;
                 int removeAt = -1;
@@ -194,7 +194,7 @@ public partial class Dialog_AnimGroupStudio
         }
 
         Rect addTagRow = v.NextRow(UIRectTag.Button, "Project/AddTagRow");
-        var addTagH = new HRow(scrollCtx, addTagRow);
+        var addTagH = new D2HRow(scrollCtx, addTagRow);
         Rect addTagBtnRect = addTagH.NextFixed(scrollCtx.Style.RowHeight, UIRectTag.Button, "Project/AddTagBtn");
         if (DrawIconButton(scrollCtx, addTagBtnRect, D2VanillaTex.Plus, "Add group tag", "Project/AddTagBtn") && scrollCtx.Pass == UIPass.Draw)
         {
@@ -249,14 +249,14 @@ public partial class Dialog_AnimGroupStudio
     }
 
 
-    private void DrawAuthorRolesSection(UIContext scrollCtx, ref VStack v)
+    private void DrawAuthorRolesSection(UIContext scrollCtx, ref D2VStack v)
     {
         DrawGroupedHeader(scrollCtx, ref v, "Left/Roles", "Roles", topPadding: true);
         EnsureRoles(project);
         EnsureAuthorRoleKeyValid(project);
         var curRole = GetRole(project, authorRoleKey);
         Rect roleRow = v.NextRow(UIRectTag.Input, "Roles/Row");
-        var roleH = new HRow(scrollCtx, roleRow);
+        var roleH = new D2HRow(scrollCtx, roleRow);
         string roleLabel = curRole?.displayName ?? authorRoleKey;
         if (D2Widgets.ButtonText(scrollCtx, roleH.NextFixed(Mathf.Max(80f, roleRow.width - 130f), UIRectTag.Button, "Roles/Picker"), roleLabel, "Roles/Picker"))
         {

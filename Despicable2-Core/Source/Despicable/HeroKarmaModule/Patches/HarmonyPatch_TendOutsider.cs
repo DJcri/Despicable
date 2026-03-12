@@ -36,19 +36,20 @@ private static IEnumerable<MethodBase> TargetMethods()
 
 private static IEnumerable<MethodBase> FindTargets()
 {
-    foreach (var m in typeof(TendUtility).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
-    {
-        if (m == null) continue;
-        if (!string.Equals(m.Name, "DoTend", StringComparison.Ordinal)) continue;
+    return HKPatchTargetUtil.FindMethods(
+        typeof(TendUtility),
+        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
+        method =>
+        {
+            if (!string.Equals(method.Name, "DoTend", StringComparison.Ordinal))
+                return false;
 
-        var p = m.GetParameters();
-        if (p == null || p.Length < 2) continue;
-
-        if (!typeof(Pawn).IsAssignableFrom(p[0].ParameterType)) continue;
-        if (!typeof(Pawn).IsAssignableFrom(p[1].ParameterType)) continue;
-
-        yield return m;
-    }
+            ParameterInfo[] parameters = method.GetParameters();
+            return parameters != null
+                && parameters.Length >= 2
+                && typeof(Pawn).IsAssignableFrom(parameters[0].ParameterType)
+                && typeof(Pawn).IsAssignableFrom(parameters[1].ParameterType);
+        });
 }
 
 public static void Postfix(Pawn doctor, Pawn patient)
@@ -100,9 +101,9 @@ public static void Postfix(Pawn doctor, Pawn patient)
     }
 
     // Tending outsiders can trigger goodwill changes; attribute those to the hero when applicable.
-    public static void Prefix(Pawn doctor, Pawn patient, ref bool __state)
+    private static void Prefix(Pawn doctor, Pawn patient, ref HKGoodwillContext.Scope __state)
     {
-        __state = false;
+        __state = default;
         try
         {
             if (doctor == null || patient == null) return;
@@ -110,8 +111,7 @@ public static void Postfix(Pawn doctor, Pawn patient)
             if (!HKHookUtilSafe.ActorIsHero(doctor)) return;
             if (patient.Faction != null && patient.Faction.IsPlayer) return;
 
-            HKGoodwillContext.Begin(doctor);
-            __state = true;
+            __state = HKGoodwillContext.Enter(doctor);
         }
         catch (Exception ex)
         {
@@ -119,10 +119,9 @@ public static void Postfix(Pawn doctor, Pawn patient)
         }
     }
 
-    public static void Finalizer(Exception __exception, bool __state)
+    private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
     {
-        if (!__state) return;
-        try { HKGoodwillContext.End(); }
+        try { __state.Dispose(); }
         catch (Exception ex)
         {
             Despicable.Core.DebugLogger.WarnExceptionOnce("HarmonyPatch_TendOutsider:3", "HarmonyPatch_TendOutsider suppressed an exception.", ex);

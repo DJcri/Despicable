@@ -33,7 +33,7 @@ public static partial class D2TabHost
         if (groups == null || groups.Count == 0)
             return selectedId;
 
-        var h = new HRow(ctx, rect);
+        var h = new D2HRow(ctx, rect);
         float w = rect.width / groups.Count;
         string resolved = selectedId;
 
@@ -61,7 +61,7 @@ public static partial class D2TabHost
         if (tabs == null || tabs.Count == 0)
             return selectedId;
 
-        var h = new HRow(ctx, rect);
+        var h = new D2HRow(ctx, rect);
         float w = rect.width / tabs.Count;
         string resolved = selectedId;
 

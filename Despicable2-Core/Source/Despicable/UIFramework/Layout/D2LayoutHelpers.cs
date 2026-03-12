@@ -15,7 +15,7 @@ public static class D2LayoutHelpers
     public static void SplitColumns(Rect outer, float leftWidth, float gap, out Rect left, out Rect right)
     {
         float lw = Mathf.Clamp(leftWidth, 0f, outer.width);
-        RectSplit.SplitVertical(outer, lw, gap, out left, out right);
+        D2RectSplit.SplitVertical(outer, lw, gap, out left, out right);
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public static class D2LayoutHelpers
         }
 
         float topH = Mathf.Max(0f, outer.height - mb - gap);
-        RectSplit.SplitHorizontal(outer, topH, gap, out top, out bottom);
+        D2RectSplit.SplitHorizontal(outer, topH, gap, out top, out bottom);
     }
 
     /// <summary>
@@ -75,12 +75,12 @@ public static class D2LayoutHelpers
         if (outer.height >= mt + gap + mb)
         {
             float topH = Mathf.Max(mt, outer.height - mb - gap);
-            RectSplit.SplitHorizontal(outer, topH, gap, out top, out bottom);
+            D2RectSplit.SplitHorizontal(outer, topH, gap, out top, out bottom);
             return;
         }
 
         // Otherwise, pin the top to its minimum, and give the bottom whatever is left.
-        RectSplit.SplitHorizontal(outer, mt, gap, out top, out bottom);
+        D2RectSplit.SplitHorizontal(outer, mt, gap, out top, out bottom);
     }
 
 
@@ -91,7 +91,7 @@ public static class D2LayoutHelpers
     public static void SplitEvenColumns(Rect outer, float gap, out Rect left, out Rect right)
     {
         float lw = Mathf.Max(0f, (outer.width - gap) * 0.5f);
-        RectSplit.SplitVertical(outer, lw, gap, out left, out right);
+        D2RectSplit.SplitVertical(outer, lw, gap, out left, out right);
     }
 
     /// <summary>
@@ -101,8 +101,8 @@ public static class D2LayoutHelpers
     {
         float cell = Mathf.Max(0f, (outer.width - (gap * 2f)) / 3f);
         Rect tail;
-        RectSplit.SplitVertical(outer, cell, gap, out first, out tail);
-        RectSplit.SplitVertical(tail, cell, gap, out second, out third);
+        D2RectSplit.SplitVertical(outer, cell, gap, out first, out tail);
+        D2RectSplit.SplitVertical(tail, cell, gap, out second, out third);
     }
 
     /// <summary>
@@ -228,7 +228,7 @@ public static class D2LayoutHelpers
     /// Allocate a consistent section header row.
     /// Medium font looks cramped in a 24px "line", so we give it a slightly taller row.
     /// </summary>
-    public static Rect NextSectionHeader(UIContext ctx, ref VStack v, string label)
+    public static Rect NextSectionHeader(UIContext ctx, ref D2VStack v, string label)
     {
         float h = Mathf.Max(ctx.Style.RowHeight, 28f);
         return v.Next(h, UIRectTag.Label, label);
@@ -240,6 +240,6 @@ public static class D2LayoutHelpers
     public static void SplitLabeledRow(Rect row, float labelWidth, float gap, out Rect labelRect, out Rect controlRect)
     {
         float lw = Mathf.Clamp(labelWidth, 0f, row.width);
-        RectSplit.SplitVertical(row, lw, gap, out labelRect, out controlRect);
+        D2RectSplit.SplitVertical(row, lw, gap, out labelRect, out controlRect);
     }
 }

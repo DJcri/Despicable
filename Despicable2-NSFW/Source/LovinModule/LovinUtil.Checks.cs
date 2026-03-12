@@ -1,4 +1,5 @@
 using RimWorld;
+// Guardrail-Reason: Lovin validation checks stay centralized because pair gating, health checks, and manual-interaction eligibility share one policy surface.
 using System.Linq;
 using Verse;
 using Verse.AI;

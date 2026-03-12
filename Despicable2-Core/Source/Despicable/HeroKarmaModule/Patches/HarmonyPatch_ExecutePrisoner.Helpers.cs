@@ -33,27 +33,19 @@ public static partial class HarmonyPatch_ExecutePrisoner
 
     private static IEnumerable<MethodBase> FindTargets()
     {
-        var seen = new HashSet<MethodBase>();
+        HashSet<MethodBase> seen = new();
+
         Type utilityType = AccessTools.TypeByName("RimWorld.ExecutionUtility");
-        if (utilityType != null)
+        foreach (MethodBase method in HKPatchTargetUtil.FindDeclaredMethods(utilityType, ShouldYieldExecutionMethod))
         {
-            foreach (MethodInfo method in AccessTools.GetDeclaredMethods(utilityType))
-            {
-                if (ShouldYieldExecutionMethod(method) && seen.Add(method))
-                    yield return method;
-            }
+            if (seen.Add(method))
+                yield return method;
         }
 
-        foreach (Type type in AccessTools.AllTypes())
+        foreach (MethodBase method in HKPatchTargetUtil.FindDeclaredMethods(IsRimWorldExecutionType, ShouldYieldExecutionMethod))
         {
-            if (!IsRimWorldExecutionType(type))
-                continue;
-
-            foreach (MethodInfo method in AccessTools.GetDeclaredMethods(type))
-            {
-                if (ShouldYieldExecutionMethod(method) && seen.Add(method))
-                    yield return method;
-            }
+            if (seen.Add(method))
+                yield return method;
         }
     }
 

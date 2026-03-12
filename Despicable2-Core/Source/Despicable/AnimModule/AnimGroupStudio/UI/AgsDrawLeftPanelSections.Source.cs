@@ -12,7 +12,7 @@ using Despicable.AnimModule.AnimGroupStudio.Model;
 namespace Despicable.AnimModule.AnimGroupStudio.UI;
 public partial class Dialog_AnimGroupStudio
 {
-    private bool DrawAuthorSourceSection(UIContext scrollCtx, ref VStack v)
+    private bool DrawAuthorSourceSection(UIContext scrollCtx, ref D2VStack v)
     {
         if (sourceMode != SourceMode.ExistingDef)
             return false;
@@ -21,7 +21,7 @@ public partial class Dialog_AnimGroupStudio
         return true;
     }
 
-    private void DrawAuthorExistingSection(UIContext scrollCtx, ref VStack v)
+    private void DrawAuthorExistingSection(UIContext scrollCtx, ref D2VStack v)
     {
         D2Widgets.Label(scrollCtx, v.NextLine(UIRectTag.Label, "Existing/FamilyLabel"), "Project", "Existing/FamilyLabel");
         string famLabel = selectedFamilyKey.NullOrEmpty() ? "(select)" : selectedFamilyKey;

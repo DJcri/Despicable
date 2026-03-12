@@ -29,13 +29,13 @@ These rules keep layouts stable (no flicker, no overlap surprises) and keep over
 - **Draw pass**: draw widgets, accept input, open dialogs/menus.
 
 ## Allocation
-- Prefer **`VStack`** / **`HRow`** / **`HFlow`** for layout.
-- When a screen has a clear space budget (header, tabs, toolbar, body, footer), carve from one remainder rect with **`RectTake.TakeTop/Bottom/Left/Right(...)`** instead of rebuilding positions with hardcoded offsets.
+- Prefer **`D2VStack`** / **`D2HRow`** / **`D2HFlow`** for layout.
+- When a screen has a clear space budget (header, tabs, toolbar, body, footer), carve from one remainder rect with **`D2RectTake.TakeTop/Bottom/Left/Right(...)`** instead of rebuilding positions with hardcoded offsets.
 - Prefer content-driven header/body sizing. Use framework measurement, style line heights, and returned shell rects before introducing fixed fit numbers.
 - `Style.Pad` is a broad default, not a license to accumulate invisible whitespace. If a blueprint window needs a different body inset, use **`BodyPadX` / `BodyPadY`** or per-edge body insets like **`BodyTopPadY` / `BodyBottomPadY`** on the style instead of page-local offset math.
 - Do not “fix” overlap or whitespace by nudging rects with ad hoc constants. If a hardcoded fit value truly appears unavoidable, document why and notify the user before landing it.
-- Prefer **`VStack.NextRow()`** for controls (checkboxes, dropdowns, sliders).
-- For paragraphs: use **`VStack.NextTextBlock(...)`**. It measures deterministically and records metadata so validation can catch under-allocation.
+- Prefer **`D2VStack.NextRow()`** for controls (checkboxes, dropdowns, sliders).
+- For paragraphs: use **`D2VStack.NextTextBlock(...)`**. It measures deterministically and records metadata so validation can catch under-allocation.
 
 ## Drawing
 - Prefer **`D2Widgets`** wrappers so rects are recorded consistently.

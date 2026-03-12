@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -69,16 +69,16 @@ internal static class HarmonyPatch_TradePrice_LocalRep
         try
         {
             if (!HKSettingsUtil.EnableLocalRep || !HKSettingsUtil.LocalRepTradePricing) return;
-            if (TryIsGiftMode()) return;
+            if (HKTradeSessionUtil.IsGiftMode("HarmonyPatch_TradePrice_LocalRep.TryIsGiftMode", "Trade price local rep patch could not probe TradeSession gift mode.")) return;
 
             var hero = HKRuntime.GetHeroPawnSafe();
             if (hero == null) return;
 
             // Only when the hero is the negotiator (if detectable).
-            Pawn negotiator = TryGetCurrentNegotiator();
+            Pawn negotiator = HKTradeSessionUtil.TryGetPlayerNegotiator("HarmonyPatch_TradePrice_LocalRep.TryGetCurrentNegotiator", "Trade price local rep patch could not probe TradeSession negotiator.");
             if (negotiator != null && negotiator != hero) return;
 
-            Faction faction = TryGetCurrentTraderFaction();
+            Faction faction = HKTradeSessionUtil.TryGetTraderFaction("HarmonyPatch_TradePrice_LocalRep.TryGetCurrentTraderFaction", "Trade price local rep patch could not probe TradeSession trader faction.");
             if (faction == null || faction.IsPlayer) return;
 
             string heroId = hero.GetUniqueLoadID();
@@ -102,95 +102,4 @@ internal static class HarmonyPatch_TradePrice_LocalRep
         }
     }
 
-    private static bool TryIsGiftMode()
-    {
-        try
-        {
-            var tradeSession = AccessTools.TypeByName("RimWorld.TradeSession");
-            if (tradeSession == null) return false;
-
-            var f = AccessTools.Field(tradeSession, "giftMode");
-            if (f != null && f.FieldType == typeof(bool))
-                return (bool)f.GetValue(null);
-
-            var p = AccessTools.Property(tradeSession, "giftMode");
-            if (p != null && p.PropertyType == typeof(bool))
-                return (bool)p.GetValue(null, null);
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HarmonyPatch_TradePrice_LocalRep.TryIsGiftMode",
-                "Trade price local rep patch could not probe TradeSession gift mode.",
-                ex);
-        }
-
-        return false;
-    }
-
-    private static Pawn TryGetCurrentNegotiator()
-    {
-        try
-        {
-            var tradeSession = AccessTools.TypeByName("RimWorld.TradeSession");
-            if (tradeSession == null) return null;
-
-            var f = AccessTools.Field(tradeSession, "playerNegotiator");
-            if (f != null) return f.GetValue(null) as Pawn;
-
-            var p = AccessTools.Property(tradeSession, "PlayerNegotiator");
-            if (p != null) return p.GetValue(null, null) as Pawn;
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HarmonyPatch_TradePrice_LocalRep.TryGetCurrentNegotiator",
-                "Trade price local rep patch could not probe TradeSession negotiator.",
-                ex);
-        }
-
-        return null;
-    }
-
-    private static Faction TryGetCurrentTraderFaction()
-    {
-        try
-        {
-            var tradeSession = AccessTools.TypeByName("RimWorld.TradeSession");
-            if (tradeSession == null) return null;
-
-            object trader = null;
-            var f = AccessTools.Field(tradeSession, "trader");
-            if (f != null) trader = f.GetValue(null);
-            if (trader == null)
-            {
-                var p = AccessTools.Property(tradeSession, "Trader");
-                if (p != null) trader = p.GetValue(null, null);
-            }
-
-            if (trader == null) return null;
-
-            // If it's a pawn trader.
-            if (trader is Pawn pawn) return pawn.Faction;
-
-            // Try property "Faction".
-            var factionProp = trader.GetType().GetProperty("Faction", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (factionProp != null)
-                return factionProp.GetValue(trader, null) as Faction;
-
-            // Try method "GetFaction".
-            var getFaction = trader.GetType().GetMethod("GetFaction", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (getFaction != null)
-                return getFaction.Invoke(trader, Array.Empty<object>()) as Faction;
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HarmonyPatch_TradePrice_LocalRep.TryGetCurrentTraderFaction",
-                "Trade price local rep patch could not probe TradeSession trader faction.",
-                ex);
-        }
-
-        return null;
-    }
 }

@@ -17,7 +17,7 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
     public static void ResetRuntimeState()
     {
         skipWorkshopDeltas = false;
-        keyframeScaleGettersByType.Clear();
+        VerseKeyframeCompat.ResetRuntimeState();
     }
 
     public static bool Prefix(PawnRenderTree __instance, PawnRenderNode node, ref PawnDrawParms parms, ref Matrix4x4 matrix, ref bool __result)
@@ -136,11 +136,6 @@ public static partial class HarmonyPatch_PawnRenderTree_TryGetMatrix
     /// AnimationTick (overridden to the workshop scrubber tick) and compose the interpolated offset/angle onto
     /// the matrix that vanilla already computed.
     /// </summary>
-    // Cached reflection handles for Verse.Keyframe scale.
-    // RimWorld/Verse versions differ: the member may be a field or property, may be named
-    // scale/Scale/drawScale/DrawScale, and may live on a derived keyframe type.
-    private static readonly Dictionary<Type, Func<Verse.Keyframe, Vector3>> keyframeScaleGettersByType
-        = new Dictionary<Type, Func<Verse.Keyframe, Vector3>>(32);
 
     public static void Postfix(PawnRenderTree __instance, PawnRenderNode node, ref PawnDrawParms parms, ref Matrix4x4 matrix, bool __result)
     {

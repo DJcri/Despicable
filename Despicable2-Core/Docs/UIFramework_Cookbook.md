@@ -41,7 +41,7 @@ public override void DoWindowContents(Rect inRect)
 
     // Footer
     bp.Footer(v => {
-        var row = ctx.HRow(v.NextButton(), tag: UIRectTag.Footer, label: "Buttons");
+        var row = ctx.D2HRow(v.NextButton(), tag: UIRectTag.Footer, label: "Buttons");
         if (D2Widgets.ButtonText(ctx, row.NextFixed(120f), "OK")) Close();
         if (D2Widgets.ButtonText(ctx, row.NextFixed(120f), "Cancel")) Close();
     });
@@ -82,7 +82,7 @@ public class ITab_MyTab : ITab
             var items = GetItemsFiltered(_search);
             _sel = D2ListView.Draw(ctx, listRect, items.Count, rowIndex => {
                 var it = items[rowIndex];
-                D2Widgets.LabelClipped(ctx, ctx.HRow(listRect).NextFill(), it.Label);
+                D2Widgets.LabelClipped(ctx, ctx.D2HRow(listRect).NextFill(), it.Label);
             }, selectedIndex: _sel);
 
             // Details
@@ -102,7 +102,7 @@ public class ITab_MyTab : ITab
 ## Recipe: Selector row (single-select)
 
 ```cs
-var row = ctx.HRow(v.NextRow(UIRectTag.Control_Selector, "Mode"), tag: UIRectTag.Control_Selector, label: "ModeRow");
+var row = ctx.D2HRow(v.NextRow(UIRectTag.Control_Selector, "Mode"), tag: UIRectTag.Control_Selector, label: "ModeRow");
 
 if (D2Widgets.SelectorButton(ctx, row.NextFill(), "Recent", selected: mode == 0)) mode = 0;
 if (D2Widgets.SelectorButton(ctx, row.NextFill(), "High",   selected: mode == 1)) mode = 1;
@@ -251,9 +251,9 @@ for (int i = 0; i < 6; i++)
 
 ```cs
 Rect remaining = inRect;
-Rect header = RectTake.TakeTop(ref remaining, ctx.Style.HeaderHeight);
-Rect tabs = RectTake.TakeTop(ref remaining, ctx.Style.RowH);
-Rect footer = RectTake.TakeBottom(ref remaining, ctx.Style.FooterHeight);
+Rect header = D2RectTake.TakeTop(ref remaining, ctx.Style.HeaderHeight);
+Rect tabs = D2RectTake.TakeTop(ref remaining, ctx.Style.RowH);
+Rect footer = D2RectTake.TakeBottom(ref remaining, ctx.Style.FooterHeight);
 Rect body = remaining;
 
 D2Widgets.Label(ctx, header, "My Window");
@@ -289,7 +289,7 @@ Use this when the header should fit its actual rows instead of preserving an old
 
 ```cs
 Rect row = v.Next(ctx.Style.RowH, UIRectTag.Input, "SearchRow");
-var h = new HRow(ctx, row);
+var h = new D2HRow(ctx, row);
 Rect fieldRect = h.NextFill();
 Rect clearRect = h.NextFixed(ctx.Style.MinClickSize);
 

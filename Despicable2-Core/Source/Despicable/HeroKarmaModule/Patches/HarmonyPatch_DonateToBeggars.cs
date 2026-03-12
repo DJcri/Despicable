@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using HarmonyLib;
-using RimWorld.Planet;
 using Verse;
 using Verse.AI;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -50,16 +49,7 @@ public static class HarmonyPatch_DonateToBeggars
 
     private static IEnumerable<MethodBase> FindTargets()
     {
-        var seen = new HashSet<MethodBase>();
-        for (int i = 0; i < CandidateTypeNames.Length; i++)
-        {
-            Type t = AccessTools.TypeByName(CandidateTypeNames[i]);
-            if (t == null) continue;
-
-            MethodInfo m = AccessTools.Method(t, "TryMakePreToilReservations");
-            if (m != null && seen.Add(m))
-                yield return m;
-        }
+        return HKPatchTargetUtil.FindFirstMethods(CandidateTypeNames, "TryMakePreToilReservations");
     }
 
     public static void Postfix(object __instance, bool __result)
@@ -70,13 +60,10 @@ public static class HarmonyPatch_DonateToBeggars
         {
             if (__instance == null) return;
 
-            Pawn initiator = AccessTools.Field(__instance.GetType(), "pawn")?.GetValue(__instance) as Pawn;
-            Job job = AccessTools.Field(__instance.GetType(), "job")?.GetValue(__instance) as Job;
-
-            if (initiator == null || job == null) return;
+            if (!HKJobDriverUtil.TryGetActorAndJob(__instance, out Pawn initiator, out Job job)) return;
             if (!HKHookUtilSafe.ActorIsHero(initiator)) return;
 
-            Pawn recipient = TryGetRecipientPawn(job);
+            Pawn recipient = HKJobDriverUtil.TryGetPawnTarget(job, TargetIndex.B, TargetIndex.A, TargetIndex.C);
             if (!HKHookUtil.IsLikelyBeggarsQuestPawn(recipient)) return;
 
             int amount = TryGetDonationAmount(job);
@@ -87,7 +74,7 @@ public static class HarmonyPatch_DonateToBeggars
             using (HKGoodwillContext.Enter(initiator))
             {
                 var ev = KarmaEvent.Create("DonateToBeggars", initiator, recipient, factionId, stage: amount, amount: amount);
-                TryAssignSettlementContext(ev, recipient, initiator);
+                HKSettlementContextUtil.TryAssignFromPawns(ev, recipient, initiator);
                 HKKarmaProcessor.Process(ev);
             }
         }
@@ -97,20 +84,12 @@ public static class HarmonyPatch_DonateToBeggars
         }
     }
 
-    private static Pawn TryGetRecipientPawn(Job job)
-    {
-        if (job == null) return null;
-
-        return job.GetTarget(TargetIndex.B).Thing as Pawn
-            ?? job.GetTarget(TargetIndex.A).Thing as Pawn
-            ?? job.GetTarget(TargetIndex.C).Thing as Pawn;
-    }
 
     private static int TryGetDonationAmount(Job job)
     {
         if (job == null) return 0;
 
-        Thing donationThing = ExtractDonationThing(job);
+        Thing donationThing = HKJobDriverUtil.TryGetNonPawnThingTarget(job, TargetIndex.A, TargetIndex.B, TargetIndex.C);
         if (donationThing == null) return 0;
 
         int count = donationThing.stackCount > 0 ? donationThing.stackCount : 1;
@@ -124,34 +103,6 @@ public static class HarmonyPatch_DonateToBeggars
     }
 
 
-    private static void TryAssignSettlementContext(KarmaEvent ev, Pawn primaryPawn, Pawn fallbackPawn)
-    {
-        if (ev == null) return;
 
-        Settlement settlement = TryGetSettlementFromPawn(primaryPawn) ?? TryGetSettlementFromPawn(fallbackPawn);
-        if (settlement == null || settlement.Faction == null || settlement.Faction.IsPlayer) return;
 
-        ev.settlementUniqueId = settlement.GetUniqueLoadID();
-        ev.settlementLabel = settlement.LabelCap;
-    }
-
-    private static Settlement TryGetSettlementFromPawn(Pawn pawn)
-    {
-        Map map = pawn?.MapHeld ?? pawn?.Map;
-        return map?.Parent as Settlement;
-    }
-
-    private static Thing ExtractDonationThing(Job job)
-    {
-        Thing a = job.GetTarget(TargetIndex.A).Thing;
-        if (a != null && a is not Pawn) return a;
-
-        Thing b = job.GetTarget(TargetIndex.B).Thing;
-        if (b != null && b is not Pawn) return b;
-
-        Thing c = job.GetTarget(TargetIndex.C).Thing;
-        if (c != null && c is not Pawn) return c;
-
-        return null;
-    }
 }

@@ -10,7 +10,6 @@ Despicable 2 (NSFW) is the adult-only add-on for Despicable 2 (Core). It adds ex
 		<li>1.6</li>
 	</supportedVersions>
 	<loadAfter>
-		<li>brrainz.harmony</li>
 		<li>LovelyDovey.Sex.WithEuterpe</li>
 		<li>LovelyDovey.Sex.WithRosaline</li>
 		<li>DCSzar.Despicable2.Core</li>

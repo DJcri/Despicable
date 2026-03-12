@@ -66,7 +66,7 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
     protected override void DrawHeader(Rect rect)
     {
         string subtitle = _pawn != null ? _pawn.LabelShortCap.ToString() : "No pawn";
-        var v = Ctx.VStack(rect, label: "Header/Stack");
+        var v = Ctx.D2VStack(rect, label: "Header/Stack");
         Rect titleRect = v.Next(28f, UIRectTag.Label, "Header/Title");
         Rect subtitleRect = v.Next(24f, UIRectTag.Label, "Header/Subtitle");
 
@@ -98,7 +98,7 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         using var panel = Ctx.GroupPanel("PreviewPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
         if (_pawn == null)
         {
-            var v = Ctx.VStack(panel.Inner, label: "PreviewPanel/Empty");
+            var v = Ctx.D2VStack(panel.Inner, label: "PreviewPanel/Empty");
             v.NextTextBlock(Ctx, "No pawn selected.", GameFont.Small, 0f, "PreviewPanel/EmptyLabel");
             return;
         }
@@ -121,7 +121,7 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         if (!unavailableReason.NullOrEmpty())
         {
             using var panel = Ctx.GroupPanel("UnavailablePanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
-            var v = Ctx.VStack(panel.Inner, label: "UnavailablePanel/Stack");
+            var v = Ctx.D2VStack(panel.Inner, label: "UnavailablePanel/Stack");
             Rect messageRect = v.NextFill(UIRectTag.Label, "UnavailablePanel/MessageRect");
             using (new TextStateScope(GameFont.Small, TextAnchor.MiddleCenter, true))
                 D2Widgets.LabelClippedAligned(Ctx, messageRect, "Face parts unavailable for this pawn.", TextAnchor.MiddleCenter, "UnavailablePanel/Message", unavailableReason);
@@ -143,11 +143,11 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         D2Section.Parts section = D2Section.Layout(Ctx, panel.Inner, new D2Section.Spec(title + "Section", headerHeight: SectionHeaderHeight, soft: false, pad: false, drawBackground: false));
         D2Section.DrawCaptionStrip(Ctx, section.Header, title, title + "Section/Title", GameFont.Medium);
         D2ScrollView.Draw(Ctx, section.Body, ref scroll, ref contentHeight,
-            delegate(UIContext localCtx, ref VStack localV) { DrawTileGrid(localCtx, ref localV, styles, forEyes); },
+            delegate(UIContext localCtx, ref D2VStack localV) { DrawTileGrid(localCtx, ref localV, styles, forEyes); },
             title + "Section/Scroll");
     }
 
-    private void DrawTileGrid(UIContext ctx, ref VStack v, List<FacePartStyleDef> styles, bool forEyes)
+    private void DrawTileGrid(UIContext ctx, ref D2VStack v, List<FacePartStyleDef> styles, bool forEyes)
     {
         if (styles == null || styles.Count == 0)
         {

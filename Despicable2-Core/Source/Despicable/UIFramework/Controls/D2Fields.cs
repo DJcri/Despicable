@@ -1,4 +1,5 @@
 using System;
+// Guardrail-Reason: Field wrappers stay together because text-buffer ownership, clear-button affordances, and numeric clamp behavior form one reusable control surface.
 using UnityEngine;
 using Verse;
 using Despicable.UIFramework;
@@ -71,7 +72,7 @@ public static class D2Fields
         if (showClear)
         {
             // Keep it boring and reliable: a tiny "x" text button.
-            if (Widgets.ButtonText(clearRect, "x", drawBackground: true, doMouseoverSound: true, active: true))
+            if (Widgets.ButtonText(clearRect, "x", drawBackground: true, doMouseoverSound: true, active: true)) // loc-ignore: symbolic clear button label
             {
                 text = string.Empty;
                 return true;
@@ -138,7 +139,7 @@ public static class D2Fields
 
         bool changed = text != before;
 
-        if (showClear && D2Widgets.ButtonIcon(ctx, clearRect, D2VanillaTex.CloseXSmall, tooltip: "Clear", label: label + "/Clear"))
+        if (showClear && D2Widgets.ButtonIcon(ctx, clearRect, D2VanillaTex.CloseXSmall, tooltip: "D2C_UI_Clear".Translate().ToString(), label: label + "/Clear"))
         {
             text = string.Empty;
             return true;
@@ -226,7 +227,7 @@ public static class D2Fields
         if (!tooltip.NullOrEmpty())
             TooltipHandler.TipRegion(rect, tooltip);
 
-        if (D2Widgets.ButtonText(ctx, left, "-", label + "/Dec"))
+        if (D2Widgets.ButtonText(ctx, left, "-", label + "/Dec")) // loc-ignore: symbolic decrement button
         {
             int next = value - Mathf.Max(1, step);
             if (min.HasValue) next = Math.Max(min.Value, next);
@@ -238,7 +239,7 @@ public static class D2Fields
         if (IntField(ctx, field, ref value, min, max, tooltip: null, label: label + "/Field"))
             changed = true;
 
-        if (D2Widgets.ButtonText(ctx, right, "+", label + "/Inc"))
+        if (D2Widgets.ButtonText(ctx, right, "+", label + "/Inc")) // loc-ignore: symbolic increment button
         {
             int next = value + Mathf.Max(1, step);
             if (min.HasValue) next = Math.Max(min.Value, next);
@@ -268,7 +269,7 @@ public static class D2Fields
         if (!tooltip.NullOrEmpty())
             TooltipHandler.TipRegion(rect, tooltip);
 
-        if (D2Widgets.ButtonIcon(ctx, left, D2VanillaTex.Minus, tooltip: "Decrease", label: label + "/Dec"))
+        if (D2Widgets.ButtonIcon(ctx, left, D2VanillaTex.Minus, tooltip: "D2C_UI_Decrease".Translate().ToString(), label: label + "/Dec"))
         {
             int next = value - Mathf.Max(1, step);
             if (min.HasValue) next = Math.Max(min.Value, next);
@@ -280,7 +281,7 @@ public static class D2Fields
         if (IntField(ctx, field, ref value, min, max, tooltip: null, label: label + "/Field"))
             changed = true;
 
-        if (D2Widgets.ButtonIcon(ctx, right, D2VanillaTex.Plus, tooltip: "Increase", label: label + "/Inc"))
+        if (D2Widgets.ButtonIcon(ctx, right, D2VanillaTex.Plus, tooltip: "D2C_UI_Increase".Translate().ToString(), label: label + "/Inc"))
         {
             int next = value + Mathf.Max(1, step);
             if (min.HasValue) next = Math.Max(min.Value, next);
@@ -312,7 +313,7 @@ public static class D2Fields
 
         float delta = Mathf.Abs(step) < 0.0001f ? 0.1f : Mathf.Abs(step);
 
-        if (D2Widgets.ButtonText(ctx, left, "-", label + "/Dec"))
+        if (D2Widgets.ButtonText(ctx, left, "-", label + "/Dec")) // loc-ignore: symbolic decrement button
         {
             float next = value - delta;
             if (min.HasValue) next = Mathf.Max(min.Value, next);
@@ -324,7 +325,7 @@ public static class D2Fields
         if (FloatField(ctx, field, ref value, min, max, tooltip: null, label: label + "/Field"))
             changed = true;
 
-        if (D2Widgets.ButtonText(ctx, right, "+", label + "/Inc"))
+        if (D2Widgets.ButtonText(ctx, right, "+", label + "/Inc")) // loc-ignore: symbolic increment button
         {
             float next = value + delta;
             if (min.HasValue) next = Mathf.Max(min.Value, next);
@@ -356,7 +357,7 @@ public static class D2Fields
 
         float delta = Mathf.Abs(step) < 0.0001f ? 0.1f : Mathf.Abs(step);
 
-        if (D2Widgets.ButtonIcon(ctx, left, D2VanillaTex.Minus, tooltip: "Decrease", label: label + "/Dec"))
+        if (D2Widgets.ButtonIcon(ctx, left, D2VanillaTex.Minus, tooltip: "D2C_UI_Decrease".Translate().ToString(), label: label + "/Dec"))
         {
             float next = value - delta;
             if (min.HasValue) next = Mathf.Max(min.Value, next);
@@ -368,7 +369,7 @@ public static class D2Fields
         if (FloatField(ctx, field, ref value, min, max, tooltip: null, label: label + "/Field"))
             changed = true;
 
-        if (D2Widgets.ButtonIcon(ctx, right, D2VanillaTex.Plus, tooltip: "Increase", label: label + "/Inc"))
+        if (D2Widgets.ButtonIcon(ctx, right, D2VanillaTex.Plus, tooltip: "D2C_UI_Increase".Translate().ToString(), label: label + "/Inc"))
         {
             float next = value + delta;
             if (min.HasValue) next = Mathf.Max(min.Value, next);

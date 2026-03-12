@@ -54,22 +54,7 @@ internal static class HarmonyPatch_PawnEditor_AppearanceEditor
 
     private static FieldInfo ResolvePawnField(Type dialogType)
     {
-        if (dialogType == null)
-            return null;
-
-        var exact = AccessTools.Field(dialogType, "pawn");
-        if (exact != null && typeof(Pawn).IsAssignableFrom(exact.FieldType))
-            return exact;
-
-        var fields = dialogType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        for (int i = 0; i < fields.Length; i++)
-        {
-            var field = fields[i];
-            if (field != null && !field.IsStatic && typeof(Pawn).IsAssignableFrom(field.FieldType))
-                return field;
-        }
-
-        return null;
+        return PawnOwnerReflectionUtil.ResolvePawnField(dialogType);
     }
 
     private static FieldInfo GetOrResolvePawnField(object instance)

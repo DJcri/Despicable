@@ -47,7 +47,7 @@ Use this quick pass after structural changes.
 - In Dev Mode or with HeroKarma debug UI enabled, inspect one ideology-sensitive event and confirm the detail text appends an `Ideology:` explanation line
 - In diagnostics, confirm an `IdeologyTrace` line appears for one ideology-sensitive event and includes semantic, matched precept, and final lane deltas
 - On a non-player settlement map, trigger multiple visible local-reputation events and confirm settlement word-of-mouth starts affecting local pawn reputation only after local score has built up
-- For detailed expected outcomes, use `Source/Despicable/HeroKarmaModule/Docs/Ideology_Validation_Sweep.md`
+- For detailed expected outcomes, use `Docs/HeroKarma/Ideology_Validation_Sweep.md`
 
 ## NSFW
 - Launch with NSFW enabled

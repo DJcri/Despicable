@@ -88,8 +88,9 @@ internal static class IntimacyValidationBridge
             return true;
 
         // Preserve Despicable's ordered-action leniency for solo manual lovin too: if the player explicitly
-        // orders the action, being drafted should not make Intimacy veto it up front.
-        reason = GetPawnFailureReason(pawn, counterpart: null, isOtherPawn: false, allowDrafted: true, allowRecentLovin: true);
+        // orders the action, being drafted should not make Intimacy veto it up front. Manual solo self relief
+        // also intentionally ignores Intimacy's ideology / desire-to-lovin preference vetoes.
+        reason = GetManualSoloFailureReason(pawn, allowDrafted: true, allowRecentLovin: true);
         if (!reason.NullOrEmpty())
             return true;
 
@@ -203,6 +204,56 @@ internal static class IntimacyValidationBridge
 
             if (!Cache.IsOldEnough(otherPawn))
                 return BuildRoleReason(isOtherPawn: true, "D2N_LovinReason_IsUnderage".Translate());
+        }
+
+        return null;
+    }
+
+    private static string GetManualSoloFailureReason(Pawn pawn, bool allowDrafted, bool allowRecentLovin)
+    {
+        if (pawn == null)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+
+        if (!pawn.Spawned)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsMissing".Translate());
+
+        if (!allowDrafted && pawn.Drafted)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsDrafted".Translate());
+
+        if (pawn.Downed)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+
+        if (!pawn.Awake())
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_CantStayAwake".Translate());
+
+        if (pawn.InAggroMentalState)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsAggressive".Translate());
+
+        if (pawn.health?.hediffSet?.BleedRateTotal > 0f)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBleeding".Translate());
+
+        if (pawn.CurJob?.workGiverDef?.workType == WorkTypeDefOf.Doctor)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+
+        if (pawn.CurJob?.workGiverDef?.workType == WorkTypeDefOf.Firefighter)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+
+        if (pawn.CurJob?.playerForced == true)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+
+        if (!allowRecentLovin && pawn.mindState?.canLovinTick > Find.TickManager.TicksGame)
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_HadLovinRecently".Translate());
+
+        if (Cache.HasTemporarilyPreventLovinHediff != null && Cache.HasTemporarilyPreventLovinHediff(pawn))
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+
+        if (Cache.IsAlreadyDoingLovin != null && Cache.IsAlreadyDoingLovin(pawn))
+            return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+
+        if (Cache.CanCurrentlyDoLovin != null && !Cache.CanCurrentlyDoLovin(pawn))
+        {
+            if (!(allowDrafted && pawn.Drafted))
+                return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
         }
 
         return null;

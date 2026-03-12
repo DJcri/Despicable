@@ -19,8 +19,9 @@ internal static class LovinJobStageUtil
             if (store != null && store.TryGetStage(job.loadID, out var stageId) && !stageId.NullOrEmpty())
                 stageTag = stageId;
         }
-        catch
+        catch (System.Exception ex)
         {
+            Despicable.Core.DebugLogger.WarnExceptionOnce("LovinJobStageUtil.TryGetStageTagFromStore", "Lovin job stage lookup from the interaction store failed; continuing without a remembered stage tag.", ex);
         }
 
         if (stageTag.NullOrEmpty())

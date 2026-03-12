@@ -100,7 +100,7 @@ public partial class Dialog_AnimGroupStudio
                 padOverride: ctx.Style.Pad));
         D2Section.DrawCaptionStrip(ctx, parts.Header, "Stage Settings", "StageSettings/Header", GameFont.Small);
 
-        var v = ctx.VStack(parts.Body, label: "StageSettings/Body");
+        var v = ctx.D2VStack(parts.Body, label: "StageSettings/Body");
         float labelWidth = Mathf.Clamp(parts.Body.width * 0.34f, 70f, 94f);
         float rowGap = ctx.Style.Gap;
 
@@ -121,7 +121,7 @@ public partial class Dialog_AnimGroupStudio
         D2LayoutHelpers.SplitLabeledRow(repRow, labelWidth, rowGap, out var repLabelRect, out var repControlsRect);
         D2Widgets.Label(ctx, repLabelRect, "Repeat", "StageSettings/RepeatLabel");
 
-        var repH = new HRow(ctx, repControlsRect);
+        var repH = new D2HRow(ctx, repControlsRect);
         int rep = Mathf.Max(1, stage.repeatCount);
         string repStr = rep.ToString();
         float toggleWidth = Mathf.Clamp(ctx.Style.MinClickSize + 28f, 50f, 60f);
@@ -152,7 +152,7 @@ public partial class Dialog_AnimGroupStudio
         var parts = D2Section.Layout(ctx, rect, new D2Section.Spec("ExistingInfo", headerHeight: SectionHeaderHeight, soft: true, pad: true, drawBackground: true, padOverride: ctx.Style.Pad));
         D2Section.DrawCaptionStrip(ctx, parts.Header, "Selection Details", "ExistingInfo/Header", GameFont.Medium);
 
-        var v = ctx.VStack(parts.Body, label: "ExistingInfo/Body");
+        var v = ctx.D2VStack(parts.Body, label: "ExistingInfo/Body");
         if (selectedGroup == null)
         {
             v.NextTextBlock(ctx, "Read-only preview of an existing AnimGroupDef. Select one on the left, then import it there if you want a mutable project.", GameFont.Small, padding: 2f, label: "ExistingInfo/Empty");

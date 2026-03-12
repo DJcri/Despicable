@@ -38,17 +38,16 @@ internal static class HKGiftPatchHelpers
         };
     }
 
-    public static bool TryBeginHeroGoodwillForGift()
+    internal static HKGoodwillContext.Scope TryEnterHeroGoodwillForGift()
     {
         Pawn actor = HKGiftContext.GetValidPawn();
         Pawn hero = HKRuntime.GetHeroPawnSafe();
         if (actor == null || hero == null || actor != hero)
         {
-            return false;
+            return default;
         }
 
-        HKGoodwillContext.Begin(hero);
-        return true;
+        return HKGoodwillContext.Enter(hero);
     }
 
     public static void ProcessTradeableGift(List<Tradeable> tradeables, Faction giveTo, GlobalTargetInfo lookTarget)
@@ -59,8 +58,8 @@ internal static class HKGiftPatchHelpers
         }
 
         Pawn actor = HKGiftContext.GetValidPawn();
-        string settlementUniqueId = TryResolveSettlementUniqueId(lookTarget) ?? HKGiftContext.GetValidSettlementUniqueId();
-        string settlementLabel = TryResolveSettlementLabel(lookTarget) ?? HKGiftContext.GetValidSettlementLabel();
+        string settlementUniqueId = HKSettlementContextUtil.TryResolveSettlementUniqueId(lookTarget, "HarmonyPatch_FactionGiftUtility_Gifts:106", "HarmonyPatch_FactionGiftUtility_Gifts failed to resolve the target settlement for a charity gift.") ?? HKGiftContext.GetValidSettlementUniqueId();
+        string settlementLabel = HKSettlementContextUtil.TryResolveSettlementLabel(lookTarget, "HarmonyPatch_FactionGiftUtility_Gifts:107", "HarmonyPatch_FactionGiftUtility_Gifts failed to resolve the target settlement label for a charity gift.") ?? HKGiftContext.GetValidSettlementLabel();
         HKGiftContext.Clear();
 
         Pawn hero = HKRuntime.GetHeroPawnSafe();
@@ -153,41 +152,7 @@ internal static class HKGiftPatchHelpers
         HKKarmaProcessor.Process(karmaEvent);
     }
 
-    private static string TryResolveSettlementUniqueId(GlobalTargetInfo lookTarget)
-    {
-        try
-        {
-            if (lookTarget.WorldObject is Settlement settlement)
-                return settlement.GetUniqueLoadID();
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HarmonyPatch_FactionGiftUtility_Gifts:106",
-                "HarmonyPatch_FactionGiftUtility_Gifts failed to resolve the target settlement for a charity gift.",
-                ex);
-        }
 
-        return null;
-    }
-
-    private static string TryResolveSettlementLabel(GlobalTargetInfo lookTarget)
-    {
-        try
-        {
-            if (lookTarget.WorldObject is Settlement settlement)
-                return settlement.LabelCap;
-        }
-        catch (Exception ex)
-        {
-            Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "HarmonyPatch_FactionGiftUtility_Gifts:107",
-                "HarmonyPatch_FactionGiftUtility_Gifts failed to resolve the target settlement label for a charity gift.",
-                ex);
-        }
-
-        return null;
-    }
 
     private static int CalculateTradeableGiftAmount(List<Tradeable> tradeables)
     {

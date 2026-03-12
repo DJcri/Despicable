@@ -8,6 +8,7 @@ namespace Despicable;
 /// </summary>
 public sealed class GameComponent_ExtendedAnimatorRuntime : GameComponent
 {
+    // Guardrail-Allow-Static: Active runtime singleton owned by the current GameComponent instance; reset naturally on new game/load via component recreation.
     private static GameComponent_ExtendedAnimatorRuntime current;
     private readonly HashSet<CompExtendedAnimator> activeAnimators = new();
     private readonly List<CompExtendedAnimator> activeScratch = new();
@@ -119,8 +120,9 @@ public sealed class GameComponent_ExtendedAnimatorRuntime : GameComponent
                     CompExtendedAnimator comp = pawn?.TryGetComp<CompExtendedAnimator>();
                     comp?.RehydrateAfterRuntimeReset();
                 }
-                catch
+                catch (System.Exception ex)
                 {
+                    Despicable.Core.DebugLogger.WarnExceptionOnce("ExtendedAnimatorRuntime.Rehydrate", "Extended animator runtime rehydrate skipped one pawn after a non-fatal exception.", ex);
                 }
             }
         }

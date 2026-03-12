@@ -31,13 +31,7 @@ public static partial class HarmonyPatch_AttackNeutral
 
     private static IEnumerable<MethodBase> FindTargets()
     {
-        Type healthTrackerType = AccessTools.TypeByName("Verse.Pawn_HealthTracker");
-        if (healthTrackerType == null)
-            yield break;
-
-        MethodInfo postApplyDamage = AccessTools.Method(healthTrackerType, "PostApplyDamage");
-        if (postApplyDamage != null)
-            yield return postApplyDamage;
+        return HKPatchTargetUtil.FindFirstMethods(new[] { "Verse.Pawn_HealthTracker" }, "PostApplyDamage");
     }
 
     private static void MaybePrune(int now)

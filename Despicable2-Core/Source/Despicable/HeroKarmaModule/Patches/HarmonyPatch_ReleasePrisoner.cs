@@ -52,11 +52,7 @@ public static class HarmonyPatch_ReleasePrisoner
             int factionId = HKHookUtil.GetFactionIdSafe(recipient);
             var ev = KarmaEvent.Create("ReleasePrisoner", initiator, recipient, factionId);
 
-            if ((initiator.MapHeld ?? initiator.Map)?.Parent is Settlement settlement && settlement.Faction != null && !settlement.Faction.IsPlayer)
-            {
-                ev.settlementUniqueId = settlement.GetUniqueLoadID();
-                ev.settlementLabel = settlement.LabelCap;
-            }
+            HKSettlementContextUtil.TryAssignFromPawns(ev, initiator);
 
             HKKarmaProcessor.Process(ev);
 
@@ -108,14 +104,7 @@ public static class HarmonyPatch_PrisonerSocialInfluence
             "RimWorld.InteractionWorker_ConvertIdeoAttempt"
         };
 
-        for (int i = 0; i < names.Length; i++)
-        {
-            var type = AccessTools.TypeByName(names[i]);
-            if (type == null) continue;
-
-            var method = AccessTools.Method(type, "Interacted");
-            if (method != null) yield return method;
-        }
+        return HKPatchTargetUtil.FindFirstMethods(names, "Interacted");
     }
 
     public static void Postfix(Pawn initiator, Pawn recipient, MethodBase __originalMethod)
@@ -293,9 +282,9 @@ internal static class HarmonyPatch_Faction_Notify_MemberExitedMap_GoodwillContex
 
     private static MethodBase TargetMethod() => _target;
 
-    private static void Prefix(Pawn __0, bool __1, ref bool __state)
+    private static void Prefix(Pawn __0, bool __1, ref HKGoodwillContext.Scope __state)
     {
-        __state = false;
+        __state = default;
 
         try
         {
@@ -309,8 +298,7 @@ internal static class HarmonyPatch_Faction_Notify_MemberExitedMap_GoodwillContex
             if (instigator == null) return;
             if (!HKHookUtilSafe.ActorIsHero(instigator)) return;
 
-            HKGoodwillContext.Begin(instigator);
-            __state = true;
+            __state = HKGoodwillContext.Enter(instigator);
         }
         catch (Exception ex)
         {
@@ -321,11 +309,9 @@ internal static class HarmonyPatch_Faction_Notify_MemberExitedMap_GoodwillContex
         }
     }
 
-    private static void Finalizer(Exception __exception, bool __state)
+    private static void Finalizer(Exception __exception, HKGoodwillContext.Scope __state)
     {
-        if (!__state) return;
-
-        try { HKGoodwillContext.End(); }
+        try { __state.Dispose(); }
         catch (Exception ex)
         {
             Despicable.Core.DebugLogger.WarnExceptionOnce(

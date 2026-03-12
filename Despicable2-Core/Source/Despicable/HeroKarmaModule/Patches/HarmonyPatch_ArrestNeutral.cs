@@ -138,14 +138,7 @@ public static class HarmonyPatch_CommunityBufferSocialRecovery
             "RimWorld.InteractionWorker_Slight"
         };
 
-        for (int i = 0; i < names.Length; i++)
-        {
-            var type = AccessTools.TypeByName(names[i]);
-            if (type == null) continue;
-
-            var method = AccessTools.Method(type, "Interacted");
-            if (method != null) yield return method;
-        }
+        return HKPatchTargetUtil.FindFirstMethods(names, "Interacted");
     }
 
     public static void Postfix(Pawn initiator, Pawn recipient)

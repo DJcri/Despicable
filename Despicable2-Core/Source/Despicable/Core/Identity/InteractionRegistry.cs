@@ -42,9 +42,4 @@ public static class InteractionRegistry
     {
         activeKeysByMapId.Clear();
     }
-
-    public static void Clear()
-    {
-        ResetRuntimeState();
-    }
 }

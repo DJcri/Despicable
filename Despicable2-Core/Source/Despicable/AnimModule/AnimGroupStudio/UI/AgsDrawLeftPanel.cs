@@ -28,7 +28,7 @@ public partial class Dialog_AnimGroupStudio
 
         var authorLeftScrollLocal = authorLeftScroll;
         var authorLeftContentHeightLocal = authorLeftContentHeight;
-        D2ScrollView.Draw(ctx, scrollRect, ref authorLeftScrollLocal, ref authorLeftContentHeightLocal, (UIContext scrollCtx, ref VStack v) =>
+        D2ScrollView.Draw(ctx, scrollRect, ref authorLeftScrollLocal, ref authorLeftContentHeightLocal, (UIContext scrollCtx, ref D2VStack v) =>
         {
             if (DrawAuthorSourceSection(scrollCtx, ref v))
                 return;

@@ -27,6 +27,8 @@ Future work should mostly be polish, targeted extension, compatibility work, and
 ### 2.1 Top-level structure
 
 - `README.md` describes the suite at a high level.
+- `AGENT.md` and `AGENTS.md` are the repo-root implementation guardrails.
+- `Tools/` contains shared guardrail and localization audit tooling.
 - `Despicable2-Core/` is the standalone base package and the architectural center of gravity.
 - `Despicable2-NSFW/` is an optional add-on package that depends on Core.
 
@@ -42,7 +44,7 @@ Core contains the standard RimWorld package layout:
 - `Patches/` XML patch operations
 - `Source/Despicable/` C# source of truth
 - `Textures/` art assets
-- `Tools/` guardrail and localization audit tooling
+- repo-root `Tools/` shared guardrail and localization audit tooling
 
 ### 2.3 NSFW package map
 
@@ -65,15 +67,15 @@ When in doubt, **Core is the system owner** and NSFW is the extender. NSFW may a
 This spec sits above the smaller docs. Keep these aligned with it:
 
 - `README.md`: high-level project overview
-- `Despicable2-Core/AGENT.md` and `AGENTS.md`: implementation guardrails
-- `Docs/Architecture_Rules.md`: architectural and refactor rules
-- `Docs/Consistency-Charter.md`: naming, ownership, file placement, reset rules
-- `Docs/UIFramework_RulesOfTheRoad.md`: UI framework contracts
-- `Docs/UIFramework_Cookbook.md`: UI usage patterns and examples
-- `Docs/Manual_Regression_Checklist.md`: manual testing expectations
-- `Docs/Smoke_Test_Policy.md`: smoke-check policy
-- `Docs/Localization_Guardrails.md`: localization audit rules
-- NSFW `AGENT.md` and localization docs: package-specific extension and localization rules
+- `AGENT.md` and `AGENTS.md`: repo-wide implementation guardrails
+- `Despicable2-Core/Docs/Architecture_Rules.md`: architectural and refactor rules
+- `Despicable2-Core/Docs/Consistency-Charter.md`: naming, ownership, file placement, reset rules
+- `Despicable2-Core/Docs/UIFramework_RulesOfTheRoad.md`: UI framework contracts
+- `Despicable2-Core/Docs/UIFramework_Cookbook.md`: UI usage patterns and examples
+- `Despicable2-Core/Docs/Manual_Regression_Checklist.md`: manual testing expectations
+- `Despicable2-Core/Docs/Smoke_Test_Policy.md`: smoke-check policy
+- `Despicable2-Core/Docs/Localization_Guardrails.md`: localization audit rules
+- `Despicable2-NSFW/Docs/Localization_Guide.md` and `Localization_CodeStringMap.md`: NSFW-specific localization addenda
 
 Use those for detailed policy. Use this file for system ownership and flow mapping.
 
@@ -501,7 +503,7 @@ Gameplay hooks emit events into HeroKarma’s pipeline through patch files and t
 
 HeroKarma includes first-class diagnostics and validation helpers. Use:
 - `HKDiagnostics`
-- docs under `HeroKarmaModule/Docs/`
+- docs under `Despicable2-Core/Docs/HeroKarma/`
 - manual regression checklist items
 
 For ideology-sensitive bugs, diagnostics and sweep docs are part of the intended workflow, not optional garnish.
@@ -524,7 +526,7 @@ Main owners include:
 - `UIContext`
 - `D2UIStyle`
 - `UIRectRegistry`
-- layout helpers such as `VStack`, `HRow`, `RectTake`, `D2Layout`, `D2ScrollView`
+- layout helpers such as `D2VStack`, `D2HRow`, `D2RectTake`, `D2Layout`, `D2ScrollView`
 - controls such as `D2Tabs`, `D2Table`, `D2BandRulerRow`, `D2ActionBar`, `D2Fields`
 - blueprint wrappers for dialogs, float menus, gizmos, and tabs
 

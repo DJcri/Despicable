@@ -91,8 +91,9 @@ internal static class LovinVisualRuntime
                 SyncPawn(pawn, force: true, refreshVisuals: false);
                 RefreshPawnVisuals(pawn);
             }
-            catch
+            catch (System.Exception ex)
             {
+                Despicable.Core.DebugLogger.WarnExceptionOnce("LovinVisualRuntime.RefreshAllLovinParts", "Lovin visual refresh skipped one pawn after a non-fatal exception.", ex);
             }
         }
     }
@@ -109,8 +110,9 @@ internal static class LovinVisualRuntime
                 SyncPawn(pawn, force: true, refreshVisuals: false);
                 RefreshPawnVisuals(pawn);
             }
-            catch
+            catch (System.Exception ex)
             {
+                Despicable.Core.DebugLogger.WarnExceptionOnce("LovinVisualRuntime.RefreshMapLovinParts", "Lovin visual refresh skipped one pawn after a non-fatal exception.", ex);
             }
         }
     }

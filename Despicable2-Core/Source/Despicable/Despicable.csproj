@@ -126,7 +126,7 @@
     <Compile Include="AnimModule\Comp\ExtendedAnimatorPropNodeBuilder.cs" />
     <Compile Include="AnimModule\Comp\ExtendedAnimatorPlaybackController.cs" />
     <Compile Include="AnimModule\Comp\CompProperties_ExtendedAnimator.cs" />
-    <Compile Include="AnimModule\ContextUtil.cs" />
+    <Compile Include="AnimModule\AnimContextUtil.cs" />
     <Compile Include="AnimModule\Graphics\GraphicStateResolver.cs" />
     <Compile Include="AnimModule\Patches\HarmonyPatch_DrawTracker.cs" />
     <Compile Include="AnimModule\Patches\HarmonyPatch_PawnRenderer.cs" />
@@ -147,6 +147,8 @@
     <Compile Include="Core\Compatibility\IModCompat.cs" />
     <Compile Include="Core\Compatibility\ModCompatRegistry.cs" />
     <Compile Include="Core\Compatibility\NLFacialAnimationCompat.cs" />
+    <Compile Include="Core\Compatibility\VerseKeyframeCompat.cs" />
+    <Compile Include="Core\Compatibility\PatchMethodDiscoveryUtil.cs" />
     <Compile Include="Core\Constants\Channels.cs" />
     <Compile Include="Core\Constants\Commands.cs" />
     <Compile Include="Core\ContentAvailability.cs" />
@@ -172,6 +174,7 @@
     <Compile Include="Core\Pawns\PawnHealthQuery.cs" />
     <Compile Include="Core\Pawns\PawnHealthSnapshot.cs" />
     <Compile Include="Core\Pawns\PawnPairQuery.cs" />
+    <Compile Include="Core\Pawns\PawnOwnerReflectionUtil.cs" />
     <Compile Include="Core\Pawns\PawnQuery.cs" />
     <Compile Include="Core\Pawns\PawnResolver.cs" />
     <Compile Include="Core\Runtime\DespicableRuntimeState.cs" />
@@ -218,11 +221,11 @@
     <Compile Include="FacePartsModule\DefOf\FacePartsModule_FacialAnimDefOf.cs" />
     <Compile Include="FacePartsModule\FacePartsUtil.cs" />
     <Compile Include="FacePartsModule\FacePartsUtil.Blacklist.cs" />
-    <Compile Include="FacePartsModule\FaceParts\ExpressionDef.cs" />
-    <Compile Include="FacePartsModule\FaceParts\FacePartDef.cs" />
-    <Compile Include="FacePartsModule\FaceParts\FacePartStyleDef.cs" />
-    <Compile Include="FacePartsModule\FaceParts\FacialAnimDef.cs" />
-    <Compile Include="FacePartsModule\FaceParts\FacialAnimKeyframeDef.cs" />
+    <Compile Include="FacePartsModule\Defs\ExpressionDef.cs" />
+    <Compile Include="FacePartsModule\Defs\FacePartDef.cs" />
+    <Compile Include="FacePartsModule\Defs\FacePartStyleDef.cs" />
+    <Compile Include="FacePartsModule\Defs\FacialAnimDef.cs" />
+    <Compile Include="FacePartsModule\Defs\FacialAnimKeyframeDef.cs" />
     <Compile Include="FacePartsModule\Runtime\FacePartsEventRuntime.cs" />
     <Compile Include="FacePartsModule\Patches\HarmonyPatch_FaceParts_Events.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchModels.cs" />
@@ -234,7 +237,7 @@
     <Compile Include="FacePartsModule\UI\Dialog_D2FacePartsCustomizer.cs" />
     <Compile Include="FacePartsModule\UI\Dialog_D2HeadtypeBlacklist.cs" />
     <Compile Include="FacePartsModule\UI\FacePreviewCache.cs" />
-    <Compile Include="FacePartsModule\Misc\HeadBlacklistDef.cs" />
+    <Compile Include="FacePartsModule\Defs\HeadBlacklistDef.cs" />
     <Compile Include="FacePartsModule\RenderNodes\Eyes\PawnRenderNodeWorker_EyeAddon.cs" />
     <Compile Include="FacePartsModule\RenderNodes\Eyes\PawnRenderNodeWorker_AutoEyePatch.cs" />
     <Compile Include="FacePartsModule\RenderNodes\Eyes\PawnRenderNode_EyeAddon.cs" />
@@ -255,10 +258,10 @@
     <Compile Include="HeroKarmaModule\LocalReputation\LocalReputationUtility.cs" />
     <Compile Include="HeroKarmaModule\LocalReputation\LocalRepTuning.cs" />
     <Compile Include="HeroKarmaModule\LocalReputation\RepRecord.cs" />
-    <Compile Include="HeroKarmaModule\IdeologyRep\HKRepIdeology.cs" />
-    <Compile Include="HeroKarmaModule\IdeologyRep\HKIdeologyEvaluationTrace.cs" />
-    <Compile Include="HeroKarmaModule\IdeologyRep\HKIdeologyCompat.cs" />
-    <Compile Include="HeroKarmaModule\IdeologyRep\HKIdeologyExactPrecepts.cs" />
+    <Compile Include="HeroKarmaModule\Ideology\HKRepIdeology.cs" />
+    <Compile Include="HeroKarmaModule\Ideology\HKIdeologyEvaluationTrace.cs" />
+    <Compile Include="HeroKarmaModule\Ideology\HKIdeologyCompat.cs" />
+    <Compile Include="HeroKarmaModule\Ideology\HKIdeologyExactPrecepts.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AddHeroKarmaGizmos.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AttackNeutral.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AttackNeutral.Helpers.cs" />
@@ -272,6 +275,10 @@
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ExecutePrisoner.Helpers.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_FactionGiftUtility_Gifts.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_FactionGiftUtility_Gifts.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKTradeSessionUtil.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKPatchTargetUtil.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKJobDriverUtil.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HKSettlementContextUtil.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Faction_TryAffectGoodwillWith.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_OrganHarvest.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Faction_TryAffectGoodwillWith.Helpers.cs" />
@@ -281,9 +288,9 @@
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Certainty.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Opinion.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_TradePrice_LocalRep.cs" />
-    <Compile Include="HeroKarmaModule\Patches\HKPatchGuard.cs" />
-    <Compile Include="HeroKarmaModule\Patches\HKGoodwillContext.cs" />
-    <Compile Include="HeroKarmaModule\Patches\HKHookUtil.cs" />
+    <Compile Include="HeroKarmaModule\Runtime\HKPatchGuard.cs" />
+    <Compile Include="HeroKarmaModule\Pipeline\HKGoodwillContext.cs" />
+    <Compile Include="HeroKarmaModule\Services\HKHookUtil.cs" />
     <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.cs" />
     <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.Hediffs.cs" />
     <Compile Include="HeroKarmaModule\Pipeline\HKEventDebouncer.cs" />
@@ -311,14 +318,15 @@
     <Compile Include="HeroKarmaModule\UI\Dialog_AssignHeroKarma.cs" />
     <Compile Include="HeroKarmaModule\UI\HKUIData.cs" />
     <Compile Include="HeroKarmaModule\UI\HKUIConstants.cs" />
-    <Compile Include="ManualInteraction\InteractionMenu.cs" />
-    <Compile Include="ManualInteraction\ManualMenuBuilder.cs" />
-    <Compile Include="ManualInteraction\ManualMenuHost.cs" />
-    <Compile Include="ManualInteraction\ManualMenuLegacyAdapter.cs" />
-    <Compile Include="ManualInteraction\ManualMenuOptionSpec.cs" />
-    <Compile Include="ManualInteraction\ManualMenuRequest.cs" />
-    <Compile Include="ManualInteraction\InteractionTargetingCache.cs" />
-    <Compile Include="ManualInteraction\Interactions.cs" />
+    <Compile Include="ManualInteractionModule\InteractionMenu.cs" />
+    <Compile Include="ManualInteractionModule\ManualMenuBuilder.cs" />
+    <Compile Include="ManualInteractionModule\ManualMenuHost.cs" />
+    <Compile Include="ManualInteractionModule\ManualMenuLegacyAdapter.cs" />
+    <Compile Include="ManualInteractionModule\ManualMenuMemberUtil.cs" />
+    <Compile Include="ManualInteractionModule\ManualMenuOptionSpec.cs" />
+    <Compile Include="ManualInteractionModule\ManualMenuRequest.cs" />
+    <Compile Include="ManualInteractionModule\InteractionTargetingCache.cs" />
+    <Compile Include="ManualInteractionModule\Interactions.cs" />
     <Compile Include="ModMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
@@ -370,12 +378,12 @@
     <Compile Include="UIFramework\Layout\D2PaneLayout.Allocation.cs" />
     <Compile Include="UIFramework\Layout\D2ScrollView.cs" />
     <Compile Include="UIFramework\Layout\D2Section.cs" />
-    <Compile Include="UIFramework\Layout\RectTake.cs" />
+    <Compile Include="UIFramework\Layout\D2RectTake.cs" />
     <Compile Include="UIFramework\Layout\D2WorkbenchLayout.cs" />
-    <Compile Include="UIFramework\Layout\HFlow.cs" />
-    <Compile Include="UIFramework\Layout\HRow.cs" />
-    <Compile Include="UIFramework\Layout\RectSplit.cs" />
-    <Compile Include="UIFramework\Layout\VStack.cs" />
+    <Compile Include="UIFramework\Layout\D2HFlow.cs" />
+    <Compile Include="UIFramework\Layout\D2HRow.cs" />
+    <Compile Include="UIFramework\Layout\D2RectSplit.cs" />
+    <Compile Include="UIFramework\Layout\D2VStack.cs" />
     <Compile Include="UIFramework\Settings\D2ModSettingsRenderer.cs" />
     <Compile Include="UIFramework\UIContext.cs" />
     <Compile Include="UIFramework\UIContext.Layout.cs" />
@@ -391,8 +399,17 @@
     <!-- Opt-in strictness for likely unlocalized UI literals. Set true in release/prerelease pipelines after cleanup. -->
     <D2FailOnUiLiterals Condition="'$(D2FailOnUiLiterals)'==''">false</D2FailOnUiLiterals>
   </PropertyGroup>
-  <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(MSBuildProjectDirectory)\..\..\Tools\LocalizationAudit.ps1&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
+  <PropertyGroup>
+    <D2RepoAuditScript>$(MSBuildProjectDirectory)\..\..\..\Tools\LocalizationAudit.ps1</D2RepoAuditScript>
+    <D2LocalAuditScript>$(MSBuildProjectDirectory)\..\..\Tools\LocalizationAudit.ps1</D2LocalAuditScript>
+    <D2LocalizationAuditScript Condition="Exists('$(D2RepoAuditScript)')">$(D2RepoAuditScript)</D2LocalizationAuditScript>
+    <D2LocalizationAuditScript Condition="'$(D2LocalizationAuditScript)'=='' and Exists('$(D2LocalAuditScript)')">$(D2LocalAuditScript)</D2LocalizationAuditScript>
+  </PropertyGroup>
+  <Target Name="D2LocalizationAudit" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true' and '$(D2LocalizationAuditScript)'!=''">
+    <Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -File &quot;$(D2LocalizationAuditScript)&quot; -ModRoot &quot;$(MSBuildProjectDirectory)\..\..&quot; $(D2LocalizationAuditUiLiteralArg)" />
+  </Target>
+  <Target Name="D2LocalizationAuditMissing" AfterTargets="Build" Condition="'$(OS)'=='Windows_NT' and '$(D2SkipLocalizationAudit)'!='true' and '$(D2LocalizationAuditScript)'==''">
+    <Message Importance="high" Text="Skipping localization audit because LocalizationAudit.ps1 was not found in repo-root Tools or package-local Tools." />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

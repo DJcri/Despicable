@@ -12,7 +12,7 @@ namespace Despicable.UIFramework;
 /// - Keep Verse.Text global state (Font, WordWrap, Anchor) well-scoped and restored
 ///
 /// This file is intentionally "pure": it shouldn't depend on Window/ITab/etc.
-/// Higher-level helpers (VStack.NextTextBlock, etc.) can call into this.
+/// Higher-level helpers (D2VStack.NextTextBlock, etc.) can call into this.
 /// </summary>
 public static class D2Text
 {

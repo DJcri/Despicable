@@ -71,7 +71,7 @@ public partial class Dialog_AnimGroupStudio
                 if (authorTrackIndex != prevIndex)
                     authorKeyIndex = -1;
 
-                var footerH = new HRow(ctx, parts.Footer);
+                var footerH = new D2HRow(ctx, parts.Footer);
                 if (DrawIconButton(
                     ctx,
                     footerH.NextFixed(ctx.Style.RowHeight, UIRectTag.Button, "TrackList/Add"),
@@ -185,7 +185,7 @@ public partial class Dialog_AnimGroupStudio
                 if (authorKeyIndex != prevKeyIndex && authorKeyIndex >= 0 && authorKeyIndex < tr.keys.Count)
                     InspectSelectedAuthorKeyframe(tr, stage);
 
-                var footerH = new HRow(ctx, parts.Footer);
+                var footerH = new D2HRow(ctx, parts.Footer);
                 if (DrawIconButton(
                     ctx,
                     footerH.NextFixed(ctx.Style.RowHeight, UIRectTag.Button, "KeyframeList/Add"),
@@ -261,7 +261,7 @@ public partial class Dialog_AnimGroupStudio
                 bool canPaste = hasExplicitSelection && authorKeyClipboard != null;
                 bool canReset = hasExplicitSelection;
 
-                var toolbarH = new HRow(ctx, parts.Toolbar);
+                var toolbarH = new D2HRow(ctx, parts.Toolbar);
                 float resetWidth = Mathf.Clamp(parts.Toolbar.width * 0.36f, 92f, 128f);
                 Rect resetRect = toolbarH.NextFixed(resetWidth, UIRectTag.Button, "KeyframeInspector/ToolbarReset");
                 if (canReset)
@@ -346,7 +346,7 @@ public partial class Dialog_AnimGroupStudio
 
                 var authorInspectorScrollLocal = authorInspectorScroll;
                 var authorInspectorContentHeightLocal = authorInspectorContentHeight;
-                D2ScrollView.Draw(ctx, parts.Body, ref authorInspectorScrollLocal, ref authorInspectorContentHeightLocal, (UIContext scrollCtx, ref VStack v) =>
+                D2ScrollView.Draw(ctx, parts.Body, ref authorInspectorScrollLocal, ref authorInspectorContentHeightLocal, (UIContext scrollCtx, ref D2VStack v) =>
                 {
                     if (isImplicitDisplay)
                     {
@@ -354,7 +354,7 @@ public partial class Dialog_AnimGroupStudio
                     }
 
                     Rect tickRow = v.NextRow(UIRectTag.Input, "Inspector/TickRow");
-                    var tickH = new HRow(scrollCtx, tickRow);
+                    var tickH = new D2HRow(scrollCtx, tickRow);
                     float tickLabelW = Mathf.Clamp(tickRow.width * 0.22f, 48f, 64f);
                     D2Widgets.Label(scrollCtx, tickH.NextFixed(tickLabelW, UIRectTag.Label, "Inspector/TickLabel"), "Tick", "Inspector/TickLabel");
                     int displayedTick = hasExplicitSelection ? k.tick : Mathf.Clamp(authorPreviewTick, 0, Mathf.Max(1, stage.durationTicks));
@@ -395,7 +395,7 @@ public partial class Dialog_AnimGroupStudio
                     DrawGroupedHeader(scrollCtx, ref v, "Inspector/Transform", "Transform");
 
                     Rect angleRow = v.NextRow(UIRectTag.Input, "Inspector/AngleRow");
-                    var angleH = new HRow(scrollCtx, angleRow);
+                    var angleH = new D2HRow(scrollCtx, angleRow);
                     float angleLabelW = Mathf.Clamp(angleRow.width * 0.18f, 56f, 72f);
                     float angleValueW = Mathf.Clamp(angleRow.width * 0.18f, 78f, 110f);
                     D2Widgets.Label(scrollCtx, angleH.NextFixed(angleLabelW, UIRectTag.Label, "Inspector/AngleLabel"), "Angle", "Inspector/AngleLabel");
@@ -447,7 +447,7 @@ public partial class Dialog_AnimGroupStudio
                     }
 
                     Rect offXRow = v.NextRow(UIRectTag.Input, "Inspector/OffsetXRow");
-                    var offXH = new HRow(scrollCtx, offXRow);
+                    var offXH = new D2HRow(scrollCtx, offXRow);
                     D2Widgets.Label(scrollCtx, offXH.NextFixed(Mathf.Clamp(offXRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/OffsetXLabel"), "Offset X", "Inspector/OffsetXLabel");
                     bool isOffsetPropNode = IsPropNodeTag(tr.nodeTag);
                     float offXMin = isOffsetPropNode ? AuthorPropOffsetClampXMin : AuthorTrackOffsetClampXMin;
@@ -466,7 +466,7 @@ public partial class Dialog_AnimGroupStudio
                     }
 
                     Rect offZRow = v.NextRow(UIRectTag.Input, "Inspector/OffsetZRow");
-                    var offZH = new HRow(scrollCtx, offZRow);
+                    var offZH = new D2HRow(scrollCtx, offZRow);
                     D2Widgets.Label(scrollCtx, offZH.NextFixed(Mathf.Clamp(offZRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/OffsetZLabel"), "Offset Z", "Inspector/OffsetZLabel");
                     float newZ = D2Widgets.HorizontalSlider(scrollCtx, offZH.Remaining(UIRectTag.Slider, "Inspector/OffsetZSlider"), k.offset.z, offZMin, offZMax, showValueLabel: true, label: "Inspector/OffsetZSlider");
                     if (!Mathf.Approximately(newZ, k.offset.z))
@@ -497,7 +497,7 @@ public partial class Dialog_AnimGroupStudio
                     k.scale.y = 1f;
 
                     Rect sxRow = v.NextRow(UIRectTag.Input, "Inspector/ScaleXRow");
-                    var sxH = new HRow(scrollCtx, sxRow);
+                    var sxH = new D2HRow(scrollCtx, sxRow);
                     D2Widgets.Label(scrollCtx, sxH.NextFixed(Mathf.Clamp(sxRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/ScaleXLabel"), "Scale X", "Inspector/ScaleXLabel");
                     float newSX = D2Widgets.HorizontalSlider(scrollCtx, sxH.Remaining(UIRectTag.Slider, "Inspector/ScaleXSlider"), k.scale.x, sMin, sMax, showValueLabel: true, label: "Inspector/ScaleXSlider");
                     if (!Mathf.Approximately(newSX, k.scale.x))
@@ -512,7 +512,7 @@ public partial class Dialog_AnimGroupStudio
                     }
 
                     Rect szRow = v.NextRow(UIRectTag.Input, "Inspector/ScaleZRow");
-                    var szH = new HRow(scrollCtx, szRow);
+                    var szH = new D2HRow(scrollCtx, szRow);
                     D2Widgets.Label(scrollCtx, szH.NextFixed(Mathf.Clamp(szRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/ScaleZLabel"), "Scale Z", "Inspector/ScaleZLabel");
                     float newSZ = D2Widgets.HorizontalSlider(scrollCtx, szH.Remaining(UIRectTag.Slider, "Inspector/ScaleZSlider"), k.scale.z, sMin, sMax, showValueLabel: true, label: "Inspector/ScaleZSlider");
                     if (!Mathf.Approximately(newSZ, k.scale.z))
@@ -529,7 +529,7 @@ public partial class Dialog_AnimGroupStudio
                     DrawGroupedHeader(scrollCtx, ref v, "Inspector/Orientation", "Facing", topPadding: true);
 
                     Rect faceRow = v.NextRow(UIRectTag.Input, "Inspector/FacingRow");
-                    var faceH = new HRow(scrollCtx, faceRow);
+                    var faceH = new D2HRow(scrollCtx, faceRow);
                     D2Widgets.Label(scrollCtx, faceH.NextFixed(Mathf.Clamp(faceRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/FacingLabel"), "Direction", "Inspector/FacingLabel");
                     if (D2Widgets.ButtonText(scrollCtx, faceH.RemainingMin(Mathf.Clamp(faceRow.width * 0.34f, 96f, 136f), UIRectTag.Button, "Inspector/FacingButton"), k.rotation.ToStringHuman(), "Inspector/FacingButton"))
                     {
@@ -559,7 +559,7 @@ public partial class Dialog_AnimGroupStudio
                     DrawGroupedHeader(scrollCtx, ref v, "Inspector/Advanced", "Advanced", topPadding: true);
 
                     Rect layerRow = v.NextRow(UIRectTag.Input, "Inspector/LayerBiasRow");
-                    var layerH = new HRow(scrollCtx, layerRow);
+                    var layerH = new D2HRow(scrollCtx, layerRow);
                     D2Widgets.Label(scrollCtx, layerH.NextFixed(Mathf.Clamp(layerRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/LayerBiasLabel"), "Layer", "Inspector/LayerBiasLabel");
                     float newLayerF = D2Widgets.HorizontalSlider(scrollCtx, layerH.Remaining(UIRectTag.Slider, "Inspector/LayerBiasSlider"), k.layerBias, -3f, 3f, showValueLabel: true, label: "Inspector/LayerBiasSlider");
                     int newLayer = Mathf.Clamp(Mathf.RoundToInt(newLayerF), -3, 3);
@@ -578,7 +578,7 @@ public partial class Dialog_AnimGroupStudio
                         DrawGroupedHeader(scrollCtx, ref v, "Inspector/ClipEffects", "Clip Effects (Root)", topPadding: true);
 
                         Rect soundRow = v.NextRow(UIRectTag.Input, "Inspector/SoundRow");
-                        var soundH = new HRow(scrollCtx, soundRow);
+                        var soundH = new D2HRow(scrollCtx, soundRow);
                         D2Widgets.Label(scrollCtx, soundH.NextFixed(Mathf.Clamp(soundRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/SoundLabel"), "Sound", "Inspector/SoundLabel");
 
                         string soundLabel = k.soundDefName.NullOrEmpty() ? "(None)" : k.soundDefName;
@@ -622,7 +622,7 @@ public partial class Dialog_AnimGroupStudio
                         }
 
                         Rect facialRow = v.NextRow(UIRectTag.Input, "Inspector/FacialRow");
-                        var facialH = new HRow(scrollCtx, facialRow);
+                        var facialH = new D2HRow(scrollCtx, facialRow);
                         D2Widgets.Label(scrollCtx, facialH.NextFixed(Mathf.Clamp(facialRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/FacialLabel"), "Facial", "Inspector/FacialLabel");
 
                         string facialLabel = k.facialAnimDefName.NullOrEmpty() ? "(None)" : k.facialAnimDefName;

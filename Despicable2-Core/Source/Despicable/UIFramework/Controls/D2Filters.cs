@@ -127,7 +127,7 @@ public static class D2Filters
             if (D2Widgets.ButtonText(ctx, rect, buttonLabel, label ?? Id))
             {
                 var opts = new List<FloatMenuOption>();
-                opts.Add(new FloatMenuOption("Any", () => SelectedIndex = -1));
+                opts.Add(new FloatMenuOption("D2C_UI_Any".Translate().ToString(), () => SelectedIndex = -1));
                 for (int i = 0; i < Options.Count; i++)
                 {
                     int local = i;

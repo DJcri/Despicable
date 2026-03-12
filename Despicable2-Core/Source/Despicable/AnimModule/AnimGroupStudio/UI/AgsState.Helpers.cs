@@ -1,4 +1,5 @@
 using RimWorld;
+// Guardrail-Reason: AGS state helpers stay grouped because clip resolution, validation, and authoring mutations operate on one editor state surface.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

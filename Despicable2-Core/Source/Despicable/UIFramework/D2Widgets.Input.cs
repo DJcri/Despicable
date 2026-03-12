@@ -195,7 +195,7 @@ public static partial class D2Widgets
 
         bool clicked = D2Widgets.ButtonText(ctx, mainRect, text ?? string.Empty, id + "/Main");
 
-        if (D2Widgets.ButtonIcon(ctx, iconRect, D2VanillaTex.Drop, tooltip: tooltip ?? "More options", label: id + "/Drop"))
+        if (D2Widgets.ButtonIcon(ctx, iconRect, D2VanillaTex.Drop, tooltip: tooltip ?? "D2C_UI_MoreOptions".Translate().ToString(), label: id + "/Drop"))
             clicked = true;
 
         if (!clicked || options == null || options.Count == 0)

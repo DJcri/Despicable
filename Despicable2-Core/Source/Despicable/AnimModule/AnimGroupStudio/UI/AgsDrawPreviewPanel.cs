@@ -1,4 +1,5 @@
 using RimWorld;
+// Guardrail-Reason: AGS preview panel keeps gizmo math, viewport projection, and playback interaction together because the editor hit-testing surface is tightly coupled.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,7 +45,7 @@ public partial class Dialog_AnimGroupStudio
 
         D2Section.DrawCaptionStrip(ctx, parts.Header, "Preview & Playback", "AuthorCenter/Header", GameFont.Medium);
 
-        var v = ctx.VStack(parts.Body);
+        var v = ctx.D2VStack(parts.Body);
 
         if (sourceMode == SourceMode.ExistingDef)
         {

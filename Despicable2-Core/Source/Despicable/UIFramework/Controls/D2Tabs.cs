@@ -148,7 +148,7 @@ public static class D2Tabs
         // Record the whole strip so overlay can show where the paging decision lives.
         ctx.Record(rect, UIRectTag.Input, label + "/TabStrip");
 
-        var h = new HRow(ctx, rect);
+        var h = new D2HRow(ctx, rect);
         float w = rect.width / labels.Length;
 
         int newSel = Mathf.Clamp(selected, 0, labels.Length - 1);

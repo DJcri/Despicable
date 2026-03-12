@@ -1,9 +1,9 @@
 using System;
-using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using System.Reflection;
 
 namespace Despicable.HeroKarma.Patches.HeroKarma;
 
@@ -16,8 +16,6 @@ internal static class HarmonyPatch_Standing_Certainty
 {
     private const string PatchId = "HKPatch.StandingCertainty";
 
-    // Guardrail-Allow-Static: Cached reflected pawn field for this standing patch; lazily re-resolved and reused as a reflection cache during the current load.
-    private static FieldInfo _pawnField;
     // Guardrail-Allow-Static: Cached Harmony target for this patch/helper; resolved during Prepare and reused for the current load.
     private static MethodBase _target;
 
@@ -64,7 +62,7 @@ internal static class HarmonyPatch_Standing_Certainty
             if (offset == 0f) return;
             if (!HKIdeologyCompat.IsStandingEffectsEnabled) return;
 
-            Pawn pawn = TryGetPawn(__instance);
+            Pawn pawn = PawnOwnerReflectionUtil.TryGetPawn(__instance);
             if (pawn == null) return;
             if (!HKHookUtilSafe.ActorIsHero(pawn)) return;
 
@@ -94,32 +92,4 @@ internal static class HarmonyPatch_Standing_Certainty
         }
     }
 
-    private static Pawn TryGetPawn(object tracker)
-    {
-        if (tracker == null) return null;
-
-        try
-        {
-            if (_pawnField == null)
-            {
-                // Find the first instance field assignable to Pawn.
-                var fields = tracker.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                for (int i = 0; i < fields.Length; i++)
-                {
-                    var f = fields[i];
-                    if (f != null && typeof(Pawn).IsAssignableFrom(f.FieldType))
-                    {
-                        _pawnField = f;
-                        break;
-                    }
-                }
-            }
-
-            return _pawnField?.GetValue(tracker) as Pawn;
-        }
-        catch
-        {
-            return null;
-        }
-    }
 }

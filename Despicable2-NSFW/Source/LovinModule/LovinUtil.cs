@@ -13,6 +13,7 @@ public static partial class LovinUtil
 {
     // Use duration ticks if no animations found
     private const int DefaultDurationTicksConstant = 10000;
+    private const int SelfLovinDefaultDurationTicksConstant = 10000;
     private const float LovinMaxPainThresholdConstant = 0.6f;
     private const float LovinMinCompatibilityConstant = -1f;
     private const int LovinMinOpinionConstant = 20;
@@ -21,6 +22,7 @@ public static partial class LovinUtil
     private const int RestDepletionIntervalConstant = 96;
 
     public static int DefaultDurationTicks => DefaultDurationTicksConstant;
+    public static int SelfLovinDefaultDurationTicks => SelfLovinDefaultDurationTicksConstant;
     public static float LovinMaxPainThreshold => LovinMaxPainThresholdConstant;
     public static float LovinMinCompatibility => LovinMinCompatibilityConstant;
     public static int LovinMinOpinion => LovinMinOpinionConstant;

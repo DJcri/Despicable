@@ -186,7 +186,7 @@ public abstract class D2WindowBlueprint : Window
 
     /// <summary>
     /// Auto-measure by running DrawBody in a Measure pass (no widgets emitted).
-    /// For best results: build your body using Ctx + VStack/HRow + D2Widgets so rects are recorded.
+    /// For best results: build your body using Ctx + D2VStack/D2HRow + D2Widgets so rects are recorded.
     /// </summary>
     protected virtual float AutoMeasureBodyHeight(Rect outRect)
     {
@@ -220,7 +220,7 @@ public abstract class D2WindowBlueprint : Window
     protected virtual void DrawFooter(Rect rect)
     {
         if (!CloseOnAccept) return;
-        if (Widgets.ButtonText(rect, "OK"))
+        if (Widgets.ButtonText(rect, "D2C_UI_OK".Translate().ToString()))
             Close();
     }
 }
