@@ -71,6 +71,28 @@ public sealed class AgsPreviewPawnPool : IDisposable
                     "AGS preview pawn pool best-effort face init failed.",
                     e);
             }
+
+            // Detached preview pawns bypass some normal lifecycle/tick initialization. Give
+            // any preview-aware comps a narrow best-effort hook here so subsystems can align
+            // synthetic preview state without broadening general gameplay bootstraps.
+            try
+            {
+                if (gen.AllComps != null)
+                {
+                    for (int i = 0; i < gen.AllComps.Count; i++)
+                    {
+                        if (gen.AllComps[i] is IDetachedPreviewPawnInitializer previewInitializer)
+                            previewInitializer.InitializeForDetachedPreview();
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce(
+                    "AgsPreviewPawnPool.EmptyCatch:6",
+                    "AGS preview pawn pool best-effort detached preview init failed.",
+                    e);
+            }
         }
         return gen;
     }

@@ -68,6 +68,7 @@
     <Compile Include="AnimModule\AnimGroupStudio\Persistence\AgsRepository.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewBinding.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPawnPool.cs" />
+    <Compile Include="AnimModule\AnimGroupStudio\Preview\IDetachedPreviewPawnInitializer.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPlayback.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewPlayback.Rendering.cs" />
     <Compile Include="AnimModule\AnimGroupStudio\Preview\AgsPreviewNodeCapture.cs" />

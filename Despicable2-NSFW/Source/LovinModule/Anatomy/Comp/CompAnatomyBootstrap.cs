@@ -1,7 +1,11 @@
+using Despicable.AnimGroupStudio.Preview;
+
+using RimWorld;
+
 using Verse;
 
 namespace Despicable;
-public class CompAnatomyBootstrap : ThingComp
+public class CompAnatomyBootstrap : ThingComp, IDetachedPreviewPawnInitializer
 {
     private bool anatomySeeded;
 
@@ -23,6 +27,30 @@ public class CompAnatomyBootstrap : ThingComp
         TrySeedNow();
     }
 
+
+    public void InitializeForDetachedPreview()
+    {
+        Pawn pawn = parent as Pawn;
+        if (pawn == null)
+            return;
+
+        if (!AnatomyBootstrapper.ForcePreviewSeedFromCurrentGender(pawn))
+            return;
+
+        anatomySeeded = true;
+
+        try
+        {
+            pawn.Drawer?.renderer?.renderTree?.SetDirty();
+            pawn.Drawer?.renderer?.SetAllGraphicsDirty();
+            pawn.Drawer?.renderer?.EnsureGraphicsInitialized();
+            PortraitsCache.SetDirty(pawn);
+        }
+        catch
+        {
+            // Best-effort preview path. Normal gameplay state remains owned by the usual lifecycle.
+        }
+    }
     private void TrySeedNow()
     {
         if (anatomySeeded)

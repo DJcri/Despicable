@@ -1,7 +1,6 @@
 using UnityEngine;
 using RimWorld;
 using Verse;
-using System.Reflection;
 
 namespace Despicable;
 /// <summary>
@@ -14,9 +13,6 @@ public sealed class WorkshopPreviewRenderer
     private int width;
     private int height;
 
-    // Cached camera used by PawnCacheRenderer (best-effort via reflection).
-    // Guardrail-Allow-Static: Best-effort reflection cache for PawnCache camera handle, reused across preview renders.
-    private static Camera cachedPawnCacheCamera;
 
     public WorkshopPreviewRenderer(int width = 700, int height = 980)
     {
@@ -110,7 +106,7 @@ public sealed class WorkshopPreviewRenderer
         RenderTexture.active = prev;
 
         // Try to ensure the cache camera doesn't clear color between draws.
-        Camera cam = GetPawnCacheCamera();
+        Camera cam = UIUtil.GetPawnCacheCameraForPreview(forceRefresh: true);
         bool hadCam = cam != null;
         CameraClearFlags oldFlags = CameraClearFlags.SolidColor;
         Color oldBg = Color.clear;
@@ -151,40 +147,6 @@ public sealed class WorkshopPreviewRenderer
                 cam.backgroundColor = oldBg;
             }
         }
-    }
-
-    private static Camera GetPawnCacheCamera()
-    {
-        if (cachedPawnCacheCamera != null) return cachedPawnCacheCamera;
-        try
-        {
-            object renderer = PawnCacheCameraManager.PawnCacheRenderer;
-            if (renderer == null) return null;
-            var t = renderer.GetType();
-
-            // Fields first.
-            foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (f.FieldType == typeof(Camera))
-                {
-                    cachedPawnCacheCamera = (Camera)f.GetValue(renderer);
-                    return cachedPawnCacheCamera;
-                }
-            }
-
-            // Then properties.
-            foreach (var p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (p.PropertyType == typeof(Camera) && p.GetIndexParameters().Length == 0)
-                {
-                    cachedPawnCacheCamera = (Camera)p.GetValue(renderer, null);
-                    return cachedPawnCacheCamera;
-                }
-            }
-        }
-        catch (System.Exception e) { Despicable.Core.DebugLogger.WarnExceptionOnce("WorkshopPreviewRenderer.EmptyCatch:2", "Workshop preview renderer best-effort cleanup failed.", e); }
-
-        return null;
     }
 
     private void Ensure()

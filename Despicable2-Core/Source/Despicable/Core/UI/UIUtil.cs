@@ -27,9 +27,6 @@ public static class UIUtil
     {
         if (pawn == null || target == null) return;
 
-        Camera cam = null;
-        PawnCacheCameraState? capturedCameraState = null;
-
         try
         {
             pawn.Drawer?.renderer?.EnsureGraphicsInitialized();
@@ -37,17 +34,13 @@ public static class UIUtil
             if (isolateCameraState)
                 ClearRenderTexture(target);
 
-            // Any live preview render can mutate the shared pawn-cache camera to match
-            // the caller's target aspect/rect. Capture and restore around every render so
-            // non-square preview surfaces (for example animation workshop panes) do not
-            // poison later vanilla portraits.
-            cam = GetPawnCacheCameraForPreview(forceRefresh: true);
+            // Let the pawn-cache renderer manage its own camera state for the supplied
+            // target texture. Manually forcing targetTexture/pixelRect/aspect here can
+            // leak non-square preview settings into later vanilla portraits when the
+            // underlying renderer swaps cameras or keeps extra internal state.
+            Camera cam = GetPawnCacheCameraForPreview(forceRefresh: true);
             if (cam != null)
-            {
-                capturedCameraState = PawnCacheCameraState.Capture(cam);
-                ConfigurePreviewCamera(cam, target);
                 AgsPreviewNodeCapture.TryAttachActiveCamera(pawn, cam);
-            }
 
             PawnCacheCameraManager.PawnCacheRenderer.RenderPawn(
                 pawn,
@@ -65,11 +58,6 @@ public static class UIUtil
         catch (Exception e)
         {
             Log.Error(e.ToString());
-        }
-        finally
-        {
-            if (capturedCameraState.HasValue && cam != null)
-                capturedCameraState.Value.Restore(cam);
         }
     }
 
@@ -209,84 +197,6 @@ public static class UIUtil
         }
     }
 
-
-    private static void ConfigurePreviewCamera(Camera cam, RenderTexture target)
-    {
-        if (cam == null || target == null)
-            return;
-
-        cam.targetTexture = target;
-        cam.rect = new Rect(0f, 0f, 1f, 1f);
-        cam.pixelRect = new Rect(0f, 0f, target.width, target.height);
-        if (target.height > 0)
-            cam.aspect = target.width / (float)target.height;
-        cam.ResetProjectionMatrix();
-    }
-
-    private readonly struct PawnCacheCameraState
-    {
-        private readonly Rect rect;
-        private readonly Rect pixelRect;
-        private readonly RenderTexture targetTexture;
-        private readonly float aspect;
-        private readonly Matrix4x4 projectionMatrix;
-        private readonly CameraClearFlags clearFlags;
-        private readonly Color backgroundColor;
-        private readonly bool orthographic;
-        private readonly float orthographicSize;
-        private readonly float fieldOfView;
-        private readonly float nearClipPlane;
-        private readonly float farClipPlane;
-        private readonly int cullingMask;
-        private readonly bool useOcclusionCulling;
-        private readonly bool allowHDR;
-        private readonly bool allowMSAA;
-
-        private PawnCacheCameraState(Camera cam)
-        {
-            rect = cam.rect;
-            pixelRect = cam.pixelRect;
-            targetTexture = cam.targetTexture;
-            aspect = cam.aspect;
-            projectionMatrix = cam.projectionMatrix;
-            clearFlags = cam.clearFlags;
-            backgroundColor = cam.backgroundColor;
-            orthographic = cam.orthographic;
-            orthographicSize = cam.orthographicSize;
-            fieldOfView = cam.fieldOfView;
-            nearClipPlane = cam.nearClipPlane;
-            farClipPlane = cam.farClipPlane;
-            cullingMask = cam.cullingMask;
-            useOcclusionCulling = cam.useOcclusionCulling;
-            allowHDR = cam.allowHDR;
-            allowMSAA = cam.allowMSAA;
-        }
-
-        public static PawnCacheCameraState Capture(Camera cam)
-        {
-            return new PawnCacheCameraState(cam);
-        }
-
-        public void Restore(Camera cam)
-        {
-            cam.rect = rect;
-            cam.pixelRect = pixelRect;
-            cam.targetTexture = targetTexture;
-            cam.aspect = aspect;
-            cam.projectionMatrix = projectionMatrix;
-            cam.clearFlags = clearFlags;
-            cam.backgroundColor = backgroundColor;
-            cam.orthographic = orthographic;
-            cam.orthographicSize = orthographicSize;
-            cam.fieldOfView = fieldOfView;
-            cam.nearClipPlane = nearClipPlane;
-            cam.farClipPlane = farClipPlane;
-            cam.cullingMask = cullingMask;
-            cam.useOcclusionCulling = useOcclusionCulling;
-            cam.allowHDR = allowHDR;
-            cam.allowMSAA = allowMSAA;
-        }
-    }
 
     private static Camera FindCameraRecursive(object value, int depthRemaining, HashSet<object> visited)
     {

@@ -10,6 +10,7 @@ using Despicable.UIFramework.Layout;
 
 namespace Despicable.FacePartsModule.UI;
 
+// Guardrail-Reason: Face-parts customizer keeps preview orchestration, selector UI, and fallback portrait resolution together because this editor window depends on one tightly coupled face-preview seam.
 public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 {
     public enum PreviewRenderMode
@@ -42,10 +43,10 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
     private float _eyesContentHeight;
     private Vector2 _mouthScroll;
     private float _mouthContentHeight;
-    private RenderTexture _previewTexture;
-    private int _previewWidth;
-    private int _previewHeight;
-    private bool _livePreviewPrepared;
+    private Pawn _previewPawn;
+    private CompFaceParts _previewComp;
+    private WorkshopPreviewRenderer _previewRenderer;
+    private bool _previewPortraitDirty = true;
 
     public Dialog_D2FacePartsCustomizer(Pawn pawn, PreviewRenderMode previewRenderMode = PreviewRenderMode.Live)
     {
@@ -69,7 +70,7 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     public override void PreClose()
     {
-        ReleasePreviewTexture();
+        ReleasePreviewResources();
         base.PreClose();
     }
 
@@ -123,27 +124,21 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         if (livePreviewRect.width <= 0f || livePreviewRect.height <= 0f)
             return;
 
+        Texture previewTexture = null;
         if (Ctx.Pass == UIPass.Draw)
         {
             PrepareLivePreview();
-            EnsurePreviewTexture(livePreviewRect);
-            if (_previewTexture != null)
-            {
-                UIUtil.RenderPawnToTexture(
-                    _pawn,
-                    _previewTexture,
-                    Rot4.South,
-                    0f,
-                    Vector3.zero,
-                    renderHeadgear: false,
-                    portrait: true,
-                    scale: 1.2f);
-            }
+            previewTexture = TryRenderLivePreviewTexture(livePreviewRect);
         }
 
         Ctx.RecordRect(livePreviewRect, UIRectTag.Icon, "PreviewPanel/Image", null);
-        if (Ctx.Pass == UIPass.Draw && _previewTexture != null)
-            GUI.DrawTexture(livePreviewRect, _previewTexture, ScaleMode.ScaleToFit, true);
+        if (Ctx.Pass == UIPass.Draw)
+        {
+            if (previewTexture != null)
+                GUI.DrawTexture(livePreviewRect, previewTexture, ScaleMode.ScaleToFit, true);
+            else
+                DrawIsolatedFaceCompositePreview(livePreviewRect);
+        }
     }
 
     private Rect ResolveLivePreviewRect(Rect rect)
@@ -159,25 +154,75 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     private void PrepareLivePreview()
     {
-        if (_livePreviewPrepared || _pawn == null)
+        if (_previewPawn == null && _pawn != null)
+        {
+            try
+            {
+                _previewPawn = PreviewPawnFactory.MakePreviewPawn(_pawn);
+                _previewComp = _previewPawn?.TryGetComp<CompFaceParts>();
+                _previewPortraitDirty = true;
+            }
+            catch (Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce(
+                    "Dialog_D2FacePartsCustomizer.CreatePreviewPawn",
+                    "Face parts customizer failed to create a preview pawn cleanly.",
+                    ex);
+            }
+        }
+
+        Pawn previewPawn = GetPortraitPawn();
+        if (previewPawn == null || !_previewPortraitDirty)
             return;
 
         try
         {
-            _pawn.Drawer?.renderer?.EnsureGraphicsInitialized();
-            AutoEyePatchRuntime.PrewarmForPawn(_pawn);
-            _comp?.InvalidateFaceStructure();
-            _comp?.RefreshFaceHard(false);
+            previewPawn.Drawer?.renderer?.EnsureGraphicsInitialized();
+            AutoEyePatchRuntime.PrewarmForPawn(previewPawn);
+            _previewComp?.InvalidateFaceStructure();
+            _previewComp?.RefreshFaceHard(false);
+            previewPawn.Drawer?.renderer?.SetAllGraphicsDirty();
+            PortraitsCache.SetDirty(previewPawn);
+            _previewPortraitDirty = false;
         }
         catch (Exception ex)
         {
             Despicable.Core.DebugLogger.WarnExceptionOnce(
                 "Dialog_D2FacePartsCustomizer.PrepareLivePreview",
-                "Face parts customizer failed to prewarm its live preview state cleanly.",
+                "Face parts customizer failed to prepare its live preview pawn cleanly.",
                 ex);
         }
+    }
 
-        _livePreviewPrepared = true;
+    private Pawn GetPortraitPawn()
+    {
+        return _previewPawn ?? _pawn;
+    }
+
+    private Texture TryRenderLivePreviewTexture(Rect rect)
+    {
+        Pawn previewPawn = GetPortraitPawn();
+        if (previewPawn == null)
+            return null;
+
+        int width = Mathf.Clamp(Mathf.CeilToInt(Mathf.Max(128f, rect.width)), 128, 2048);
+        int height = Mathf.Clamp(Mathf.CeilToInt(Mathf.Max(128f, rect.height)), 128, 2048);
+
+        try
+        {
+            _previewRenderer ??= new WorkshopPreviewRenderer(width, height);
+            _previewRenderer.EnsureSize(width, height);
+            _previewRenderer.RenderPawn(previewPawn, Rot4.South, 0f, default, renderHeadgear: false, portrait: true, scale: 1.2f);
+            return _previewRenderer.GetTexture();
+        }
+        catch (Exception ex)
+        {
+            Despicable.Core.DebugLogger.WarnExceptionOnce(
+                "Dialog_D2FacePartsCustomizer.RenderLivePreviewTexture",
+                "Face parts customizer failed to render its isolated live preview cleanly.",
+                ex);
+            return null;
+        }
     }
 
     private void DrawIsolatedFaceCompositePreview(Rect rect)
@@ -315,6 +360,21 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
         _comp.InvalidateFaceStructure();
         _comp.RefreshFaceHard(true);
+
+        if (_previewComp != null)
+        {
+            if (forEyes)
+                _previewComp.eyeStyleDef = _comp.eyeStyleDef;
+            else
+                _previewComp.mouthStyleDef = _comp.mouthStyleDef;
+
+            _previewComp.InvalidateFaceStructure();
+            _previewComp.RefreshFaceHard(false);
+            _previewPawn?.Drawer?.renderer?.SetAllGraphicsDirty();
+            if (_previewPawn != null)
+                PortraitsCache.SetDirty(_previewPawn);
+            _previewPortraitDirty = false;
+        }
     }
 
     private string GetUnavailableReason()
@@ -334,46 +394,51 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         return null;
     }
 
-    private void EnsurePreviewTexture(Rect rect)
+    private void ReleasePreviewResources()
     {
-        int width = Mathf.Max(32, Mathf.RoundToInt(rect.width));
-        int height = Mathf.Max(32, Mathf.RoundToInt(rect.height));
-        if (_previewTexture != null && _previewWidth == width && _previewHeight == height)
-            return;
-
-        ReleasePreviewTexture();
-        _previewTexture = new RenderTexture(width, height, 24)
+        if (_previewPawn != null)
         {
-            name = "D2FacePartsPreview",
-            useMipMap = false,
-            autoGenerateMips = false
-        };
-        _previewTexture.Create();
-        _previewWidth = width;
-        _previewHeight = height;
-    }
+            try
+            {
+                if (_previewPawn.Spawned)
+                    _previewPawn.DeSpawn();
+            }
+            catch (Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce(
+                    "Dialog_D2FacePartsCustomizer.ReleasePreviewPawnDeSpawn",
+                    "Face parts customizer failed to despawn its preview pawn cleanly.",
+                    ex);
+            }
 
-    private void ReleasePreviewTexture()
-    {
-        if (_previewTexture == null)
-            return;
+            try
+            {
+                _previewPawn.Destroy(DestroyMode.Vanish);
+            }
+            catch (Exception ex)
+            {
+                Despicable.Core.DebugLogger.WarnExceptionOnce(
+                    "Dialog_D2FacePartsCustomizer.ReleasePreviewPawnDestroy",
+                    "Face parts customizer failed to destroy its preview pawn cleanly.",
+                    ex);
+            }
+        }
 
         try
         {
-            if (_previewTexture.IsCreated())
-                _previewTexture.Release();
+            _previewRenderer?.Dispose();
         }
         catch (Exception ex)
         {
             Despicable.Core.DebugLogger.WarnExceptionOnce(
-                "Dialog_D2FacePartsCustomizer.ReleasePreviewTexture",
-                "Face parts customizer failed to release its preview texture cleanly.",
+                "Dialog_D2FacePartsCustomizer.ReleasePreviewRenderer",
+                "Face parts customizer failed to release its live preview renderer cleanly.",
                 ex);
         }
 
-        UnityEngine.Object.Destroy(_previewTexture);
-        _previewTexture = null;
-        _previewWidth = 0;
-        _previewHeight = 0;
+        _previewRenderer = null;
+        _previewPawn = null;
+        _previewComp = null;
+        _previewPortraitDirty = true;
     }
 }

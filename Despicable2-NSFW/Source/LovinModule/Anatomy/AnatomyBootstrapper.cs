@@ -43,6 +43,27 @@ internal static class AnatomyBootstrapper
         return true;
     }
 
+    internal static bool ForcePreviewSeedFromCurrentGender(Pawn pawn)
+    {
+        if (pawn == null || pawn.RaceProps?.Humanlike != true)
+            return false;
+
+        if (pawn.health?.hediffSet == null)
+            return false;
+
+        BodyPartRecord part;
+        if (!AnatomyQuery.TryGetExternalGenitals(pawn, out part))
+            return false;
+
+        if (pawn.health.hediffSet.PartIsMissing(part))
+            return true;
+
+        bool wantsPenis = pawn.gender == Gender.Male;
+        bool wantsVagina = pawn.gender == Gender.Female;
+        ApplyExactSet(pawn, part, wantsPenis, wantsVagina);
+        return true;
+    }
+
     private static void ApplyExactSet(Pawn pawn, BodyPartRecord part, bool wantsPenis, bool wantsVagina)
     {
         RemoveIfPresent(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Penis, !wantsPenis);
