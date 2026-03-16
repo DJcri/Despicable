@@ -11,7 +11,7 @@ public partial class CompFaceParts
         if (ModMain.IsNlFacialInstalled)
             return null;
 
-        if (pawn == null || !enabled || pawn.RaceProps?.Humanlike != true)
+        if (pawn == null || pawn.RaceProps?.Humanlike != true || !IsRenderActiveNow())
             return null;
 
         // Assign styles if not already assigned

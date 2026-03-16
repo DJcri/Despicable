@@ -201,7 +201,7 @@ public static partial class FacePartsUtil
             {
                 CompFaceParts comp = pawn.TryGetComp<CompFaceParts>();
                 if (comp != null)
-                    comp.InitializeFacePartState();
+                    comp.RefreshFaceHard(true);
             }
             catch (System.Exception e)
             {

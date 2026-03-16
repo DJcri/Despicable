@@ -12,6 +12,10 @@ public class PawnRenderNodeWorker_FacePart : PawnRenderNodeWorker_FlipWhenCrawli
 {
     public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
     {
+        CompFaceParts facePartsComp = parms.pawn.TryGetComp<CompFaceParts>();
+        if (facePartsComp?.IsRenderActiveNow() != true)
+            return false;
+
         if (base.CanDrawNow(node, parms))
         {
             // Don't render face parts if dessicated

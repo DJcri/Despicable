@@ -104,6 +104,8 @@ public partial class CompFaceParts
         if (pawn == null)
             return;
 
+        bool hadRenderableState = HasActiveFaceRenderState();
+
         if (ModMain.IsNlFacialInstalled)
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
@@ -120,13 +122,20 @@ public partial class CompFaceParts
 
         RefreshEnabledFromSettings();
 
+        PawnRenderer renderer = pawn.Drawer?.renderer;
         if (!enabled || pawn.RaceProps?.Humanlike != true)
         {
-            shouldUpdate = false;
+            if (hadRenderableState)
+            {
+                renderer?.renderTree?.SetDirty();
+                renderer?.SetAllGraphicsDirty();
+                if (markPortraitDirty)
+                    PortraitsCache.SetDirty(pawn);
+            }
+
+            DisableFacePartsInstance();
             return;
         }
-
-        PawnRenderer renderer = pawn.Drawer?.renderer;
         if (renderer == null)
         {
             shouldUpdate = false;
@@ -158,6 +167,8 @@ public partial class CompFaceParts
         if (pawn == null)
             return;
 
+        bool hadRenderableState = HasActiveFaceRenderState();
+
         if (ModMain.IsNlFacialInstalled)
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
@@ -177,7 +188,15 @@ public partial class CompFaceParts
 
         if (!enabled || !pawn.RaceProps.Humanlike)
         {
-            shouldUpdate = false;
+            if (hadRenderableState)
+            {
+                pawn.Drawer?.renderer?.renderTree?.SetDirty();
+                pawn.Drawer?.renderer?.SetAllGraphicsDirty();
+                if (markPortraitDirty)
+                    PortraitsCache.SetDirty(pawn);
+            }
+
+            DisableFacePartsInstance();
             return;
         }
 
@@ -292,6 +311,8 @@ public partial class CompFaceParts
         if (pawn == null)
             return;
 
+        bool hadRenderableState = HasActiveFaceRenderState();
+
         if (ModMain.IsNlFacialInstalled)
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
@@ -316,8 +337,15 @@ public partial class CompFaceParts
 
         if (!enabled || pawn.RaceProps == null || !pawn.RaceProps.Humanlike)
         {
-            faceWarmInitialized = false;
-            shouldUpdate = false;
+            if (hadRenderableState)
+            {
+                pawn.Drawer?.renderer?.renderTree?.SetDirty();
+                pawn.Drawer?.renderer?.SetAllGraphicsDirty();
+                if (markPortraitDirty)
+                    PortraitsCache.SetDirty(pawn);
+            }
+
+            DisableFacePartsInstance();
             return;
         }
 

@@ -112,6 +112,36 @@ public partial class CompFaceParts : ThingComp
         cachedEligibleHeadValid = false;
         cachedExpressionState = default(FaceExpressionState);
         cachedExpressionStateInitialized = false;
+        faceWarmInitialized = false;
+        faceStructureDirty = true;
+    }
+
+    private bool HasActiveFaceRenderState()
+    {
+        return faceWarmInitialized
+            || facialAnim != null
+            || animExpression != null
+            || baseExpression != null
+            || eyeStyleDef != null
+            || mouthStyleDef != null;
+    }
+
+    public bool IsRenderActiveNow()
+    {
+        if (ModMain.IsNlFacialInstalled || pawn == null)
+            return false;
+
+        if (!IsFacePartsEnabledInSettings)
+            return false;
+
+        if (pawn.RaceProps?.Humanlike != true)
+            return false;
+
+        HeadTypeDef headType = pawn.story?.headType;
+        if (headType == null)
+            return false;
+
+        return !FacePartsUtil.IsHeadBlacklisted(headType);
     }
 
     private int CurrentGameTick => Find.TickManager?.TicksGame ?? 0;
@@ -269,7 +299,23 @@ public partial class CompFaceParts : ThingComp
 
     public void RefreshEnabledFromSettings()
     {
-        enabled = !ModMain.IsNlFacialInstalled && IsFacePartsEnabledInSettings;
+        if (ModMain.IsNlFacialInstalled || !IsFacePartsEnabledInSettings)
+        {
+            enabled = false;
+            return;
+        }
+
+        if (pawn?.RaceProps?.Humanlike != true || pawn.story == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        HeadTypeDef headType = pawn.story.headType;
+        cachedEligibleHeadType = headType;
+        cachedEligibleHeadResult = headType != null && !FacePartsUtil.IsHeadBlacklisted(headType);
+        cachedEligibleHeadValid = true;
+        enabled = cachedEligibleHeadResult;
     }
 
     // Check at initialization whether to enable faces
@@ -883,6 +929,8 @@ public partial class CompFaceParts : ThingComp
         if (anim == null)
             return;
         if (pawn == null)
+            return;
+        if (!IsRenderActiveNow())
             return;
         // For things that shouldn't animate faces
         if (pawn.Dead)

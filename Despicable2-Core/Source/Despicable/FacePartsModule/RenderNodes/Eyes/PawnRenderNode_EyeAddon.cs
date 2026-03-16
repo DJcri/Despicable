@@ -301,6 +301,11 @@ public class PawnRenderNode_EyeAddon : PawnRenderNode
 
     public override Verse.Graphic GraphicFor(Pawn pawn)
     {
+        if (compFaceParts?.IsRenderActiveNow() != true)
+        {
+            return null;
+        }
+
         if (pawn?.health?.hediffSet == null)
         {
             return null;
