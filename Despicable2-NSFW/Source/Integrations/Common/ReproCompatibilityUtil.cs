@@ -12,19 +12,12 @@ namespace Despicable.NSFW.Integrations;
 /// </summary>
 internal static class ReproCompatibilityUtil
 {
-    /// <summary>
-    /// Returns true if the pair appears to satisfy the sex requirements of a LovinTypeDef.
-    /// This is best-effort and should never hard-block unknown alien anatomy systems.
-    /// </summary>
     internal static bool PairSatisfiesLovinTypeRequirements(Pawn a, Pawn b, LovinTypeDef lovinType)
     {
         if (lovinType == null) return true;
         return PairSatisfiesSexRequirements(a, b, lovinType.requiresMale, lovinType.requiresFemale);
     }
 
-    /// <summary>
-    /// Best-effort check for whether the pair has at least one "male" and/or "female" reproductive signal.
-    /// </summary>
     internal static bool PairSatisfiesSexRequirements(Pawn a, Pawn b, bool requiresMale, bool requiresFemale)
     {
         if (a == null || b == null) return false;
@@ -34,25 +27,20 @@ internal static class ReproCompatibilityUtil
         if (a.RaceProps == null || b.RaceProps == null) return false;
         if (!a.RaceProps.Humanlike || !b.RaceProps.Humanlike) return false;
 
-        bool aHasSlot = AnatomyQuery.HasExternalGenitalsSlot(a);
-        bool bHasSlot = AnatomyQuery.HasExternalGenitalsSlot(b);
+        bool aKnown = AnatomyQuery.TryGetLogicalAnatomy(a, out bool aHasPenis, out bool aHasVagina);
+        bool bKnown = AnatomyQuery.TryGetLogicalAnatomy(b, out bool bHasPenis, out bool bHasVagina);
 
-        // Preserve tolerant behavior for unknown frameworks / unpatched bodies.
-        if (!aHasSlot || !bHasSlot)
+        if (!aKnown || !bKnown)
             return true;
 
-        bool malePresent = AnatomyQuery.HasPenis(a) || AnatomyQuery.HasPenis(b);
-        bool femalePresent = AnatomyQuery.HasVagina(a) || AnatomyQuery.HasVagina(b);
+        bool malePresent = aHasPenis || bHasPenis;
+        bool femalePresent = aHasVagina || bHasVagina;
 
         if (requiresMale && !malePresent) return false;
         if (requiresFemale && !femalePresent) return false;
         return true;
     }
 
-    /// <summary>
-    /// Returns true if the pair appears capable of "vaginal" style intercourse.
-    /// This is intentionally conservative and remains permissive for unknown alien frameworks.
-    /// </summary>
     internal static bool CanDoVaginal(Pawn a, Pawn b)
     {
         if (a == null || b == null) return false;
@@ -61,23 +49,18 @@ internal static class ReproCompatibilityUtil
         if (!a.RaceProps.Humanlike || !b.RaceProps.Humanlike) return false;
         if (!a.RaceProps.IsFlesh || !b.RaceProps.IsFlesh) return false;
 
-        bool aHasSlot = AnatomyQuery.HasExternalGenitalsSlot(a);
-        bool bHasSlot = AnatomyQuery.HasExternalGenitalsSlot(b);
+        bool aKnown = AnatomyQuery.TryGetLogicalAnatomy(a, out bool aHasPenis, out bool aHasVagina);
+        bool bKnown = AnatomyQuery.TryGetLogicalAnatomy(b, out bool bHasPenis, out bool bHasVagina);
 
-        // Preserve the old permissive philosophy for unknown systems.
-        if (!aHasSlot || !bHasSlot)
+        if (!aKnown || !bKnown)
             return true;
 
-        bool malePresent = AnatomyQuery.HasPenis(a) || AnatomyQuery.HasPenis(b);
-        bool femalePresent = AnatomyQuery.HasVagina(a) || AnatomyQuery.HasVagina(b);
+        bool malePresent = aHasPenis || bHasPenis;
+        bool femalePresent = aHasVagina || bHasVagina;
 
         return malePresent && femalePresent;
     }
 
-    /// <summary>
-    /// Returns true if a single pawn appears to satisfy the sex requirements of a solo LovinTypeDef.
-    /// This mirrors the pair helper's best-effort philosophy and avoids hard-blocking unknown alien frameworks.
-    /// </summary>
     internal static bool PawnSatisfiesSoloLovinTypeRequirements(Pawn pawn, LovinTypeDef lovinType)
     {
         if (lovinType == null) return true;
@@ -90,13 +73,12 @@ internal static class ReproCompatibilityUtil
         if (!requiresMale && !requiresFemale) return true;
 
         if (pawn.RaceProps == null || !pawn.RaceProps.Humanlike) return false;
-        if (!AnatomyQuery.HasExternalGenitalsSlot(pawn)) return true;
 
-        bool malePresent = AnatomyQuery.HasPenis(pawn);
-        bool femalePresent = AnatomyQuery.HasVagina(pawn);
+        bool known = AnatomyQuery.TryGetLogicalAnatomy(pawn, out bool hasPenis, out bool hasVagina);
+        if (!known) return true;
 
-        if (requiresMale && !malePresent) return false;
-        if (requiresFemale && !femalePresent) return false;
+        if (requiresMale && !hasPenis) return false;
+        if (requiresFemale && !hasVagina) return false;
         return true;
     }
 }

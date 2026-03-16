@@ -13,7 +13,6 @@ public sealed class ModMain : Mod
     public static ModMain Instance { get; private set; }
     public static Harmony Harmony { get; private set; }
 
-    // Guardrail-Allow-Static: One-time NSFW startup gate owned by mod initialization lifecycle.
     private static bool _initialized;
 
     public ModMain(ModContentPack content) : base(content)
@@ -29,8 +28,6 @@ public sealed class ModMain : Mod
 
         _initialized = true;
 
-        // Optional: sanity check Core is loaded (your assembly ref already enforces this,
-        // but this gives nicer logs if someone messes up load order).
         if (!LoadedModManager.RunningModsListForReading.Any(m =>
                 m.PackageIdPlayerFacing != null &&
                 m.PackageIdPlayerFacing.ToLower().Contains("despicable2") &&
@@ -46,6 +43,7 @@ public sealed class ModMain : Mod
 
         HookBootstraps.EnsureRegistered();
         NsfwCompatBootstrap.EnsureInitialized();
+        AnatomyDefInjector.InjectForAllHumanlikes();
 
         Log.Message("[Despicable2.NSFW] Initialized.");
     }

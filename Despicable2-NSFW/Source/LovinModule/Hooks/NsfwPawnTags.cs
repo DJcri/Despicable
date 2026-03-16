@@ -6,7 +6,7 @@ using Despicable.Core.Staging;
 namespace Despicable;
 /// <summary>
 /// Baseline tag provider for NSFW staging. Tags are opaque strings consumed by slot requirements.
-/// Repro tags are derived from seeded anatomy so staging can consume one stable truth source.
+/// Repro tags are derived from logical anatomy first, then fall back to visible gender if anatomy is still unknown.
 /// </summary>
 public sealed class NsfwPawnTags : IStagePawnTagProvider
 {
@@ -30,18 +30,28 @@ public sealed class NsfwPawnTags : IStagePawnTagProvider
             into.Add("can_move");
         }
 
-        // Visual gender tags remain available for appearance-oriented staging rules.
         if (pawn.gender == Gender.Male)
             into.Add("male");
 
         if (pawn.gender == Gender.Female)
             into.Add("female");
 
-        // Repro tags now come from anatomy truth, not direct GW/gender probing.
-        if (AnatomyQuery.HasPenis(pawn))
+        bool anatomyKnown = AnatomyQuery.TryGetLogicalAnatomy(pawn, out bool hasPenis, out bool hasVagina);
+        if (anatomyKnown)
+        {
+            if (hasPenis)
+                into.Add("repro_male");
+
+            if (hasVagina)
+                into.Add("repro_female");
+
+            return;
+        }
+
+        if (pawn.gender == Gender.Male)
             into.Add("repro_male");
 
-        if (AnatomyQuery.HasVagina(pawn))
+        if (pawn.gender == Gender.Female)
             into.Add("repro_female");
     }
 }

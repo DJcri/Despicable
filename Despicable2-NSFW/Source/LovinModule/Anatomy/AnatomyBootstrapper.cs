@@ -4,9 +4,49 @@ using Despicable.NSFW.Integrations;
 using Despicable.NSFW.Integrations.GenderWorks;
 
 namespace Despicable;
+internal enum AnatomyBootstrapResult
+{
+    Pending,
+    Resolved,
+    Skipped
+}
+
 internal static class AnatomyBootstrapper
 {
-    internal static bool TrySeed(Pawn pawn)
+    internal static AnatomyBootstrapResult TryResolveAndApply(Pawn pawn, bool allowGenderWorksNoSignalResolution = false, bool forceResync = false)
+    {
+        if (pawn == null || pawn.RaceProps?.Humanlike != true)
+            return AnatomyBootstrapResult.Skipped;
+
+        if (pawn.health?.hediffSet == null)
+            return AnatomyBootstrapResult.Pending;
+
+        CompAnatomyBootstrap tracker = pawn.TryGetComp<CompAnatomyBootstrap>();
+        if (tracker == null)
+            return AnatomyBootstrapResult.Skipped;
+
+        bool hadLegacyState = HasLegacyNaturalAnatomyHediffs(pawn);
+        if (!forceResync && tracker.HasResolvedAnatomy && !hadLegacyState)
+            return AnatomyBootstrapResult.Resolved;
+
+        if (AnatomyQuery.IsExternalGenitalsMissing(pawn))
+        {
+            tracker.SetResolvedAnatomy(hasPenis: false, hasVagina: false);
+            RemoveLegacyNaturalAnatomyHediffs(pawn);
+            return AnatomyBootstrapResult.Resolved;
+        }
+
+        bool wantsPenis;
+        bool wantsVagina;
+        if (!TryResolveDesiredSet(pawn, out wantsPenis, out wantsVagina))
+            return AnatomyBootstrapResult.Pending;
+
+        tracker.SetResolvedAnatomy(wantsPenis, wantsVagina);
+        RemoveLegacyNaturalAnatomyHediffs(pawn);
+        return AnatomyBootstrapResult.Resolved;
+    }
+
+    internal static bool ForceSeedFromCurrentGender(Pawn pawn)
     {
         if (pawn == null || pawn.RaceProps?.Humanlike != true)
             return false;
@@ -14,79 +54,103 @@ internal static class AnatomyBootstrapper
         if (pawn.health?.hediffSet == null)
             return false;
 
-        BodyPartRecord part;
-        if (!AnatomyQuery.TryGetExternalGenitals(pawn, out part))
+        CompAnatomyBootstrap tracker = pawn.TryGetComp<CompAnatomyBootstrap>();
+        if (tracker == null)
             return false;
 
-        if (pawn.health.hediffSet.PartIsMissing(part))
-            return true;
-
-        if (AnatomyQuery.HasKnownExternalGenitalAnatomy(pawn))
-            return true;
-
-        if (IntegrationGuards.IsGenderWorksLoaded())
+        if (AnatomyQuery.IsExternalGenitalsMissing(pawn))
         {
-            bool wantsPenis = GenderWorksUtil.HasMaleReproductiveOrganTag(pawn);
-            bool wantsVagina = GenderWorksUtil.HasFemaleReproductiveOrganTag(pawn);
-            ApplyExactSet(pawn, part, wantsPenis, wantsVagina);
+            tracker.SetResolvedAnatomy(hasPenis: false, hasVagina: false);
+            RemoveLegacyNaturalAnatomyHediffs(pawn);
             return true;
         }
 
-        if (pawn.def == ThingDefOf.Human)
-        {
-            bool wantsPenis = pawn.gender == Gender.Male;
-            bool wantsVagina = pawn.gender == Gender.Female;
-            ApplyExactSet(pawn, part, wantsPenis, wantsVagina);
-            return true;
-        }
+        bool wantsPenis;
+        bool wantsVagina;
+        if (!TryResolveDesiredSet(pawn, out wantsPenis, out wantsVagina))
+            return false;
 
+        tracker.SetResolvedAnatomy(wantsPenis, wantsVagina);
+        RemoveLegacyNaturalAnatomyHediffs(pawn);
         return true;
     }
 
     internal static bool ForcePreviewSeedFromCurrentGender(Pawn pawn)
     {
+        return ForceSeedFromCurrentGender(pawn);
+    }
+
+    private static bool TryResolveDesiredSet(Pawn pawn, out bool wantsPenis, out bool wantsVagina)
+    {
+        wantsPenis = false;
+        wantsVagina = false;
+
         if (pawn == null || pawn.RaceProps?.Humanlike != true)
             return false;
 
-        if (pawn.health?.hediffSet == null)
-            return false;
-
-        BodyPartRecord part;
-        if (!AnatomyQuery.TryGetExternalGenitals(pawn, out part))
-            return false;
-
-        if (pawn.health.hediffSet.PartIsMissing(part))
+        bool legacyPenis = HasLegacyNaturalAnatomyHediff(pawn, LovinModule_AnatomyDefOf.D2_Genital_Penis);
+        bool legacyVagina = HasLegacyNaturalAnatomyHediff(pawn, LovinModule_AnatomyDefOf.D2_Genital_Vagina);
+        if (legacyPenis || legacyVagina)
+        {
+            wantsPenis = legacyPenis;
+            wantsVagina = legacyVagina;
             return true;
+        }
 
-        bool wantsPenis = pawn.gender == Gender.Male;
-        bool wantsVagina = pawn.gender == Gender.Female;
-        ApplyExactSet(pawn, part, wantsPenis, wantsVagina);
-        return true;
+        if (IntegrationGuards.IsGenderWorksLoaded())
+        {
+            if (GenderWorksUtil.TryResolveForDespicable(pawn, out wantsPenis, out wantsVagina))
+                return true;
+        }
+
+        wantsPenis = pawn.gender == Gender.Male;
+        wantsVagina = pawn.gender == Gender.Female;
+        return pawn.def == ThingDefOf.Human || pawn.RaceProps?.Humanlike == true;
     }
 
-    private static void ApplyExactSet(Pawn pawn, BodyPartRecord part, bool wantsPenis, bool wantsVagina)
+    private static bool HasLegacyNaturalAnatomyHediffs(Pawn pawn)
     {
-        RemoveIfPresent(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Penis, !wantsPenis);
-        RemoveIfPresent(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Vagina, !wantsVagina);
-
-        AddIfMissing(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Penis, wantsPenis);
-        AddIfMissing(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Vagina, wantsVagina);
+        return HasLegacyNaturalAnatomyHediff(pawn, LovinModule_AnatomyDefOf.D2_Genital_Penis)
+            || HasLegacyNaturalAnatomyHediff(pawn, LovinModule_AnatomyDefOf.D2_Genital_Vagina);
     }
 
-    private static void AddIfMissing(Pawn pawn, BodyPartRecord part, HediffDef def, bool shouldHave)
+    private static bool HasLegacyNaturalAnatomyHediff(Pawn pawn, HediffDef def)
     {
-        if (!shouldHave || def == null)
+        if (pawn?.health?.hediffSet?.hediffs == null || def == null)
+            return false;
+
+        if (AnatomyQuery.IsExternalGenitalsMissing(pawn))
+            return false;
+
+        if (!AnatomyQuery.TryGetExternalGenitals(pawn, out BodyPartRecord part))
+            return false;
+
+        var hediffs = pawn.health.hediffSet.hediffs;
+        for (int i = 0; i < hediffs.Count; i++)
+        {
+            Hediff hediff = hediffs[i];
+            if (hediff?.def == def && hediff.Part == part)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void RemoveLegacyNaturalAnatomyHediffs(Pawn pawn)
+    {
+        if (pawn?.health?.hediffSet?.hediffs == null)
             return;
 
-        if (GetPartHediff(pawn, part, def) != null)
+        if (!AnatomyQuery.TryGetExternalGenitals(pawn, out BodyPartRecord part))
             return;
 
-        pawn.health.AddHediff(def, part);
+        RemoveLegacyNaturalAnatomyHediff(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Penis);
+        RemoveLegacyNaturalAnatomyHediff(pawn, part, LovinModule_AnatomyDefOf.D2_Genital_Vagina);
     }
 
-    private static void RemoveIfPresent(Pawn pawn, BodyPartRecord part, HediffDef def, bool shouldRemove)
+    private static void RemoveLegacyNaturalAnatomyHediff(Pawn pawn, BodyPartRecord part, HediffDef def)
     {
-        if (!shouldRemove || def == null)
+        if (def == null)
             return;
 
         Hediff hediff = GetPartHediff(pawn, part, def);

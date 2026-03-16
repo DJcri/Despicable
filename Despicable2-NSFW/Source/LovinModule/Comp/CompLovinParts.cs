@@ -40,33 +40,47 @@ public class CompLovinParts : ThingComp
         if (!CanRenderLovinGenitals(pawn))
             return null;
 
-        GenitalDef genitalDef = LovinModule_GenitalDefOf.Genital_Penis;
-        if (genitalDef == null)
-            return null;
-
         bool isWorkshopPreview = WorkshopRenderContext.Active;
-        bool isAnimating = isWorkshopPreview || (AnimatorComp?.hasAnimPlaying == true);
-        bool shouldShowForCoverage = !HasPants(pawn);
-        if (!shouldShowForCoverage)
-            shouldShowForCoverage = LovinVisualRuntime.IsLovinVisualActiveForRender(pawn);
+        bool hasRuntimeAnimationPlaying = AnimatorComp?.hasAnimPlaying == true;
+        bool isAnimating = isWorkshopPreview || hasRuntimeAnimationPlaying;
+        bool shouldShowForLovinVisual = LovinVisualRuntime.IsLovinVisualActiveForRender(pawn);
 
-        if (!shouldShowForCoverage && !isAnimating)
+        // Route A policy: normal anatomy should not ambient-render on the live map merely because pants are absent.
+        // Keep genital visuals scoped to explicit lovin visuals, active animation playback, or workshop preview.
+        if (!shouldShowForLovinVisual && !isAnimating)
             return null;
+
+        List<PawnRenderNode> nodes = new List<PawnRenderNode>(2);
+        TryAddGenitalNode(nodes, pawn, LovinModule_GenitalDefOf.Genital_Penis, AnatomyQuery.HasPenis(pawn), isAnimating);
+
+        // Female genital overlays proved visually noisy during active animation and preview playback.
+        // Suppress them whenever we are sampling an animation scene, including workshop/authoring preview.
+        bool shouldShowVaginaNode = AnatomyQuery.HasVagina(pawn) && !isAnimating;
+        TryAddGenitalNode(nodes, pawn, LovinModule_GenitalDefOf.Genital_Vagina, shouldShowVaginaNode, isAnimating);
+
+        return nodes.Count > 0 ? nodes : null;
+    }
+
+    private static void TryAddGenitalNode(List<PawnRenderNode> nodes, Pawn pawn, GenitalDef genitalDef, bool shouldAdd, bool isAnimating)
+    {
+        if (!shouldAdd || genitalDef == null)
+            return;
 
         PawnRenderNodeProperties genitalProps = CommonUtil.CloneNodeProperties(genitalDef.properties);
         if (genitalProps == null)
-            return null;
+            return;
 
         genitalProps.anchorTag = "Body";
         genitalProps.texPath = isAnimating
-            ? genitalDef.texPathAroused
-            : genitalDef.properties.texPath;
+            ? (genitalDef.texPathAroused.NullOrEmpty() ? genitalDef.properties?.texPath : genitalDef.texPathAroused)
+            : genitalDef.properties?.texPath;
+
+        if (genitalProps.texPath.NullOrEmpty())
+            return;
 
         PawnRenderNode genitalNode = CommonUtil.CreateNodeFromOwnedProps(pawn, genitalProps, PawnRenderNodeTagDefOf.Body);
-        if (genitalNode == null)
-            return null;
-
-        return new List<PawnRenderNode>(1) { genitalNode };
+        if (genitalNode != null)
+            nodes.Add(genitalNode);
     }
 
     private static bool CanRenderLovinGenitals(Pawn pawn)
@@ -85,15 +99,7 @@ public class CompLovinParts : ThingComp
         if (pawn == null || pawn.RaceProps?.Humanlike != true)
             return false;
 
-        return AnatomyQuery.HasPenis(pawn);
-    }
-
-    private static bool HasPants(Pawn pawn)
-    {
-        bool hasPants = false;
-        bool hasShirt = false;
-        pawn?.apparel?.HasBasicApparel(out hasPants, out hasShirt);
-        return hasPants;
+        return AnatomyQuery.HasPenis(pawn) || AnatomyQuery.HasVagina(pawn);
     }
 
     private Pawn OwnerPawn => parent as Pawn;

@@ -3,6 +3,7 @@ using HarmonyLib;
 using Verse;
 using System;
 using System.Reflection;
+using Despicable.NSFW.Integrations;
 
 namespace Despicable;
 
@@ -55,6 +56,9 @@ internal static class HarmonyPatch_LovinVisual_HealthEvents
 
         LovinVisualRuntime.SyncPawn(pawn, force: true, refreshVisuals: false);
         LovinVisualRuntime.NotifyPotentialRenderStateChanged(pawn);
+
+        if (IntegrationGuards.IsGenderWorksLoaded())
+            pawn.TryGetComp<CompAnatomyBootstrap>()?.NotifyPotentialAnatomyChange();
     }
 }
 

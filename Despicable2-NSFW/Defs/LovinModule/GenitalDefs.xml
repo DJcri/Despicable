@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
 	
@@ -21,24 +21,22 @@
 			<baseLayer>64</baseLayer>
 		</properties>
 	</Despicable.GenitalDef>
-	
-	<!--
+
 	<Despicable.GenitalDef>
-		<defName>Vagina</defName>
-		<gender>1</gender>
-		<texPathAroused></texPathAroused>
+		<defName>Genital_Vagina</defName>
+		<gender>2</gender>
+		<texPathAroused>Genitals/Vagina/aroused</texPathAroused>
 		<properties Class="PawnRenderNodeProperties">
 			<debugLabel>Vagina</debugLabel>
 			<nodeClass>Despicable.PawnRenderNode_Genitals</nodeClass>
 			<workerClass>Despicable.PawnRenderNodeWorker_Genitals</workerClass>
-			<texPath></texPath>
+			<texPath>Genitals/Vagina/neutral</texPath>
 			<tagDef>Genitals</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Skin</colorType>
 			<baseLayer>64</baseLayer>
 		</properties>
 	</Despicable.GenitalDef>
-	-->
 	
 	<!-- Appendage offsets for each bodytype -->
 	<Despicable.BodyTypeGenitalsOffsetDef>
