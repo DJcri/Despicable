@@ -86,10 +86,12 @@ public sealed class D2ModSettingsRenderer
             DrawActiveTabBody(ctx, settings, body.Inner);
         }
 
-        if (facialBefore != settings.facialPartsExtensionEnabled || autoEyeBefore != settings.experimentalAutoEyePatchEnabled)
+        bool canRefreshLiveState = Current.ProgramState == ProgramState.Playing && Current.Game != null;
+
+        if (canRefreshLiveState && (facialBefore != settings.facialPartsExtensionEnabled || autoEyeBefore != settings.experimentalAutoEyePatchEnabled))
             FacePartsUtil.RefreshAllFacePartsForSettingsChange();
 
-        if (nudityBefore != settings.nudityEnabled || renderGenitalsBefore != settings.renderGenitalsEnabled)
+        if (canRefreshLiveState && (nudityBefore != settings.nudityEnabled || renderGenitalsBefore != settings.renderGenitalsEnabled))
             TryRefreshAllLovinPartsForSettingsChange();
     }
 

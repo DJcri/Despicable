@@ -92,131 +92,89 @@ public static partial class FacePartsUtil
         Log.Message($"Removed head '{headType.defName}' from the blacklist.");
     }
 
+
     public static void SaveHeadTypeBlacklist()
     {
-        string directoryPath = Path.Combine(ModMain.Instance.Content.RootDir, "Config");
-        if (!Directory.Exists(directoryPath))
-            Directory.CreateDirectory(directoryPath);
-
-        HeadBlacklistDef blacklistDef = DefDatabase<HeadBlacklistDef>.GetNamed("Despicable_HeadBlacklist");
+        HeadBlacklistDef blacklistDef = DefDatabase<HeadBlacklistDef>.GetNamedSilentFail("Despicable_HeadBlacklist");
         if (blacklistDef == null)
         {
             Log.Error("Could not find the HeadBlacklistDef to save.");
             return;
         }
 
-        HeadBlacklistData dataToSave = new();
+        Settings settings = TryGetSettings();
+        if (settings == null)
+        {
+            Log.Error("Could not resolve Despicable settings while saving the head blacklist.");
+            return;
+        }
+
+        settings.headTypeBlacklistDefNames ??= new List<string>();
+        settings.allowedDefaultDisabledHeadDefNames ??= new List<string>();
+
+        settings.headTypeBlacklistDefNames.Clear();
+        settings.allowedDefaultDisabledHeadDefNames.Clear();
+
         foreach (HeadTypeDef head in blacklistDef.blacklistedHeads)
         {
-            if (head == null || IsSystemBlacklisted(head) || IsDefaultDisabledHead(head))
+            if (head == null || IsSystemBlacklisted(head) || IsDefaultDisabledHead(head) || head.defName.NullOrEmpty())
                 continue;
 
-            dataToSave.blacklistedHeadNames.Add(head.defName);
+            if (!settings.headTypeBlacklistDefNames.Contains(head.defName))
+                settings.headTypeBlacklistDefNames.Add(head.defName);
         }
 
         foreach (string allowedDefName in AllowedDefaultDisabledHeadDefNames)
         {
-            if (!allowedDefName.NullOrEmpty())
-                dataToSave.allowedHeadNames.Add(allowedDefName);
+            if (!allowedDefName.NullOrEmpty() && !settings.allowedDefaultDisabledHeadDefNames.Contains(allowedDefName))
+                settings.allowedDefaultDisabledHeadDefNames.Add(allowedDefName);
         }
-
-        ModContentPack modContentPack = LoadedModManager.GetMod<ModMain>().Content;
-        string filePath = Path.Combine(modContentPack.RootDir, "Config", "FaceHeadBlacklist.xml");
-
-        XmlSerializer serializer = new(typeof(HeadBlacklistData));
-        XmlWriterSettings settings = new XmlWriterSettings
-        {
-            Indent = true,
-            IndentChars = "    ",
-            OmitXmlDeclaration = false
-        };
 
         try
         {
-            using (XmlWriter writer = XmlWriter.Create(filePath, settings))
-            {
-                serializer.Serialize(writer, dataToSave);
-            }
-
+            (ModMain.Instance ?? LoadedModManager.GetMod<ModMain>())?.WriteSettings();
             RefreshAllFaceParts();
-            Log.Message($"Successfully saved head blacklist to: {filePath}");
         }
         catch (System.Exception e)
         {
-            Log.Error($"Failed to save head blacklist file. Error: {e.Message}");
+            Log.Error($"Failed to save head blacklist settings. Error: {e}");
         }
     }
 
     public static void LoadHeadTypeBlacklist()
     {
-        string directoryPath = Path.Combine(ModMain.Instance.Content.RootDir, "Config");
-        if (!Directory.Exists(directoryPath))
-        {
-            Log.Message("Config directory not found. Starting with default blacklist.");
-            return;
-        }
-
-        ModContentPack modContentPack = ModMain.Instance.Content;
-        string filePath = Path.Combine(modContentPack.RootDir, "Config", "FaceHeadBlacklist.xml");
-        if (!File.Exists(filePath))
-        {
-            Log.Message("Saved blacklist file not found. Starting with default list.");
-            return;
-        }
-
-        HeadBlacklistDef blacklistDef = DefDatabase<HeadBlacklistDef>.GetNamed("Despicable_HeadBlacklist");
+        HeadBlacklistDef blacklistDef = DefDatabase<HeadBlacklistDef>.GetNamedSilentFail("Despicable_HeadBlacklist");
         if (blacklistDef == null)
         {
             Log.Error("Could not find the HeadBlacklistDef to load into.");
             return;
         }
 
-        XmlSerializer serializer = new(typeof(HeadBlacklistData));
-        try
+        blacklistDef.blacklistedHeads ??= new List<HeadTypeDef>();
+        blacklistDef.blacklistedHeads.Clear();
+        AllowedDefaultDisabledHeadDefNames.Clear();
+
+        Settings settings = TryGetSettings();
+        if (settings != null)
         {
-            using (XmlReader reader = XmlReader.Create(filePath))
+            settings.headTypeBlacklistDefNames ??= new List<string>();
+            settings.allowedDefaultDisabledHeadDefNames ??= new List<string>();
+
+            if (settings.headTypeBlacklistDefNames.Count > 0 || settings.allowedDefaultDisabledHeadDefNames.Count > 0)
             {
-                HeadBlacklistData loadedData = (HeadBlacklistData)serializer.Deserialize(reader);
-
-                blacklistDef.blacklistedHeads.Clear();
-                AllowedDefaultDisabledHeadDefNames.Clear();
-
-                foreach (string headName in loadedData.blacklistedHeadNames)
-                {
-                    HeadTypeDef headDef = DefDatabase<HeadTypeDef>.GetNamedSilentFail(headName);
-                    if (headDef != null)
-                    {
-                        if (!IsSystemBlacklisted(headDef) && !IsDefaultDisabledHead(headDef))
-                            blacklistDef.blacklistedHeads.Add(headDef);
-                    }
-                    else
-                    {
-                        Log.Warning($"Blacklisted head '{headName}' was not found in Defs and will not be loaded.");
-                    }
-                }
-
-                if (loadedData.allowedHeadNames != null)
-                {
-                    foreach (string headName in loadedData.allowedHeadNames)
-                    {
-                        if (headName.NullOrEmpty())
-                            continue;
-
-                        HeadTypeDef headDef = DefDatabase<HeadTypeDef>.GetNamedSilentFail(headName);
-                        if (headDef != null && IsDefaultDisabledHead(headDef))
-                            AllowedDefaultDisabledHeadDefNames.Add(headName);
-                    }
-                }
-
+                ApplySettingsBlacklist(settings, blacklistDef);
                 EnsureSystemBlacklist(blacklistDef);
+                return;
             }
+        }
 
-            Log.Message($"Successfully loaded head blacklist from: {filePath}");
-        }
-        catch (System.Exception e)
+        if (TryLoadLegacyBlacklist(blacklistDef, settings))
         {
-            Log.Error($"Failed to load head blacklist file. Error: {e.Message}");
+            EnsureSystemBlacklist(blacklistDef);
+            return;
         }
+
+        EnsureSystemBlacklist(blacklistDef);
     }
 
     public static void RefreshAllFacePartsForSettingsChange()
@@ -227,11 +185,151 @@ public static partial class FacePartsUtil
 
     private static void RefreshAllFaceParts()
     {
-        foreach (Pawn pawn in PawnsFinder.AllMapsAndWorld_Alive)
+        if (Current.ProgramState != ProgramState.Playing || Current.Game == null)
+            return;
+
+        IEnumerable<Pawn> pawns = PawnsFinder.AllMapsAndWorld_Alive;
+        if (pawns == null)
+            return;
+
+        foreach (Pawn pawn in pawns)
         {
-            CompFaceParts comp = pawn.TryGetComp<CompFaceParts>();
-            if (comp != null)
-                comp.InitializeFacePartState();
+            if (pawn == null)
+                continue;
+
+            try
+            {
+                CompFaceParts comp = pawn.TryGetComp<CompFaceParts>();
+                if (comp != null)
+                    comp.InitializeFacePartState();
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning($"[Despicable] Failed refreshing face parts for {pawn.LabelShortCap}: {e.Message}");
+            }
+        }
+    }
+
+    private static Settings TryGetSettings()
+    {
+        if (ModMain.Instance?.settings != null)
+            return ModMain.Instance.settings;
+
+        return LoadedModManager.GetMod<ModMain>()?.GetSettings<Settings>();
+    }
+
+    private static void ApplySettingsBlacklist(Settings settings, HeadBlacklistDef blacklistDef)
+    {
+        if (settings == null || blacklistDef == null)
+            return;
+
+        for (int i = 0; i < settings.headTypeBlacklistDefNames.Count; i++)
+        {
+            string headName = settings.headTypeBlacklistDefNames[i];
+            if (headName.NullOrEmpty())
+                continue;
+
+            HeadTypeDef headDef = DefDatabase<HeadTypeDef>.GetNamedSilentFail(headName);
+            if (headDef != null)
+            {
+                if (!IsSystemBlacklisted(headDef) && !IsDefaultDisabledHead(headDef) && !blacklistDef.blacklistedHeads.Contains(headDef))
+                    blacklistDef.blacklistedHeads.Add(headDef);
+            }
+            else
+            {
+                Log.Warning($"Blacklisted head '{headName}' was not found in Defs and will not be loaded.");
+            }
+        }
+
+        for (int i = 0; i < settings.allowedDefaultDisabledHeadDefNames.Count; i++)
+        {
+            string headName = settings.allowedDefaultDisabledHeadDefNames[i];
+            if (headName.NullOrEmpty())
+                continue;
+
+            HeadTypeDef headDef = DefDatabase<HeadTypeDef>.GetNamedSilentFail(headName);
+            if (headDef != null && IsDefaultDisabledHead(headDef))
+                AllowedDefaultDisabledHeadDefNames.Add(headName);
+        }
+    }
+
+    private static bool TryLoadLegacyBlacklist(HeadBlacklistDef blacklistDef, Settings settings)
+    {
+        ModContentPack modContentPack = ModMain.Instance?.Content ?? LoadedModManager.GetMod<ModMain>()?.Content;
+        if (modContentPack == null)
+            return false;
+
+        string filePath = Path.Combine(modContentPack.RootDir, "Config", "FaceHeadBlacklist.xml");
+        if (!File.Exists(filePath))
+            return false;
+
+        XmlSerializer serializer = new(typeof(HeadBlacklistData));
+        try
+        {
+            using XmlReader reader = XmlReader.Create(filePath);
+            HeadBlacklistData loadedData = (HeadBlacklistData)serializer.Deserialize(reader);
+            if (loadedData == null)
+                return false;
+
+            blacklistDef.blacklistedHeads.Clear();
+            AllowedDefaultDisabledHeadDefNames.Clear();
+
+            if (loadedData.blacklistedHeadNames != null)
+            {
+                foreach (string headName in loadedData.blacklistedHeadNames)
+                {
+                    HeadTypeDef headDef = DefDatabase<HeadTypeDef>.GetNamedSilentFail(headName);
+                    if (headDef != null)
+                    {
+                        if (!IsSystemBlacklisted(headDef) && !IsDefaultDisabledHead(headDef) && !blacklistDef.blacklistedHeads.Contains(headDef))
+                            blacklistDef.blacklistedHeads.Add(headDef);
+                    }
+                }
+            }
+
+            if (loadedData.allowedHeadNames != null)
+            {
+                foreach (string headName in loadedData.allowedHeadNames)
+                {
+                    if (headName.NullOrEmpty())
+                        continue;
+
+                    HeadTypeDef headDef = DefDatabase<HeadTypeDef>.GetNamedSilentFail(headName);
+                    if (headDef != null && IsDefaultDisabledHead(headDef))
+                        AllowedDefaultDisabledHeadDefNames.Add(headName);
+                }
+            }
+
+            if (settings != null)
+            {
+                settings.headTypeBlacklistDefNames = blacklistDef.blacklistedHeads
+                    .Where(h => h != null && !h.defName.NullOrEmpty())
+                    .Select(h => h.defName)
+                    .Distinct()
+                    .ToList();
+
+                settings.allowedDefaultDisabledHeadDefNames = AllowedDefaultDisabledHeadDefNames
+                    .Where(name => !name.NullOrEmpty())
+                    .Distinct()
+                    .ToList();
+
+                try
+                {
+                    (ModMain.Instance ?? LoadedModManager.GetMod<ModMain>())?.WriteSettings();
+                }
+                catch (System.Exception e)
+                {
+                    Log.Warning($"[Despicable] Failed migrating legacy head blacklist settings: {e.Message}");
+                }
+            }
+
+            Log.Message($"Successfully migrated legacy head blacklist from: {filePath}");
+            return true;
+        }
+        catch (System.Exception e)
+        {
+            Log.Error($"Failed to load legacy head blacklist file. Error: {e}");
+            return false;
         }
     }
 

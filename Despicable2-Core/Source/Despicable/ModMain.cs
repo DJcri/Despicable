@@ -34,6 +34,18 @@ namespace Despicable
             // Delegate all assembly startup to the shared bootstrap so constructor and static-load
             // paths cannot drift apart over time.
             DespicableBootstrap.EnsureInitialized();
+
+            LongEventHandler.ExecuteWhenFinished(() =>
+            {
+                try
+                {
+                    FacePartsUtil.LoadHeadTypeBlacklist();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[Despicable] Failed to load head blacklist during deferred startup: {e}");
+                }
+            });
         }
 
         public override void DoSettingsWindowContents(Rect inRect)

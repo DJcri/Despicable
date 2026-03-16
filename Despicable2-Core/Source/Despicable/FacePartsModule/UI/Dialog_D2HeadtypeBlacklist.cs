@@ -69,7 +69,15 @@ public sealed class Dialog_D2HeadtypeBlacklist : D2WindowBlueprint
 
     public override void PreClose()
     {
-        FacePartsUtil.SaveHeadTypeBlacklist();
+        try
+        {
+            FacePartsUtil.SaveHeadTypeBlacklist();
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[Despicable] Failed to persist head blacklist on close: {e}");
+        }
+
         base.PreClose();
     }
 
@@ -221,6 +229,8 @@ public sealed class Dialog_D2HeadtypeBlacklist : D2WindowBlueprint
             FacePartsUtil.AddHeadToBlacklist(headType);
         else
             FacePartsUtil.RemoveHeadFromBlacklist(headType);
+
+        FacePartsUtil.SaveHeadTypeBlacklist();
     }
 
     private List<HeadTypeDef> BuildFilteredHeads()

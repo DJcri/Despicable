@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Verse;
 
 namespace Despicable;
@@ -67,6 +68,10 @@ public class Settings : ModSettings
     // Animation Workshop export settings
     public string workshopExportRootPath = ""; // absolute path to a mod project folder (optional)
 
+    // Face-parts blacklist persistence
+    public List<string> headTypeBlacklistDefNames = new();
+    public List<string> allowedDefaultDisabledHeadDefNames = new();
+
     public override void ExposeData()
     {
         Scribe_Values.Look(ref animationExtensionEnabled, "animationExtensionEnabled", true);
@@ -108,6 +113,11 @@ public class Settings : ModSettings
         Scribe_Values.Look(ref renderGenitalsEnabled, "renderGenitalsEnabled", true);
         Scribe_Values.Look(ref soundVolume, "soundVolume", 1f);
         Scribe_Values.Look(ref workshopExportRootPath, "workshopExportRootPath", "");
+        Scribe_Collections.Look(ref headTypeBlacklistDefNames, "headTypeBlacklistDefNames", LookMode.Value);
+        Scribe_Collections.Look(ref allowedDefaultDisabledHeadDefNames, "allowedDefaultDisabledHeadDefNames", LookMode.Value);
+
+        headTypeBlacklistDefNames ??= new List<string>();
+        allowedDefaultDisabledHeadDefNames ??= new List<string>();
 
         // Player-facing Hero Karma settings are currently intentionally minimal.
         // If a prior version saved custom advanced values, reset them to safe defaults
