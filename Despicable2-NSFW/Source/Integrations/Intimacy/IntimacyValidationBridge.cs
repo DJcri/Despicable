@@ -50,11 +50,13 @@ internal static class IntimacyValidationBridge
 
         // Preserve Despicable's manual ordered-pawn leniency here: Intimacy still governs approval,
         // but the ordered pawn may be drafted without the bridge vetoing the command up front.
-        reason = GetPawnFailureReason(orderedPawn, otherPawn, isOtherPawn: false, allowDrafted: true, allowRecentLovin: false);
+        // Ordered manual lovin should also ignore the recent-lovin cooldown just like Despicable's
+        // native manual path, for both the commanded pawn and the counterpart.
+        reason = GetPawnFailureReason(orderedPawn, otherPawn, isOtherPawn: false, allowDrafted: true, allowRecentLovin: true);
         if (!reason.NullOrEmpty())
             return true;
 
-        reason = GetPawnFailureReason(otherPawn, orderedPawn, isOtherPawn: true, allowDrafted: false, allowRecentLovin: false);
+        reason = GetPawnFailureReason(otherPawn, orderedPawn, isOtherPawn: true, allowDrafted: false, allowRecentLovin: true);
         if (!reason.NullOrEmpty())
             return true;
 

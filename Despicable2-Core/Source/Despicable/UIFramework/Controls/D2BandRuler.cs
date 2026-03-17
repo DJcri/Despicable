@@ -178,19 +178,52 @@ public static class D2BandRuler
         DrawRotatedDiamond(ctx, diamondInner, fill, id + "/Diamond/Fill");
     }
 
+    private static Texture2D cachedDiamondMask;
+
     private static void DrawRotatedDiamond(UIContext ctx, Rect rect, Color color, string id)
     {
         ctx.RecordRect(rect, UIRectTag.Icon, id, null);
         if (ctx.Pass == UIPass.Measure)
             return;
 
-        Matrix4x4 old = GUI.matrix;
-        Vector2 pivot = rect.center;
-        GUIUtility.RotateAroundPivot(45f, pivot);
+        Texture2D tex = GetDiamondMask();
         using (new GUIColorScope(color))
         {
-            GUI.DrawTexture(rect, BaseContent.WhiteTex, ScaleMode.StretchToFill, true);
+            GUI.DrawTexture(rect, tex, ScaleMode.StretchToFill, true);
         }
-        GUI.matrix = old;
+    }
+
+    private static Texture2D GetDiamondMask()
+    {
+        if (cachedDiamondMask != null)
+            return cachedDiamondMask;
+
+        const int size = 32;
+        var tex = new Texture2D(size, size, TextureFormat.ARGB32, false)
+        {
+            name = "D2BandRuler_DiamondMask",
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp,
+            hideFlags = HideFlags.HideAndDontSave
+        };
+
+        float center = (size - 1) * 0.5f;
+        float radius = center - 1f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = Mathf.Abs(x - center);
+                float dy = Mathf.Abs(y - center);
+                float manhattan = dx + dy;
+                float edge = radius + 0.5f;
+                float alpha = Mathf.Clamp01(edge - manhattan);
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+            }
+        }
+
+        tex.Apply(false, true);
+        cachedDiamondMask = tex;
+        return cachedDiamondMask;
     }
 }
