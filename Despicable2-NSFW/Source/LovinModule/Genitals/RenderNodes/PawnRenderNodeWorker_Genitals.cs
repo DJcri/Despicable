@@ -39,20 +39,25 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
             WorkshopRenderContext.Active &&
             parms.flags.FlagSet(PawnRenderFlags.Portrait);
 
-        if (!handledByWorkshopPortraitInheritance
-            && animationDef != null
-            && TryResolveAnimationAngleSource(node, out PawnRenderNode angleNode, out AnimationPart animPart))
+        if (!handledByWorkshopPortraitInheritance && animationDef != null)
         {
-            AnimationWorker worker = angleNode?.AnimationWorker;
-            if (worker != null && worker.Enabled(animationDef, angleNode, animPart, parms))
+            int animationTick = node?.tree?.AnimationTick ?? 0;
+
+            if (TryGetInheritedAnimationAngle(node, parms, animationDef, animationTick, out float inheritedAngle))
             {
-                num += worker.AngleAtTick(
-                    node.tree.AnimationTick,
-                    animationDef,
-                    angleNode,
-                    animPart,
-                    parms
-                );
+                num += inheritedAngle;
+            }
+
+            // In the animation studio preview we want genitals to keep inheriting the
+            // parent node's angle while still responding to direct edits on the
+            // Genitals track itself. Treat the node's own keyed angle as a local
+            // additive tweak on top of the inherited pose, but only in workshop
+            // preview so runtime behavior stays parent-driven.
+            if (WorkshopRenderContext.Active
+                && !parms.flags.FlagSet(PawnRenderFlags.Portrait)
+                && TryGetLocalAnimationAngle(node, parms, animationDef, animationTick, out float localAngle))
+            {
+                num += localAngle;
             }
         }
 
@@ -62,6 +67,72 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
         }
 
         return Quaternion.AngleAxis(num, Vector3.up);
+    }
+
+    private static bool TryGetInheritedAnimationAngle(
+        PawnRenderNode node,
+        PawnDrawParms parms,
+        AnimationDef animationDef,
+        int animationTick,
+        out float angle)
+    {
+        angle = 0f;
+
+        AnimationPart animPart = null;
+        bool hasAnimPart = node?.tree != null
+            && node.tree.TryGetAnimationPartForNode(node, out animPart)
+            && animPart != null;
+
+        if (node?.parent?.AnimationWorker == null
+            || animationDef == null
+            || !hasAnimPart
+            || !node.parent.AnimationWorker.Enabled(animationDef, node, animPart, parms))
+        {
+            return false;
+        }
+
+        angle = node.parent.AnimationWorker.AngleAtTick(
+            animationTick,
+            animationDef,
+            node,
+            animPart,
+            parms
+        );
+
+        return true;
+    }
+
+    private static bool TryGetLocalAnimationAngle(
+        PawnRenderNode node,
+        PawnDrawParms parms,
+        AnimationDef animationDef,
+        int animationTick,
+        out float angle)
+    {
+        angle = 0f;
+
+        AnimationPart animPart = null;
+        bool hasAnimPart = node?.tree != null
+            && node.tree.TryGetAnimationPartForNode(node, out animPart)
+            && animPart != null;
+
+        if (node?.AnimationWorker == null
+            || animationDef == null
+            || !hasAnimPart
+            || !node.AnimationWorker.Enabled(animationDef, node, animPart, parms))
+        {
+            return false;
+        }
+
+        angle = node.AnimationWorker.AngleAtTick(
+            animationTick,
+            animationDef,
+            node,
+            animPart,
+            parms
+        );
+
+        return true;
     }
 
     public override Vector3 OffsetFor(PawnRenderNode node, PawnDrawParms parms, out Vector3 pivot)
@@ -95,29 +166,5 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
         }
 
         return vector;
-    }
-
-    private static bool TryResolveAnimationAngleSource(PawnRenderNode node, out PawnRenderNode angleNode, out AnimationPart animPart)
-    {
-        angleNode = null;
-        animPart = null;
-
-        PawnRenderNode current = node;
-        while (current != null)
-        {
-            if (current.tree != null
-                && current.AnimationWorker != null
-                && current.tree.TryGetAnimationPartForNode(current, out animPart)
-                && animPart != null)
-            {
-                angleNode = current;
-                return true;
-            }
-
-            current = current.parent;
-        }
-
-        animPart = null;
-        return false;
     }
 }
