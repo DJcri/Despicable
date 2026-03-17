@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <Despicable.AnimationOffsetDef>
+    <defName>Offset_Self_Relief_A_unisex_1</defName>
+    <offsets>
+      <li Class="Despicable.AnimationOffset_BodyType">
+        <races>
+          <li>Human</li>
+        </races>
+        <offsets />
+      </li>
+    </offsets>
+  </Despicable.AnimationOffsetDef>
+</Defs>

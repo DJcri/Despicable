@@ -1,5 +1,6 @@
 using System;
 using Verse;
+using Despicable.Core.Compatibility.PerspectiveShiftCompat;
 
 namespace Despicable.HeroKarma;
 public partial class GameComponent_HeroKarma
@@ -12,6 +13,7 @@ public partial class GameComponent_HeroKarma
         // here keeps the bridge aligned with the current save instead of a stale one
         // from a previous game session.
         HKBackendBridge.Register(new BackendBridgeImpl(this));
+        PerspectiveShiftCompatUtility.TryAssignCurrentAuthenticAvatarAsHero();
     }
 
     private Pawn ResolvePreviousHeroForCleanup()

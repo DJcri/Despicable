@@ -59,8 +59,7 @@ public static void Postfix(Pawn doctor, Pawn patient)
             if (doctor == null || patient == null) return;
             if (!HKHookUtilSafe.ActorIsHero(doctor)) return;
 
-            // outsider = not player faction; (includes prisoners/guests/neutral)
-            if (patient.Faction != null && patient.Faction.IsPlayer) return;
+            // Player-faction patients still affect Hero Karma; they simply have no non-player faction context.
 
             int factionId = HKHookUtil.GetFactionIdSafe(patient);
             string actorId = doctor.GetUniqueLoadID();
@@ -109,7 +108,7 @@ public static void Postfix(Pawn doctor, Pawn patient)
             if (doctor == null || patient == null) return;
             if (!HKSettingsUtil.HookEnabled("TendOutsider") && !HKSettingsUtil.HookEnabled("StabilizeOutsider")) return;
             if (!HKHookUtilSafe.ActorIsHero(doctor)) return;
-            if (patient.Faction != null && patient.Faction.IsPlayer) return;
+            // Player-faction patients still affect Hero Karma; they simply have no non-player faction context.
 
             __state = HKGoodwillContext.Enter(doctor);
         }

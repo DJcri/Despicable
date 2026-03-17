@@ -17,7 +17,7 @@ public static class ModCompatRegistry
             return;
 
         string key = compat.Id ?? compat.GetType().FullName ?? "UnknownCompat";
-        if (!Activated.Add(key))
+        if (Activated.Contains(key))
             return;
 
         bool canActivate;
@@ -36,6 +36,9 @@ public static class ModCompatRegistry
             SafeReport(compat, logPrefix, key, "inactive");
             return;
         }
+
+        if (!Activated.Add(key))
+            return;
 
         try
         {

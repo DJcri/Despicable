@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <Despicable.AnimGroupDef>
+    <defName>Self_Relief_A</defName>
+    <stageTags>
+      <li>Self</li>
+    </stageTags>
+    <numActors>1</numActors>
+    <loopIndex>
+      <li>1</li>
+      <li>30</li>
+      <li>1</li>
+      <li>2</li>
+    </loopIndex>
+    <animRoles>
+      <li>Role_Self_Relief_A_unisex_1</li>
+    </animRoles>
+  </Despicable.AnimGroupDef>
+  <Despicable.AnimRoleDef>
+    <defName>Role_Self_Relief_A_unisex_1</defName>
+    <gender>0</gender>
+    <offsetDef>Offset_Self_Relief_A_unisex_1</offsetDef>
+    <anims>
+      <li>Self_Relief_A_unisex_1_Stage1_A</li>
+      <li>Self_Relief_A_unisex_1_Stage2_A</li>
+      <li>Self_Relief_A_unisex_1_Stage3_A</li>
+      <li>Self_Relief_A_unisex_1_Stage4_A</li>
+    </anims>
+  </Despicable.AnimRoleDef>
+</Defs>

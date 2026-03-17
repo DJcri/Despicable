@@ -30,7 +30,7 @@ public static class HarmonyPatch_ArrestNeutral
             if (initiator == null || target == null) return;
             if (!HKHookUtilSafe.ActorIsHero(initiator)) return;
             if (HKHookUtil.IsAnimal(target) || HKHookUtil.IsPermanentManhunterOrBerserk(target)) return;
-            if (target.Faction != null && target.Faction.IsPlayer) return;
+            // Player-faction pawns can still matter for Hero Karma even without a non-player faction context.
             if (target.HostileTo(initiator)) return;
             if (HKBalanceTuning.LocalRepEvents.SuppressArrestNeutralIfTargetGuilty && HKHookUtil.IsCurrentlyGuilty(target)) return;
 
@@ -84,7 +84,7 @@ public static class HarmonyPatch_ArrestNeutral
 
             // Neutral outsider only.
             if (HKHookUtil.IsAnimal(target) || HKHookUtil.IsPermanentManhunterOrBerserk(target)) return;
-            if (target.Faction != null && target.Faction.IsPlayer) return;
+            // Player-faction pawns can still matter for Hero Karma even without a non-player faction context.
             if (target.HostileTo(initiator)) return;
             if (HKBalanceTuning.LocalRepEvents.SuppressArrestNeutralIfTargetGuilty && HKHookUtil.IsCurrentlyGuilty(target)) return;
 

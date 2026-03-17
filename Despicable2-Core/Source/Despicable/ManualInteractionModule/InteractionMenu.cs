@@ -170,11 +170,12 @@ public class InteractionMenu
             "InteractionOption_Chat".Translate(targetPawn.Name.ToStringShort),
             () =>
             {
+                InteractionDef requestedChatDef = ChooseChatInteractionDef();
                 var res = Despicable.Core.InteractionEntry.ResolveManual(
                     pawn,
                     targetPawn,
                     Despicable.Core.Channels.ManualSocial,
-                    req => req.RequestedInteractionDef = InteractionDefOf.Chitchat
+                    req => req.RequestedInteractionDef = requestedChatDef
                 );
 
                 if (!res.Allowed || res.ChosenInteractionDef == null)
@@ -208,6 +209,11 @@ public class InteractionMenu
 
         // HeroModule legacy abilities removed from compile path (reference-only).
         return specs;
+    }
+
+    private static InteractionDef ChooseChatInteractionDef()
+    {
+        return Rand.Chance(0.75f) ? InteractionDefOf.Chitchat : InteractionDefOf.DeepTalk;
     }
 
     private static ManualMenuOptionSpec BuildSocialOption(string label, System.Action action, Pawn targetPawn)

@@ -150,6 +150,11 @@
     <Compile Include="Core\Compatibility\NLFacialAnimationCompat.cs" />
     <Compile Include="Core\Compatibility\VerseKeyframeCompat.cs" />
     <Compile Include="Core\Compatibility\PatchMethodDiscoveryUtil.cs" />
+    <Compile Include="Core\Compatibility\PerspectiveShiftCompat\PerspectiveShiftCompatBootstrap.cs" />
+    <Compile Include="Core\Compatibility\PerspectiveShiftCompat\PerspectiveShiftCompatModule.cs" />
+    <Compile Include="Core\Compatibility\PerspectiveShiftCompat\HarmonyPatch_PerspectiveShift_AvatarInteractionProviders.cs" />
+    <Compile Include="Core\Compatibility\PerspectiveShiftCompat\HarmonyPatch_PerspectiveShift_State_SetAvatar.cs" />
+    <Compile Include="Core\Compatibility\PerspectiveShiftCompat\PerspectiveShiftCompatUtility.cs" />
     <Compile Include="Core\Constants\Channels.cs" />
     <Compile Include="Core\Constants\Commands.cs" />
     <Compile Include="Core\ContentAvailability.cs" />

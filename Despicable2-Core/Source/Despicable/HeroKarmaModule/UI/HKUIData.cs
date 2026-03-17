@@ -431,8 +431,6 @@ internal static class HKUIData
             return false;
         if (target.IsColonistPlayerControlled || target.IsPrisonerOfColony)
             return false;
-        if (target.Faction != null && target.Faction.IsPlayer)
-            return false;
 
         try
         {

@@ -168,10 +168,8 @@ public static partial class HarmonyPatch_AttackNeutral
             return false;
         }
 
-        if (victim.Faction != null && victim.Faction.IsPlayer)
-        {
-            return false;
-        }
+        // Colony targets intentionally still affect Hero Karma. Player-faction pawns do not carry
+        // a non-player faction context, but the deed itself should still be evaluated.
 
         // If the victim is hostile *and* this interaction was not initiated by the hero recently,
         // treat it as self-defense and do not generate karma events.

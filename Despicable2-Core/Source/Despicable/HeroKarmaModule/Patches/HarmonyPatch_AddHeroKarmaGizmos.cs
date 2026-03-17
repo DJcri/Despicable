@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using HarmonyLib;
 using Verse;
 using Despicable.HeroKarma.UI;
+using Despicable.Core.Compatibility.PerspectiveShiftCompat;
 
 namespace Despicable.HeroKarma.Patches;
 
@@ -30,6 +31,9 @@ public static class HarmonyPatch_AddHeroKarmaGizmos
             yield return new Command_OpenHeroKarma();
             yield break;
         }
+
+        if (PerspectiveShiftCompatUtility.ShouldSuppressManualHeroAssignGizmo(__instance))
+            yield break;
 
         yield return new Command_SetHeroKarma(__instance);
     }
