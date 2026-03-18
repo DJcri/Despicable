@@ -7,12 +7,10 @@ internal static class HKSettlementContextUtil
 {
     public static bool TryAssignFromSettlement(KarmaEvent karmaEvent, Settlement settlement)
     {
-        if (karmaEvent == null || !IsUsableSettlement(settlement))
+        if (karmaEvent == null || !IsForeignSettlement(settlement))
             return false;
 
-        karmaEvent.settlementUniqueId = settlement.GetUniqueLoadID();
-        karmaEvent.settlementLabel = settlement.LabelCap;
-        return true;
+        return AssignSettlementContext(karmaEvent, settlement);
     }
 
     public static bool TryAssignFromPawns(KarmaEvent karmaEvent, Pawn primaryPawn, Pawn fallbackPawn = null)
@@ -21,14 +19,14 @@ internal static class HKSettlementContextUtil
             return false;
 
         return TryResolveSettlementFromPawn(primaryPawn, out Settlement settlement)
-            ? TryAssignFromSettlement(karmaEvent, settlement)
-            : TryResolveSettlementFromPawn(fallbackPawn, out Settlement fallbackSettlement) && TryAssignFromSettlement(karmaEvent, fallbackSettlement);
+            ? AssignSettlementContext(karmaEvent, settlement)
+            : TryResolveSettlementFromPawn(fallbackPawn, out Settlement fallbackSettlement) && AssignSettlementContext(karmaEvent, fallbackSettlement);
     }
 
     public static bool TryResolveSettlementFromPawn(Pawn pawn, out Settlement settlement)
     {
         settlement = null;
-        if (!global::Despicable.PawnContext.TryResolveSettlement(pawn, out Settlement resolved) || !IsUsableSettlement(resolved))
+        if (!global::Despicable.PawnContext.TryResolveWordOfMouthSettlement(pawn, out Settlement resolved) || resolved == null)
             return false;
 
         settlement = resolved;
@@ -54,7 +52,7 @@ internal static class HKSettlementContextUtil
         settlement = null;
         try
         {
-            if (lookTarget.WorldObject is not Settlement candidate || !IsUsableSettlement(candidate))
+            if (lookTarget.WorldObject is not Settlement candidate || !IsForeignSettlement(candidate))
                 return false;
 
             settlement = candidate;
@@ -70,7 +68,17 @@ internal static class HKSettlementContextUtil
         }
     }
 
-    private static bool IsUsableSettlement(Settlement settlement)
+    private static bool AssignSettlementContext(KarmaEvent karmaEvent, Settlement settlement)
+    {
+        if (karmaEvent == null || settlement == null)
+            return false;
+
+        karmaEvent.settlementUniqueId = settlement.GetUniqueLoadID();
+        karmaEvent.settlementLabel = settlement.LabelCap;
+        return true;
+    }
+
+    private static bool IsForeignSettlement(Settlement settlement)
     {
         return settlement != null && settlement.Faction != null && !settlement.Faction.IsPlayer;
     }

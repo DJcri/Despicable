@@ -194,6 +194,32 @@ public static class HKIdeologyStanceResolver
 
 public static class HKRepIdeologyModifierResolver
 {
+    public static HKRepIdeologyModifier GetPlayerFactionSettlementModifierForAnimalCruelty(int baseDelta, out string matchedRuleDefName)
+    {
+        matchedRuleDefName = null;
+
+        if (!HKIdeologyCompat.IsAvailable)
+            return HKRepIdeologyModifier.Identity;
+
+        if (!HKBalanceTuning.ReputationIdeology.EnableTargetPreceptModifiers)
+            return HKRepIdeologyModifier.Identity;
+
+        if (baseDelta >= 0)
+            return HKRepIdeologyModifier.Identity;
+
+        Ideo ideo = TryGetPlayerPrimaryIdeo();
+        if (ideo == null)
+            return HKRepIdeologyModifier.Identity;
+
+        if (HKIdeologyExactPrecepts.TryFindMatchingMemeDefName(ideo, out string matchedMemeDefName, "AnimalPersonhood"))
+        {
+            matchedRuleDefName = "meme:" + matchedMemeDefName;
+            return MultNegative(HKBalanceTuning.ReputationIdeology.AnimalPersonhood_AnimalCruelty_Negative, "AnimalPersonhood_AnimalCruelty");
+        }
+
+        return HKRepIdeologyModifier.Identity;
+    }
+
     public static HKRepIdeologyModifier GetModifier(Pawn target, HKRepSemantic semantic, int baseDelta, string eventKey, out string matchedRuleDefName)
     {
         matchedRuleDefName = null;
@@ -415,6 +441,25 @@ public static class HKRepIdeologyModifierResolver
             Despicable.Core.DebugLogger.WarnExceptionOnce("HKRepIdeologyModifierResolver.TryGetIdeo", "Hero Karma failed to read a target ideology while resolving Reputation precept modifiers.", ex);
             return null;
         }
+    }
+
+    private static Ideo TryGetPlayerPrimaryIdeo()
+    {
+        try
+        {
+            Faction ofPlayer = Faction.OfPlayer;
+            if (ofPlayer != null && ofPlayer.ideos != null)
+                return ofPlayer.ideos.PrimaryIdeo;
+        }
+        catch (Exception ex)
+        {
+            Despicable.Core.DebugLogger.WarnExceptionOnce(
+                "HKRepIdeologyModifierResolver.TryGetPlayerPrimaryIdeo",
+                "Hero Karma failed to read the player primary ideology while resolving local reputation modifiers.",
+                ex);
+        }
+
+        return null;
     }
 
     private static HKRepIdeologyModifier MultPositive(float raw, string reasonKey)

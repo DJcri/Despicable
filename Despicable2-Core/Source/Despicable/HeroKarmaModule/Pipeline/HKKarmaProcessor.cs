@@ -93,6 +93,7 @@ public static partial class HKKarmaProcessor
             // Combat spam can be intense, but escalation should pass (handled by debouncer stage logic).
             case "AttackNeutral": return CooldownVeryShort;
             case "HarmGuest": return 300;
+            case "HarmColonyAnimal": return 300;
             case "KillDownedNeutral": return 300;
 
             // Medical actions can tick repeatedly; rate-limit per target.
@@ -124,6 +125,7 @@ public static partial class HKKarmaProcessor
 
             case "AttackNeutral": return 2500;
             case "HarmGuest": return 2500;
+            case "HarmColonyAnimal": return 2500;
             case "KillDownedNeutral": return 2500;
 
             case "TendOutsider": return 10000;
@@ -148,6 +150,7 @@ public static partial class HKKarmaProcessor
 
             case "AttackNeutral": return 10;   // per target; escalation still passes
             case "HarmGuest": return 3;        // per target
+            case "HarmColonyAnimal": return 1; // per target; hit -> down escalation still passes
             case "KillDownedNeutral": return 1;
 
             case "TendOutsider": return 1;     // per target

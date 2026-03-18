@@ -205,6 +205,34 @@ public static class LocalReputationUtility
         TryApplyDeltaInternal(heroId, settlementTargetId, RepTargetKind.Settlement, factionId: -1, settlementDelta, eventKey, reason, recordRecent: false, out _, baseDelta: 0, affectedByLabel: null);
     }
 
+    public static bool TryEnsureEncounterEchoRecord(Pawn hero, Pawn targetPawn)
+    {
+        if (hero == null || targetPawn == null) return false;
+        if (hero == targetPawn) return false;
+        if (Current.Game == null) return false;
+
+        string heroId = hero.GetUniqueLoadID();
+        string pawnId = targetPawn.GetUniqueLoadID();
+        if (heroId.NullOrEmpty() || pawnId.NullOrEmpty()) return false;
+
+        var comp = Current.Game.GetComponent<HKLocalReputationComponent>();
+        if (comp == null) return false;
+
+        bool valid = TryGetPawnScoreBreakdownDetailed(heroId, pawnId, out int effectiveScore, out _, out int factionSharedScore, out _, out int settlementSharedScore, out _, out _);
+        if (!valid) return false;
+        if (effectiveScore == 0 && factionSharedScore == 0 && settlementSharedScore == 0) return false;
+
+        int nowTick = Find.TickManager?.TicksGame ?? 0;
+        RepRecord record = comp.GetOrCreatePawnRecord(heroId, pawnId);
+        if (record == null) return false;
+
+        if (record.lastAppliedTick < nowTick)
+            record.lastAppliedTick = nowTick;
+
+        comp.NotifyPawnRecordTouched(heroId, nowTick);
+        return true;
+    }
+
     private static bool UsesExplicitSettlementDelta(string eventKey)
     {
         switch (HKSettingsUtil.CanonicalizeEventKey(eventKey))
@@ -215,6 +243,7 @@ public static class LocalReputationUtility
             case "KillDownedNeutral":
             case "AttackNeutral":
             case "HarmGuest":
+            case "HarmColonyAnimal":
             case "ArrestNeutral":
             case "ExecutePrisoner":
             case "EnslaveAttempt":
@@ -279,7 +308,7 @@ public static class LocalReputationUtility
 
         try
         {
-            if (!global::Despicable.PawnContext.TryResolveSettlement(targetPawn, out string settlementUniqueId, out settlementLabel))
+            if (!global::Despicable.PawnContext.TryResolveWordOfMouthSettlement(targetPawn, out string settlementUniqueId, out settlementLabel))
                 return false;
 
             settlementTargetId = HKLocalReputationComponent.SettlementKey(settlementUniqueId);
@@ -400,6 +429,26 @@ public static class LocalReputationUtility
     {
         index = 0f;
         if (!TryGetPawnScore(heroId, targetPawnId, out int score)) return false;
+        index = InfluenceIndexFromScore(score);
+        return true;
+    }
+
+    public static bool TryGetDirectPawnScore(string heroId, string targetPawnId, out int score)
+    {
+        score = 0;
+        if (heroId.NullOrEmpty() || targetPawnId.NullOrEmpty()) return false;
+        var comp = Current.Game?.GetComponent<HKLocalReputationComponent>();
+        if (comp == null) return false;
+        var direct = comp.GetPawnRecord(heroId, targetPawnId);
+        if (direct == null) return false;
+        score = Mathf.Clamp(direct.score, RepMin, RepMax);
+        return true;
+    }
+
+    public static bool TryGetDirectPawnInfluenceIndex(string heroId, string targetPawnId, out float index)
+    {
+        index = 0f;
+        if (!TryGetDirectPawnScore(heroId, targetPawnId, out int score)) return false;
         index = InfluenceIndexFromScore(score);
         return true;
     }

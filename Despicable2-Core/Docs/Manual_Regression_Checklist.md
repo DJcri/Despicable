@@ -54,6 +54,8 @@ Use this quick pass after structural changes.
 - Confirm NSFW initializes once
 - Confirm optional integrations register cleanly
 - Trigger one basic interaction path
+- Confirm manual and autonomous lovin both block blood-related pawns by default
+- With Birds of a Feather installed, confirm the related-pawn gate automatically allows those pairings without any player-facing toggle
 
 ## Harmony-sensitive gameplay
 - Test prisoner release

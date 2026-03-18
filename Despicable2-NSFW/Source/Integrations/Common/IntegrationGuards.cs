@@ -78,6 +78,12 @@ internal static class IntegrationGuards
         return true;
     }
 
+    internal static bool IsBirdsOfAFeatherLoaded()
+        => ModsConfig.IsActive("LovelyDovey.BirdsOfAFeather");
+
+    internal static bool ShouldAllowRelatedLovinWithBirdsOfAFeather()
+        => IsBirdsOfAFeatherLoaded();
+
     internal static bool IsGenderWorksLoaded()
         => ModsConfig.IsActive("LovelyDovey.Sex.WithRosaline");
 }

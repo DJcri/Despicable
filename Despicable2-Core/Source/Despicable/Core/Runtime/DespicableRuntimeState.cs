@@ -30,6 +30,7 @@ public static class DespicableRuntimeState
         HKEventDebouncer.ResetRuntimeState();
         InteractionRegistry.ResetRuntimeState();
         HKGoodwillContext.ResetRuntimeState();
+        HKAnimalInteractionContext.ResetRuntimeState();
         HKGiftContext.ResetRuntimeState();
         HKReleaseContext.ResetRuntimeState();
         D2CommandBar.ResetRuntimeState();

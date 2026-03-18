@@ -94,6 +94,11 @@ public static partial class HKKarmaProcessor
                     AddSettlementRepFromEventContext(list, ev, HKBalanceTuning.GetHarmGuestPenalty(HKBalanceTuning.GetHarmGuestLocalRepSettlementDelta(ev.stage), guestTargetIsGuilty), ev.eventKey, "Violence noted locally");
                     break;
 
+                case "HarmColonyAnimal":
+                    AddPawnRep(list, ev.targetPawnId, HKBalanceTuning.GetHarmColonyAnimalPawnDelta(ev.stage), ev.eventKey, "Harmed colony animal");
+                    AddSettlementRepFromEventContext(list, ev, GetAnimalPersonhoodAdjustedSettlementRepDelta(ev, HKBalanceTuning.GetHarmColonyAnimalSettlementDelta(ev.stage)), ev.eventKey, "Animal cruelty noted locally");
+                    break;
+
                 case "FreeSlave":
                     AddPawnRep(list, ev, HKBalanceTuning.LocalRepEvents.FreeSlavePawn, "Freed");
                     AddFactionRep(list, ev.targetFactionId, HKBalanceTuning.LocalRepEvents.FreeSlaveFaction, ev.eventKey, "Freed their member");
@@ -189,6 +194,25 @@ public static partial class HKKarmaProcessor
         return finalDelta;
     }
 
+    private static int GetAnimalPersonhoodAdjustedSettlementRepDelta(KarmaEvent ev, int baseDelta)
+    {
+        if (ev == null || baseDelta == 0)
+            return baseDelta;
+
+        HKRepIdeologyModifier modifier = HKRepIdeologyModifierResolver.GetPlayerFactionSettlementModifierForAnimalCruelty(baseDelta, out string matchedRuleDefName);
+        int finalDelta = HKRepIdeologyMath.ApplyAndRound(baseDelta, modifier);
+
+        if (!matchedRuleDefName.NullOrEmpty())
+        {
+            HKIdeologyEvaluationTrace trace = HKIdeologyEvaluationTrace.GetOrCreate(ev);
+            string label = ResolveIdeologyRuleLabel(matchedRuleDefName);
+            if (trace != null && !label.NullOrEmpty())
+                trace.AddNote("settlement reaction affected by " + label);
+        }
+
+        return finalDelta;
+    }
+
     private static string ResolveIdeologyRuleLabel(string matchedRuleDefName)
     {
         if (matchedRuleDefName.NullOrEmpty())
@@ -247,7 +271,7 @@ public static partial class HKKarmaProcessor
         if (delta == 0) return false;
         if (Mathf.Approximately(HKBalanceTuning.LocalRep.SettlementEchoToPawnFactor, 0f)) return false;
 
-        if (!global::Despicable.PawnContext.TryResolveSettlement(pawn, out string settlementUniqueId, out _)) return false;
+        if (!global::Despicable.PawnContext.TryResolveWordOfMouthSettlement(pawn, out string settlementUniqueId, out _)) return false;
 
         list.Add(new HKToken_LocalRepSettlement(settlementUniqueId, delta, eventKey, reason, recordRecent: false));
         HKIdeologyEvaluationTrace.GetOrCreate(ev)?.AddSettlementDelta(delta);
@@ -387,8 +411,7 @@ public static partial class HKKarmaProcessor
     {
         try
         {
-            Map map = pawn?.MapHeld ?? pawn?.Map;
-            if (map?.Parent is Settlement settlement)
+            if (global::Despicable.PawnContext.TryResolveWordOfMouthSettlement(pawn, out Settlement settlement) && settlement != null)
                 return settlement.LabelCap;
         }
         catch (Exception ex)

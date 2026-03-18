@@ -1,6 +1,9 @@
 using RimWorld;
 // Guardrail-Reason: Lovin validation checks stay centralized because pair gating, health checks, and manual-interaction eligibility share one policy surface.
+using System;
+using System.Collections;
 using System.Linq;
+using System.Reflection;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -28,6 +31,91 @@ public static partial class LovinUtil
         Ideology = 1,
         Orientation = 2,
         Relation = 3
+    }
+
+    private static readonly PropertyInfo FamilyByBloodRelationProperty = typeof(PawnRelationDef).GetProperty("familyByBloodRelation", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+    private static readonly FieldInfo FamilyByBloodRelationField = typeof(PawnRelationDef).GetField("familyByBloodRelation", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+    private static readonly PropertyInfo DirectRelationsProperty = typeof(Pawn_RelationsTracker).GetProperty("DirectRelations", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+    private static readonly FieldInfo DirectRelationsField = typeof(Pawn_RelationsTracker).GetField("directRelations", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+    internal static bool ShouldBlockRelatedLovin()
+    {
+        return !IntegrationGuards.ShouldAllowRelatedLovinWithBirdsOfAFeather();
+    }
+
+    internal static bool ArePawnsRelatedByBlood(Pawn a, Pawn b)
+    {
+        if (!ShouldBlockRelatedLovin())
+            return false;
+
+        return HasDirectBloodRelation(a, b) || HasDirectBloodRelation(b, a);
+    }
+
+    internal static string GetRelatedPawnFailureReason(Pawn a, Pawn b)
+    {
+        return ArePawnsRelatedByBlood(a, b)
+            ? "D2N_LovinReason_RelatedByBlood".Translate()
+            : null;
+    }
+
+    private static bool HasDirectBloodRelation(Pawn source, Pawn other)
+    {
+        if (source?.relations == null || other == null)
+            return false;
+
+        IEnumerable relations = DirectRelationsProperty?.GetValue(source.relations, null) as IEnumerable
+            ?? DirectRelationsField?.GetValue(source.relations) as IEnumerable;
+        if (relations == null)
+            return false;
+
+        foreach (object entry in relations)
+        {
+            if (entry == null)
+                continue;
+
+            Pawn relatedPawn = ReadRelationPawn(entry);
+            if (relatedPawn != other)
+                continue;
+
+            PawnRelationDef relationDef = ReadRelationDef(entry);
+            if (IsBloodRelationDef(relationDef))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static Pawn ReadRelationPawn(object entry)
+    {
+        Type type = entry.GetType();
+        return type.GetField("otherPawn", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.GetValue(entry) as Pawn
+            ?? type.GetProperty("otherPawn", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.GetValue(entry, null) as Pawn;
+    }
+
+    private static PawnRelationDef ReadRelationDef(object entry)
+    {
+        Type type = entry.GetType();
+        return type.GetField("def", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.GetValue(entry) as PawnRelationDef
+            ?? type.GetProperty("def", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.GetValue(entry, null) as PawnRelationDef;
+    }
+
+    private static bool IsBloodRelationDef(PawnRelationDef relationDef)
+    {
+        if (relationDef == null)
+            return false;
+
+        object value = FamilyByBloodRelationProperty?.GetValue(relationDef, null)
+            ?? FamilyByBloodRelationField?.GetValue(relationDef);
+        if (value is bool familyByBloodRelation)
+            return familyByBloodRelation;
+
+        string defName = relationDef.defName;
+        return defName == "Parent"
+            || defName == "Child"
+            || defName == "Sibling"
+            || defName == "HalfSibling"
+            || defName == "Grandparent"
+            || defName == "Grandchild";
     }
 
     private static LovinHealthCheckSnapshot CreateHealthCheckSnapshot(Pawn pawn)
@@ -180,6 +268,9 @@ public static partial class LovinUtil
         if (!PassesHealthCheck(pawn) || !PassesHealthCheck(target))
             return false;
 
+        if (!PassesRelatedPawnCheck(pawn, target))
+            return false;
+
         // Preference gates: configurable.
         Settings s = CommonUtil.GetSettings();
         bool mutual = s.lovinMutualConsent;
@@ -204,6 +295,11 @@ public static partial class LovinUtil
         }
 
         return true;
+    }
+
+    public static bool PassesRelatedPawnCheck(Pawn pawn, Pawn target)
+    {
+        return GetRelatedPawnFailureReason(pawn, target) == null;
     }
 
     public static bool PassesIdeologyCheck(Pawn pawn, Pawn target)
@@ -420,6 +516,10 @@ public static partial class LovinUtil
         bool mutual = s.lovinMutualConsent;
         bool respectIdeology = s.lovinRespectIdeology;
 
+        string relatedReason = GetRelatedPawnFailureReason(orderedPawn, otherPawn);
+        if (!relatedReason.NullOrEmpty())
+            return relatedReason;
+
         if (!PassesOrientationCheck(otherPawn, orderedPawn))
             return "D2N_LovinReason_OrientationMismatch".Translate();
 
@@ -442,6 +542,9 @@ public static partial class LovinUtil
 
         if (!PassesOrientationCheck(orderedPawn, otherPawn))
             return ManualLovinBoundaryCause.Orientation;
+
+        if (!PassesRelatedPawnCheck(orderedPawn, otherPawn))
+            return ManualLovinBoundaryCause.Relation;
 
         if (!PassesRelationsCheck(orderedPawn, otherPawn))
             return ManualLovinBoundaryCause.Relation;

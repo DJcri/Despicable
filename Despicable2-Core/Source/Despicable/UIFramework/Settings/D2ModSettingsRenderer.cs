@@ -210,6 +210,8 @@ public sealed class D2ModSettingsRenderer
             DrawIntegrationsSection(ctx, settings, ref v);
         }
         v.NextSpace(ctx.Style.GapM);
+        DrawHeroKarmaSection(ctx, settings, ref v);
+        v.NextSpace(ctx.Style.GapM);
         DrawToolsSection(ctx, ref v);
     }
 
@@ -274,7 +276,9 @@ public sealed class D2ModSettingsRenderer
         {
             Type guardsType = AccessTools.TypeByName("Despicable.NSFW.Integrations.IntegrationGuards");
             if (guardsType != null)
+            {
                 intimacyLoaded = (bool?)(AccessTools.Method(guardsType, "IsIntimacyLoaded")?.Invoke(null, null)) ?? false;
+            }
         }
         catch
         {
@@ -289,6 +293,30 @@ public sealed class D2ModSettingsRenderer
             enabled: intimacyLoaded,
             disabledReason: "Intimacy must be installed first.",
             id: "Core/Integrations/HideLovinOptionToggle");
+
+    }
+
+    private static void DrawHeroKarmaSection(UIContext ctx, Settings settings, ref D2VStack outer)
+    {
+        float height = MeasureSectionHeight(ctx, 1);
+        Rect rect = outer.Next(height, UIRectTag.PanelSoft, "Core/HeroKarma/Outer");
+        using var panel = ctx.GroupPanel("Core/HeroKarma", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
+        var v = ctx.D2VStack(panel.Inner, label: "Core/HeroKarma/Stack");
+        DrawSectionHeader(ctx, ref v, "Hero Karma", "Core/HeroKarma/Header");
+
+        bool enabled = settings.heroModuleEnabled && (!Prefs.DevMode || settings.heroKarmaEnableLocalRep);
+        string disabledReason = !settings.heroModuleEnabled
+            ? "Hero Module must be enabled first."
+            : "Local Reputation must be enabled first.";
+
+        DrawCheckboxRow(
+            ctx,
+            v.NextRow(UIRectTag.Checkbox, "Core/HeroKarma/OffMapPlayerWordOfMouth"),
+            "D2C_Settings_AllowOffMapPlayerFactionSettlementWordOfMouth".Translate(),
+            ref settings.heroKarmaAllowOffMapPlayerFactionSettlementWordOfMouth,
+            enabled: enabled,
+            disabledReason: disabledReason,
+            id: "Core/HeroKarma/OffMapPlayerWordOfMouthToggle");
     }
 
     private static void DrawToolsSection(UIContext ctx, ref D2VStack outer)

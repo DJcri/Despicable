@@ -21,12 +21,16 @@ public class Settings : ModSettings
 
     public bool heroModuleEnabled = true;
     public bool hideManualLovinOptionWhenIntimacyInstalled = true;
+    // Legacy compatibility-only flag. Related-pawn lovin is now automatically allowed
+    // when Birds of a Feather is installed, so this is no longer player-facing or read by gameplay.
+    public bool allowRelatedLovinWhenBirdsOfAFeatherInstalled = false;
 
     // HeroKarma (Step 4)
     public bool heroKarmaEnableGlobalKarma = true;
     public bool heroKarmaEnableLocalRep = true;
     public bool heroKarmaEnableIdeologyApproval = true;
     public bool heroKarmaEchoDiagnosticsToLog = false;
+    public bool heroKarmaAllowOffMapPlayerFactionSettlementWordOfMouth = true;
 
     // Compatibility-only migration flag for older saves/configs.
     // This is no longer player-facing, but we still read the legacy key so prior setups remain compatible.
@@ -82,10 +86,12 @@ public class Settings : ModSettings
         Scribe_Values.Look(ref lovinRespectIdeology, "lovinRespectIdeology", true);
         Scribe_Values.Look(ref heroModuleEnabled, "heroModuleEnabled", true);
         Scribe_Values.Look(ref hideManualLovinOptionWhenIntimacyInstalled, "hideManualLovinOptionWhenIntimacyInstalled", true);
+        Scribe_Values.Look(ref allowRelatedLovinWhenBirdsOfAFeatherInstalled, "allowRelatedLovinWhenBirdsOfAFeatherInstalled", false);
         Scribe_Values.Look(ref heroKarmaEnableGlobalKarma, "heroKarmaEnableGlobalKarma", true);
         Scribe_Values.Look(ref heroKarmaEnableLocalRep, "heroKarmaEnableLocalRep", true);
         Scribe_Values.Look(ref heroKarmaEnableIdeologyApproval, "heroKarmaEnableIdeologyApproval", true);
         Scribe_Values.Look(ref heroKarmaEchoDiagnosticsToLog, "heroKarmaEchoDiagnosticsToLog", false);
+        Scribe_Values.Look(ref heroKarmaAllowOffMapPlayerFactionSettlementWordOfMouth, "heroKarmaAllowOffMapPlayerFactionSettlementWordOfMouth", true);
         Scribe_Values.Look(ref heroKarmaMigrateLegacyKarmaToStanding, "heroKarmaMigrateLegacyKarmaToStanding", false);
         Scribe_Values.Look(ref heroKarmaStandingEnableEffects, "heroKarmaStandingEnableEffects", true);
         Scribe_Values.Look(ref heroKarmaLocalRepInfluencePrisoners, "heroKarmaLocalRepInfluencePrisoners", true);

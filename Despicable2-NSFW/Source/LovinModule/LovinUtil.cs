@@ -120,6 +120,12 @@ public static partial class LovinUtil
             return "Target " + reason;
         }
 
+        string relatedReason = GetRelatedPawnFailureReason(pawn, target);
+        if (!relatedReason.NullOrEmpty())
+        {
+            return relatedReason;
+        }
+
         if (!PassesOrientationCheck(pawn, target))
         {
             return "Orientation mismatch.";

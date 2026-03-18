@@ -140,6 +140,9 @@ public static partial class ApprovalResolver
             case "HarmGuest":
                 return ResolveHarmGuestCosmic(ev, out reason);
 
+            case "HarmColonyAnimal":
+                return ResolveHarmColonyAnimalCosmic(ev, out reason);
+
             default:
                 return 0;
         }
@@ -199,6 +202,18 @@ public static partial class ApprovalResolver
 
         reason = "Hit guest";
         return HKBalanceTuning.GetHarmGuestPenalty(HKBalanceTuning.KarmaEvents.HarmGuestHit, targetIsGuilty);
+    }
+
+    private static int ResolveHarmColonyAnimalCosmic(KarmaEvent ev, out string reason)
+    {
+        if (ev != null && ev.stage >= 1)
+        {
+            reason = "Downed colony animal";
+            return HKBalanceTuning.KarmaEvents.HarmColonyAnimalDown;
+        }
+
+        reason = "Hit colony animal";
+        return HKBalanceTuning.KarmaEvents.HarmColonyAnimalHit;
     }
 
     // --- Ideology standing (relative) ---------------------------------------------------------

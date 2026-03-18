@@ -87,6 +87,11 @@ internal static class HKSettingsUtil
         get { var s = Settings; return ModuleEnabled && s != null && s.heroKarmaEchoDiagnosticsToLog; }
     }
 
+    public static bool LocalRepAllowOffMapPlayerFactionSettlementWordOfMouth
+    {
+        get { var s = Settings; return ModuleEnabled && (s == null ? true : s.heroKarmaAllowOffMapPlayerFactionSettlementWordOfMouth); }
+    }
+
     // DevMode-only hook gates. If DevMode is off, hooks are always enabled.
     public const string EventSellCaptive = "SellCaptive";
     public const string LegacyEventSellPrisoner = "SellPrisoner";

@@ -14,6 +14,7 @@
   <D2N_LovinReason_Unknown>unavailable</D2N_LovinReason_Unknown>
   <D2N_LovinReason_SamePawn>same pawn</D2N_LovinReason_SamePawn>
   <D2N_LovinReason_NoCompatibleTypes>not compatible</D2N_LovinReason_NoCompatibleTypes>
+  <D2N_LovinReason_RelatedByBlood>related by blood</D2N_LovinReason_RelatedByBlood>
   <D2N_LovinReason_IsMissing>are missing</D2N_LovinReason_IsMissing>
   <D2N_LovinReason_IsNotHumanlike>are not humanlike</D2N_LovinReason_IsNotHumanlike>
   <D2N_LovinReason_IsDrafted>are drafted</D2N_LovinReason_IsDrafted>

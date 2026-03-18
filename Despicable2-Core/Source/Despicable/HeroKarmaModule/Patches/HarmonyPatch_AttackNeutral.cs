@@ -25,6 +25,8 @@ public static partial class HarmonyPatch_AttackNeutral
         public bool victimWasHostile;
         public bool victimWasGuestLike;
         public bool victimFactionWasHostile;
+        public bool victimWasDangerousMentalState;
+        public bool victimWasHostileToPlayerFaction;
     }
 
     public static void ResetRuntimeState()
@@ -48,6 +50,8 @@ public static partial class HarmonyPatch_AttackNeutral
             __state.victimWasDowned = victim != null && victim.Downed;
             __state.victimWasGuestLike = HKHookUtil.IsGuestLike(victim);
             __state.victimWasHostile = victim != null && victim.HostileTo(instigatorPawn);
+            __state.victimWasDangerousMentalState = HKHookUtil.IsPermanentManhunterOrBerserk(victim);
+            __state.victimWasHostileToPlayerFaction = victim != null && Faction.OfPlayer != null && victim.HostileTo(Faction.OfPlayer);
 
             __state.victimFactionWasHostile =
                 victim?.Faction != null && instigatorPawn.Faction != null && victim.Faction.HostileTo(instigatorPawn.Faction);
@@ -88,12 +92,19 @@ public static partial class HarmonyPatch_AttackNeutral
             }
 
             Pawn victim = GetVictimPawn(__instance);
+            int stage = victim != null ? GetAttackStage(victim) : 0;
+
+            if (TryProcessHarmColonyAnimal(instigatorPawn, victim, stage, __state))
+            {
+                RememberInitiated(instigatorPawn, victim);
+                return;
+            }
+
             if (!ShouldProcessAttack(instigatorPawn, victim))
             {
                 return;
             }
 
-            int stage = GetAttackStage(victim);
             int factionId = HKHookUtil.GetFactionIdSafe(victim);
 
             // Prefer guest harm classification if enabled.
@@ -154,6 +165,43 @@ public static partial class HarmonyPatch_AttackNeutral
                 "HarmonyPatch_AttackNeutral suppressed an exception.",
                 ex);
         }
+    }
+
+    private static bool TryProcessHarmColonyAnimal(Pawn instigatorPawn, Pawn victim, int stage, AttackState state)
+    {
+        if (instigatorPawn == null || victim == null)
+        {
+            return false;
+        }
+
+        if (!HKHookUtil.IsAnimal(victim))
+        {
+            return false;
+        }
+
+        if (!HKSettingsUtil.HookEnabled("HarmColonyAnimal"))
+        {
+            return false;
+        }
+
+        if (stage >= 2)
+        {
+            return false;
+        }
+
+        if (victim.Faction == null || !victim.Faction.IsPlayer)
+        {
+            return false;
+        }
+
+        if (state.victimWasHostile || state.victimWasDangerousMentalState || state.victimWasHostileToPlayerFaction)
+        {
+            return false;
+        }
+
+        var animalHarmEvent = KarmaEvent.Create("HarmColonyAnimal", instigatorPawn, victim, targetFactionId: 0, stage: stage);
+        HKKarmaProcessor.Process(animalHarmEvent);
+        return true;
     }
 
     private static bool ShouldProcessAttack(Pawn instigatorPawn, Pawn victim)

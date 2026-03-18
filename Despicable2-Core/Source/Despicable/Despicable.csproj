@@ -271,6 +271,9 @@
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AddHeroKarmaGizmos.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AttackNeutral.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AttackNeutral.Helpers.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AnimalBondChance_LocalRep.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AnimalTrainingChance_LocalRep.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_AnimalTrainingScope.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ArrestNeutral.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_RescueOutsider.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_FreeSlave.cs" />
@@ -290,11 +293,13 @@
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Faction_TryAffectGoodwillWith.Helpers.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_OrganHarvest.Helpers.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_ReleasePrisoner.cs" />
+    <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Pawn_SpawnSetup_EncounterEcho.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_TendOutsider.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Certainty.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_Standing_Opinion.cs" />
     <Compile Include="HeroKarmaModule\Patches\HarmonyPatch_TradePrice_LocalRep.cs" />
     <Compile Include="HeroKarmaModule\Runtime\HKPatchGuard.cs" />
+    <Compile Include="HeroKarmaModule\Runtime\HKAnimalInteractionContext.cs" />
     <Compile Include="HeroKarmaModule\Pipeline\HKGoodwillContext.cs" />
     <Compile Include="HeroKarmaModule\Services\HKHookUtil.cs" />
     <Compile Include="HeroKarmaModule\Perks\HKPerkEffects.cs" />

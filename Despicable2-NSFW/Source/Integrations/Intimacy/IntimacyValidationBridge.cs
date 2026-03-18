@@ -336,8 +336,8 @@ internal static class IntimacyValidationBridge
         if (Cache.AreMutuallyAttracted != null && !Cache.AreMutuallyAttracted(orderedPawn, otherPawn))
             return "D2N_LovinReason_OrientationMismatch".Translate();
 
-        if (Cache.PairingIsIncestious != null && Cache.PairingIsIncestious(orderedPawn, otherPawn))
-            return "D2N_LovinReason_NoCompatibleTypes".Translate();
+        if (LovinUtil.ShouldBlockRelatedLovin() && Cache.PairingIsIncestious != null && Cache.PairingIsIncestious(orderedPawn, otherPawn))
+            return "D2N_LovinReason_RelatedByBlood".Translate();
 
         if (Cache.IdeologyForbidsLovin != null)
         {

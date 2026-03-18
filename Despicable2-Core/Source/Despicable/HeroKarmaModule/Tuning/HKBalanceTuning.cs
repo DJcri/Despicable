@@ -66,6 +66,8 @@ public static class HKBalanceTuning
         public const int HarmGuestHit = -7;
         public const int HarmGuestDown = -12;
         public const int HarmGuestKill = -18;
+        public const int HarmColonyAnimalHit = -KarmaMagnitudeMedium;
+        public const int HarmColonyAnimalDown = -(KarmaMagnitudeMedium * 2);
     }
 
     public static class LocalRepEvents
@@ -122,6 +124,11 @@ public static class HKBalanceTuning
         public const int SellPrisonerFaction = SellCaptiveFaction; // legacy alias
         public const int SellCaptiveSettlement = -3;
         public const int SellPrisonerSettlement = SellCaptiveSettlement; // legacy alias
+
+        public const int HarmColonyAnimalPawnHit = -3;
+        public const int HarmColonyAnimalPawnDown = -6;
+        public const int HarmColonyAnimalSettlementHit = -4;
+        public const int HarmColonyAnimalSettlementDown = -6;
     }
 
     public static class ReputationIdeology
@@ -151,6 +158,7 @@ public static class HKBalanceTuning
 
         public const float AntiOrganUse_OrganHarvest_Negative = 1.35f;
         public const float ProOrganUse_OrganHarvest_Negative = 0.75f;
+        public const float AnimalPersonhood_AnimalCruelty_Negative = 1.35f;
 
         public const float AntiSlavery_CaptivityMercy = 1.35f;
         public const float AntiSlavery_CoercionSlavery_Negative = 1.50f;
@@ -214,6 +222,13 @@ public static class HKBalanceTuning
         public const bool PawnToSettlementEchoForceMinimumOne = false;
 
         public const float PrisonerSilverTongueMult = 1.25f;
+
+        public const float AnimalTrainingChanceSwing = 0.15f;
+        public const float AnimalTrainingChanceClampMin = 0.85f;
+        public const float AnimalTrainingChanceClampMax = 1.15f;
+        public const float AnimalBondChanceSwing = 0.40f;
+        public const float AnimalBondChanceClampMin = 0.60f;
+        public const float AnimalBondChanceClampMax = 1.40f;
 
         public const float RecruitCoeff = -0.20f;
         public const float RecruitClampMin = -0.20f;
@@ -388,6 +403,26 @@ public static class HKBalanceTuning
     {
         int w = GetAttackSeverityWeight(stage);
         return -(w + 1);
+    }
+
+    public static int GetHarmColonyAnimalPawnDelta(int stage)
+    {
+        return stage >= 1 ? LocalRepEvents.HarmColonyAnimalPawnDown : LocalRepEvents.HarmColonyAnimalPawnHit;
+    }
+
+    public static int GetHarmColonyAnimalSettlementDelta(int stage)
+    {
+        return stage >= 1 ? LocalRepEvents.HarmColonyAnimalSettlementDown : LocalRepEvents.HarmColonyAnimalSettlementHit;
+    }
+
+    public static float GetAnimalTrainingChanceMultiplier(float directInfluenceIndex)
+    {
+        return Mathf.Clamp(1f + (LocalRep.AnimalTrainingChanceSwing * directInfluenceIndex), LocalRep.AnimalTrainingChanceClampMin, LocalRep.AnimalTrainingChanceClampMax);
+    }
+
+    public static float GetAnimalBondChanceMultiplier(float directInfluenceIndex)
+    {
+        return Mathf.Clamp(1f + (LocalRep.AnimalBondChanceSwing * directInfluenceIndex), LocalRep.AnimalBondChanceClampMin, LocalRep.AnimalBondChanceClampMax);
     }
 
     public static int ClampStandingCharityDelta(int delta)

@@ -56,6 +56,9 @@
   <D2HK_UI_Assign>Asignar</D2HK_UI_Assign>
 
   <D2HK_UI_TradePriceImprovement>Mejora del precio de comercio</D2HK_UI_TradePriceImprovement>
+  <D2HK_UI_AnimalTrainingChance>Animal Training Chance</D2HK_UI_AnimalTrainingChance>
+  <D2HK_UI_AnimalBondChance>Animal Bond Chance</D2HK_UI_AnimalBondChance>
+  <D2HK_UI_AnimalDirectRepTooltip>Uses direct reputation with this animal only. Echoed reputation does not affect animal training or bonding.</D2HK_UI_AnimalDirectRepTooltip>
   <D2HK_UI_GoodwillGains>Ganancias de buena voluntad</D2HK_UI_GoodwillGains>
   <D2HK_UI_GoodwillLosses>Pérdidas de buena voluntad</D2HK_UI_GoodwillLosses>
   <D2HK_UI_NegotiationAbility>Capacidad de negociación</D2HK_UI_NegotiationAbility>

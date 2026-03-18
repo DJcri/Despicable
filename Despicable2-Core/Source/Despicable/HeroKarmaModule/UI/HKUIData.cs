@@ -341,25 +341,39 @@ internal static class HKUIData
             bool hasIntimidating = HKPerkEffects.HasIntimidatingPresence(hero);
             bool hasTerror = HKPerkEffects.HasTerrorEffect(hero);
 
-            if (target != null && HKSettingsUtil.LocalRepInfluencePrisoners && target.IsPrisonerOfColony)
+            if (target != null && global::Despicable.PawnQuery.IsAnimal(target))
             {
-                float recruit = LocalRepTuning.RecruitDeltaResistance(influence, hasSilverTongue);
-                float convert = LocalRepTuning.ConvertDeltaCertainty(influence, hasSilverTongue);
+                float directInfluence = LocalReputationUtility.InfluenceIndexFromScore(snapshot.directScore);
+                float trainingDelta = HKBalanceTuning.GetAnimalTrainingChanceMultiplier(directInfluence) - 1f;
+                float bondDelta = HKBalanceTuning.GetAnimalBondChanceMultiplier(directInfluence) - 1f;
 
-                if (!Mathf.Approximately(recruit, 0f))
-                    lines.Add(HKDisplayLine.Pair("D2HK_UI_RecruitResistance".Translate(), FormatSignedFixed(recruit, 2), TintForSigned(recruit, beneficialWhenPositive: false)));
-                if (!Mathf.Approximately(convert, 0f))
-                    lines.Add(HKDisplayLine.Pair("D2HK_UI_ConvertCertainty".Translate(), FormatSignedPercent(convert, 1), TintForSigned(convert, beneficialWhenPositive: false)));
+                if (!Mathf.Approximately(trainingDelta, 0f))
+                    lines.Add(HKDisplayLine.Pair("D2HK_UI_AnimalTrainingChance".Translate(), FormatSignedPercent(trainingDelta, 1), TintForSigned(trainingDelta, beneficialWhenPositive: true), "D2HK_UI_AnimalDirectRepTooltip".Translate()));
+                if (!Mathf.Approximately(bondDelta, 0f))
+                    lines.Add(HKDisplayLine.Pair("D2HK_UI_AnimalBondChance".Translate(), FormatSignedPercent(bondDelta, 1), TintForSigned(bondDelta, beneficialWhenPositive: true), "D2HK_UI_AnimalDirectRepTooltip".Translate()));
             }
-
-            if (target != null && HKSettingsUtil.LocalRepArrestCompliance && IsArrestRelevant(target))
+            else
             {
-                float trust = LocalRepTuning.ArrestTrustChance(influence);
-                float fear = LocalRepTuning.ArrestFearSynergyChance(influence, hasIntimidating || hasTerror);
-                if (trust > 0f)
-                    lines.Add(HKDisplayLine.Pair("D2HK_UI_ArrestCompliance".Translate(), FormatSignedPercent(trust, 1), TintForSigned(trust, beneficialWhenPositive: true)));
-                if (fear > 0f)
-                    lines.Add(HKDisplayLine.Pair("D2HK_UI_ArrestComplianceFear".Translate(), FormatSignedPercent(fear, 1), TintForSigned(fear, beneficialWhenPositive: true)));
+                if (target != null && HKSettingsUtil.LocalRepInfluencePrisoners && target.IsPrisonerOfColony)
+                {
+                    float recruit = LocalRepTuning.RecruitDeltaResistance(influence, hasSilverTongue);
+                    float convert = LocalRepTuning.ConvertDeltaCertainty(influence, hasSilverTongue);
+
+                    if (!Mathf.Approximately(recruit, 0f))
+                        lines.Add(HKDisplayLine.Pair("D2HK_UI_RecruitResistance".Translate(), FormatSignedFixed(recruit, 2), TintForSigned(recruit, beneficialWhenPositive: false)));
+                    if (!Mathf.Approximately(convert, 0f))
+                        lines.Add(HKDisplayLine.Pair("D2HK_UI_ConvertCertainty".Translate(), FormatSignedPercent(convert, 1), TintForSigned(convert, beneficialWhenPositive: false)));
+                }
+
+                if (target != null && HKSettingsUtil.LocalRepArrestCompliance && IsArrestRelevant(target))
+                {
+                    float trust = LocalRepTuning.ArrestTrustChance(influence);
+                    float fear = LocalRepTuning.ArrestFearSynergyChance(influence, hasIntimidating || hasTerror);
+                    if (trust > 0f)
+                        lines.Add(HKDisplayLine.Pair("D2HK_UI_ArrestCompliance".Translate(), FormatSignedPercent(trust, 1), TintForSigned(trust, beneficialWhenPositive: true)));
+                    if (fear > 0f)
+                        lines.Add(HKDisplayLine.Pair("D2HK_UI_ArrestComplianceFear".Translate(), FormatSignedPercent(fear, 1), TintForSigned(fear, beneficialWhenPositive: true)));
+                }
             }
         }
 

@@ -55,6 +55,9 @@
   <D2HK_UI_Cancel>取消</D2HK_UI_Cancel>
   <D2HK_UI_Assign>指派</D2HK_UI_Assign>
   <D2HK_UI_TradePriceImprovement>交易价格改善</D2HK_UI_TradePriceImprovement>
+  <D2HK_UI_AnimalTrainingChance>Animal Training Chance</D2HK_UI_AnimalTrainingChance>
+  <D2HK_UI_AnimalBondChance>Animal Bond Chance</D2HK_UI_AnimalBondChance>
+  <D2HK_UI_AnimalDirectRepTooltip>Uses direct reputation with this animal only. Echoed reputation does not affect animal training or bonding.</D2HK_UI_AnimalDirectRepTooltip>
   <D2HK_UI_GoodwillGains>善意增长</D2HK_UI_GoodwillGains>
   <D2HK_UI_GoodwillLosses>善意损失</D2HK_UI_GoodwillLosses>
   <D2HK_UI_NegotiationAbility>谈判能力</D2HK_UI_NegotiationAbility>

@@ -15,6 +15,11 @@ public class LocalReputationService : ILocalReputationService
     {
         var comp = Current.Game?.GetComponent<HKLocalReputationComponent>();
         if (comp == null) return RepSnapshot.Invalid;
+
+        Pawn hero = HKResolve.TryResolvePawnById(heroPawnId);
+        Pawn target = HKResolve.TryResolvePawnById(targetPawnId);
+        LocalReputationUtility.TryEnsureEncounterEchoRecord(hero, target);
+
         var r = comp.GetPawnRecord(heroPawnId, targetPawnId);
         if (r == null)
         {
