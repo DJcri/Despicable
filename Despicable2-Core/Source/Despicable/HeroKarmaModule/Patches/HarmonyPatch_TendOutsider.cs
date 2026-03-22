@@ -58,6 +58,7 @@ public static void Postfix(Pawn doctor, Pawn patient)
         {
             if (doctor == null || patient == null) return;
             if (!HKHookUtilSafe.ActorIsHero(doctor)) return;
+            if (HKHookUtil.IsMechanoid(patient)) return;
 
             // Player-faction patients still affect Hero Karma; they simply have no non-player faction context.
 
@@ -108,6 +109,7 @@ public static void Postfix(Pawn doctor, Pawn patient)
             if (doctor == null || patient == null) return;
             if (!HKSettingsUtil.HookEnabled("TendOutsider") && !HKSettingsUtil.HookEnabled("StabilizeOutsider")) return;
             if (!HKHookUtilSafe.ActorIsHero(doctor)) return;
+            if (HKHookUtil.IsMechanoid(patient)) return;
             // Player-faction patients still affect Hero Karma; they simply have no non-player faction context.
 
             __state = HKGoodwillContext.Enter(doctor);

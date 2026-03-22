@@ -44,6 +44,12 @@ public static class PawnQuery
         catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("PawnQuery.IsHumanlike", "PawnQuery failed to read humanlike race state.", ex); return false; }
     }
 
+    public static bool IsMechanoid(Pawn pawn)
+    {
+        try { return pawn != null && pawn.RaceProps != null && pawn.RaceProps.IsMechanoid; }
+        catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("PawnQuery.IsMechanoid", "PawnQuery failed to read mechanoid race state.", ex); return false; }
+    }
+
     public static bool IsSpawned(Pawn pawn)
     {
         try { return pawn != null && pawn.Spawned; }

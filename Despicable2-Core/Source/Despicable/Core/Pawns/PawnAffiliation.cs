@@ -23,9 +23,12 @@ public static class PawnAffiliation
     {
         try
         {
-            if (pawn?.guest == null) return false;
-            return pawn.guest.GuestStatus != GuestStatus.Prisoner
-                && pawn.guest.GuestStatus != GuestStatus.Slave;
+            if (pawn == null) return false;
+            if (!PawnQuery.IsHumanlike(pawn) || PawnQuery.IsMechanoid(pawn)) return false;
+            if (pawn.guest == null) return false;
+            if (IsPrisonerLike(pawn) || IsSlaveLike(pawn)) return false;
+
+            return pawn.HostFaction != null || pawn.IsQuestLodger();
         }
         catch (Exception ex) { Despicable.Core.DebugLogger.WarnExceptionOnce("PawnAffiliation.IsGuestLike", "PawnAffiliation failed to read guest state.", ex); return false; }
     }

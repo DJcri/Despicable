@@ -45,6 +45,7 @@ public static class HarmonyPatch_RescueOutsider
 
             Pawn target = HKJobDriverUtil.TryGetPawnTarget(job, TargetIndex.A);
             if (target == null) return;
+            if (HKHookUtil.IsMechanoid(target)) return;
 
             // Rescuing animals and player-faction pawns should still affect Hero Karma even without a non-player faction context.
             if (target.Dead) return;

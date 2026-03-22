@@ -24,6 +24,10 @@ internal static class HKHookUtil
         return global::Despicable.PawnQuery.IsPermanentManhunterOrBerserk(p);
     }
 
+    public static bool IsMechanoid(Pawn p)
+    {
+        return global::Despicable.PawnQuery.IsMechanoid(p);
+    }
 
 public static bool IsGuestLike(Pawn p)
 {
