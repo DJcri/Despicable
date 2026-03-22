@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -12,14 +13,25 @@ namespace Despicable.Core.Compatibility;
 [HarmonyPatch(typeof(Pawn), nameof(Pawn.CurJobDef), MethodType.Getter)]
 internal static class HarmonyPatch_Pawn_CurJobDef_NLFacialAnimationCompat
 {
+    private static readonly string[] RelevantCustomLovinJobDefNames =
+    {
+        "Job_GetLovin",
+        "Job_GetBedLovin",
+        "Job_GiveLovin"
+    };
+
+    private static readonly JobDef[] RelevantCustomLovinJobDefs = new JobDef[RelevantCustomLovinJobDefNames.Length];
+    private static bool relevantCustomLovinJobDefsResolved;
+
     private static void Postfix(Pawn __instance, ref JobDef __result)
     {
         if (!ModMain.IsNlFacialInstalled) return;
+        if (!ContentAvailability.NSFWActive) return;
         if (__instance?.Map == null) return;
+        if (!IsRelevantCustomLovinJob(__result)) return;
 
         Job curJob = __instance.CurJob;
         if (curJob == null) return;
-        if (!IsRelevantCustomLovinJob(curJob.def)) return;
 
         var store = InteractionInstanceStore.Get(__instance.Map);
         if (store == null) return;
@@ -33,12 +45,28 @@ internal static class HarmonyPatch_Pawn_CurJobDef_NLFacialAnimationCompat
 
     private static bool IsRelevantCustomLovinJob(JobDef jobDef)
     {
-        string defName = jobDef?.defName;
-        if (defName == null) return false;
+        if (jobDef == null)
+            return false;
 
-        return defName == "Job_GetLovin"
-            || defName == "Job_GetBedLovin"
-            || defName == "Job_GiveLovin";
+        EnsureRelevantCustomLovinJobDefsResolved();
+        for (int i = 0; i < RelevantCustomLovinJobDefs.Length; i++)
+        {
+            if (ReferenceEquals(jobDef, RelevantCustomLovinJobDefs[i]))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void EnsureRelevantCustomLovinJobDefsResolved()
+    {
+        if (relevantCustomLovinJobDefsResolved)
+            return;
+
+        for (int i = 0; i < RelevantCustomLovinJobDefNames.Length; i++)
+            RelevantCustomLovinJobDefs[i] = DefDatabase<JobDef>.GetNamedSilentFail(RelevantCustomLovinJobDefNames[i]);
+
+        relevantCustomLovinJobDefsResolved = true;
     }
 
     private static bool ShouldExposeAsLovin(Pawn pawn, InteractionInstanceStore store, Job curJob)

@@ -141,6 +141,7 @@ public static class AgsCompile
             var k = track.keys[i];
             if (k == null) continue;
 
+            string graphicState = !k.graphicState.NullOrEmpty() ? k.graphicState : (k.variant >= 0 ? "variant_" + k.variant : null);
             var ek = new ExtendedKeyframe
             {
                 tick = k.tick,
@@ -148,16 +149,12 @@ public static class AgsCompile
                 offset = k.offset,
                 rotation = k.rotation,
                 visible = k.visible,
-                graphicState = k.graphicState,
+                graphicState = graphicState,
                 layerBias = Mathf.Clamp(k.layerBias, -3, 3)
             };
 
             // Preserve authored scale (prop nodes use this heavily). Defaults to Vector3.one when unset.
             VerseKeyframeCompat.TrySetScale(ek, k.scale);
-
-            // AgsModel.KeySpec.variant uses -1 as "unset" (not nullable).
-            if (k.variant != -1)
-                ek.variant = k.variant;
 
             if (!k.soundDefName.NullOrEmpty())
                 ek.sound = DefDatabase<SoundDef>.GetNamedSilentFail(k.soundDefName);

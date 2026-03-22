@@ -31,18 +31,25 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
     });
 
     private const float SectionHeaderHeight = 28f;
+    private const float EyeDetailSideToggleRowHeight = 24f;
     private const float TileSize = 64f;
     private const float TileGap = 6f;
     private const float WidePreviewWidth = 360f;
+
+    private enum FaceStyleLane
+    {
+        Eyes,
+        Brows,
+        Mouth,
+        EyeDetails,
+    }
 
     private readonly Pawn _pawn;
     private readonly CompFaceParts _comp;
     private readonly PreviewRenderMode _previewRenderMode;
 
-    private Vector2 _eyesScroll;
-    private float _eyesContentHeight;
-    private Vector2 _mouthScroll;
-    private float _mouthContentHeight;
+    private Vector2 _selectorsScroll;
+    private float _selectorsContentHeight;
     private Pawn _previewPawn;
     private CompFaceParts _previewComp;
     private WorkshopPreviewRenderer _previewRenderer;
@@ -54,6 +61,8 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         _comp = pawn?.TryGetComp<CompFaceParts>();
         _previewRenderMode = previewRenderMode;
 
+        SetEditorActiveForPawn(_pawn, true);
+
         draggable = true;
         doCloseX = true;
         closeOnClickedOutside = false;
@@ -64,12 +73,20 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     public override Vector2 InitialSize => new(920f, 640f);
 
+    private static void SetEditorActiveForPawn(Pawn pawn, bool isActive)
+    {
+        FaceRuntimeActivityManager.SetEditorActive(pawn, isActive);
+        pawn?.TryGetComp<CompFaceParts>()?.NotifyEditorActiveStateChanged(isActive);
+    }
+
     protected override bool UseBodyScroll => false;
     protected override bool EnableAutoMeasure => false;
     protected override D2UIStyle Style => FaceUiStyle;
 
     public override void PreClose()
     {
+        SetEditorActiveForPawn(_pawn, false);
+        SetEditorActiveForPawn(_previewPawn, false);
         ReleasePreviewResources();
         base.PreClose();
     }
@@ -106,21 +123,21 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     private void DrawPreviewPane(Rect rect)
     {
-        using var panel = Ctx.GroupPanel("PreviewPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
+        using var previewPanel = Ctx.GroupPanel("PreviewPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
         if (_pawn == null)
         {
-            var v = Ctx.D2VStack(panel.Inner, label: "PreviewPanel/Empty");
+            var v = Ctx.D2VStack(previewPanel.Inner, label: "PreviewPanel/Empty");
             v.NextTextBlock(Ctx, "No pawn selected.", GameFont.Small, 0f, "PreviewPanel/EmptyLabel");
             return;
         }
 
         if (_previewRenderMode == PreviewRenderMode.IsolatedComposite)
         {
-            DrawIsolatedFaceCompositePreview(panel.Inner);
+            DrawIsolatedFaceCompositePreview(previewPanel.Inner);
             return;
         }
 
-        Rect livePreviewRect = ResolveLivePreviewRect(panel.Inner);
+        Rect livePreviewRect = ResolveLivePreviewRect(previewPanel.Inner);
         if (livePreviewRect.width <= 0f || livePreviewRect.height <= 0f)
             return;
 
@@ -154,23 +171,6 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     private void PrepareLivePreview()
     {
-        if (_previewPawn == null && _pawn != null)
-        {
-            try
-            {
-                _previewPawn = PreviewPawnFactory.MakePreviewPawn(_pawn);
-                _previewComp = _previewPawn?.TryGetComp<CompFaceParts>();
-                _previewPortraitDirty = true;
-            }
-            catch (Exception ex)
-            {
-                Despicable.Core.DebugLogger.WarnExceptionOnce(
-                    "Dialog_D2FacePartsCustomizer.CreatePreviewPawn",
-                    "Face parts customizer failed to create a preview pawn cleanly.",
-                    ex);
-            }
-        }
-
         Pawn previewPawn = GetPortraitPawn();
         if (previewPawn == null || !_previewPortraitDirty)
             return;
@@ -179,8 +179,8 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         {
             previewPawn.Drawer?.renderer?.EnsureGraphicsInitialized();
             AutoEyePatchRuntime.PrewarmForPawn(previewPawn);
-            _previewComp?.InvalidateFaceStructure();
-            _previewComp?.RefreshFaceHard(false);
+            _comp?.InvalidateFaceStructure();
+            _comp?.RefreshFaceHard(false);
             previewPawn.Drawer?.renderer?.SetAllGraphicsDirty();
             PortraitsCache.SetDirty(previewPawn);
             _previewPortraitDirty = false;
@@ -196,7 +196,7 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
 
     private Pawn GetPortraitPawn()
     {
-        return _previewPawn ?? _pawn;
+        return _pawn ?? _previewPawn;
     }
 
     private Texture TryRenderLivePreviewTexture(Rect rect)
@@ -228,9 +228,12 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
     private void DrawIsolatedFaceCompositePreview(Rect rect)
     {
         Texture2D headTexture = FacePreviewCache.ResolveHeadTexture(_pawn?.story?.headType);
-        Texture2D eyeTexture = FacePreviewCache.ResolveFacePartTexture(_pawn, _comp?.eyeStyleDef);
-        Texture2D mouthTexture = FacePreviewCache.ResolveFacePartTexture(_pawn, _comp?.mouthStyleDef);
-        Texture2D detailTexture = FacePreviewCache.ResolveTexture(_comp?.GetBaseDetailTexPath(), "FacePreviewCache.ResolveDetailTexture");
+        FacePartSideMode eyeDetailSideMode = _comp?.GetResolvedEyeDetailSideMode() ?? FacePartSideMode.Both;
+        string eyeDetailDebugLabel = ResolvePreferredPreviewDebugLabel("FacePart_EyeDetail_L", "FacePart_EyeDetail_R", _comp?.eyeDetailStyleDef, eyeDetailSideMode);
+        Texture2D eyeDetailTexture = ResolvePreviewPartTexture(eyeDetailDebugLabel, _comp?.eyeDetailStyleDef, CompFaceParts.EMPTY_DETAIL_TEX_PATH, "FacePreviewCache.ResolveEyeDetailTexture", eyeDetailSideMode);
+        Texture2D eyeTexture = ResolvePreviewPartTexture("FacePart_Eye_L", _comp?.eyeStyleDef, CompFaceParts.DEFAULT_EYE_TEX_PATH, "FacePreviewCache.ResolveEyeTexture");
+        Texture2D browTexture = ResolvePreviewPartTexture("FacePart_Brow_L", _comp?.browStyleDef, CompFaceParts.DEFAULT_BROW_TEX_PATH, "FacePreviewCache.ResolveBrowTexture");
+        Texture2D mouthTexture = ResolvePreviewPartTexture("FacePart_Mouth", _comp?.mouthStyleDef, CompFaceParts.DEFAULT_MOUTH_TEX_PATH, "FacePreviewCache.ResolveMouthTexture");
 
         FacePreviewCache.DrawAlignedTextureStack(
             Ctx,
@@ -239,9 +242,32 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
             FacePreviewCache.PreviewAnchor.Center,
             padding: 8f,
             headTexture,
-            detailTexture,
+            eyeDetailTexture,
             eyeTexture,
+            browTexture,
             mouthTexture);
+    }
+
+    private static string ResolvePreferredPreviewDebugLabel(string leftDebugLabel, string rightDebugLabel, FacePartStyleDef style, FacePartSideMode selectedSideMode = FacePartSideMode.Both)
+    {
+        FacePartSideMode effectiveSideMode = CompFaceParts.ResolveStyleSideMode(style, selectedSideMode);
+        if (effectiveSideMode == FacePartSideMode.RightOnly && !rightDebugLabel.NullOrEmpty())
+            return rightDebugLabel;
+
+        return leftDebugLabel;
+    }
+
+    private Texture2D ResolvePreviewPartTexture(string debugLabel, FacePartStyleDef style, string fallbackTexPath, string warnOnceKey, FacePartSideMode selectedSideMode = FacePartSideMode.Both)
+    {
+        Texture2D texture = FacePreviewCache.ResolveFacePartTexture(_pawn, style, debugLabel, fallbackTexPath, selectedSideMode);
+        if (texture != null)
+            return texture;
+
+        string resolvedPath = fallbackTexPath;
+        if ((debugLabel == "FacePart_Eye_L" || debugLabel == "FacePart_Eye_R") && !resolvedPath.NullOrEmpty())
+            resolvedPath = FacePartsUtil.GetEyePath(_pawn, resolvedPath);
+
+        return FacePreviewCache.ResolveTexture(resolvedPath, warnOnceKey);
     }
 
     private void DrawSelectorsPane(Rect rect)
@@ -249,38 +275,77 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         string unavailableReason = GetUnavailableReason();
         if (!unavailableReason.NullOrEmpty())
         {
-            using var panel = Ctx.GroupPanel("UnavailablePanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
-            var v = Ctx.D2VStack(panel.Inner, label: "UnavailablePanel/Stack");
+            using var unavailablePanel = Ctx.GroupPanel("UnavailablePanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
+            var v = Ctx.D2VStack(unavailablePanel.Inner, label: "UnavailablePanel/Stack");
             Rect messageRect = v.NextFill(UIRectTag.Label, "UnavailablePanel/MessageRect");
             using (new TextStateScope(GameFont.Small, TextAnchor.MiddleCenter, true))
                 D2Widgets.LabelClippedAligned(Ctx, messageRect, "Face parts unavailable for this pawn.", TextAnchor.MiddleCenter, "UnavailablePanel/Message", unavailableReason);
             return;
         }
 
-        float panelGap = Ctx.Style.GapM;
-        float panelHeight = Mathf.Max(0f, (rect.height - panelGap) * 0.5f);
-        Rect eyesRect = new(rect.x, rect.y, rect.width, panelHeight);
-        Rect mouthRect = new(rect.x, eyesRect.yMax + panelGap, rect.width, Mathf.Max(0f, rect.yMax - eyesRect.yMax - panelGap));
-
-        DrawStylePanel(eyesRect, "Eyes", GetStyles(forEyes: true), ref _eyesScroll, ref _eyesContentHeight, forEyes: true);
-        DrawStylePanel(mouthRect, "Mouth", GetStyles(forEyes: false), ref _mouthScroll, ref _mouthContentHeight, forEyes: false);
+        using var selectorsPanel = Ctx.GroupPanel("SelectorsPanel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
+        D2ScrollView.Draw(
+            Ctx,
+            selectorsPanel.Inner,
+            ref _selectorsScroll,
+            ref _selectorsContentHeight,
+            delegate(UIContext localCtx, ref D2VStack localV)
+            {
+                DrawAllStylePanels(localCtx, ref localV);
+            },
+            "SelectorsPanel/Scroll");
     }
 
-    private void DrawStylePanel(Rect rect, string title, List<FacePartStyleDef> styles, ref Vector2 scroll, ref float contentHeight, bool forEyes)
+    private void DrawAllStylePanels(UIContext ctx, ref D2VStack v)
     {
-        using var panel = Ctx.GroupPanel(title + "Panel", rect, soft: true, pad: true, padOverride: Ctx.Style.Pad);
-        D2Section.Parts section = D2Section.Layout(Ctx, panel.Inner, new D2Section.Spec(title + "Section", headerHeight: SectionHeaderHeight, soft: false, pad: false, drawBackground: false));
-        D2Section.DrawCaptionStrip(Ctx, section.Header, title, title + "Section/Title", GameFont.Medium);
-        D2ScrollView.Draw(Ctx, section.Body, ref scroll, ref contentHeight,
-            delegate(UIContext localCtx, ref D2VStack localV) { DrawTileGrid(localCtx, ref localV, styles, forEyes); },
-            title + "Section/Scroll");
+        DrawStylePanel(ctx, ref v, FaceStyleLane.Eyes);
+        DrawStylePanel(ctx, ref v, FaceStyleLane.Brows);
+        DrawStylePanel(ctx, ref v, FaceStyleLane.Mouth);
+        DrawStylePanel(ctx, ref v, FaceStyleLane.EyeDetails);
     }
 
-    private void DrawTileGrid(UIContext ctx, ref D2VStack v, List<FacePartStyleDef> styles, bool forEyes)
+    private void DrawStylePanel(UIContext ctx, ref D2VStack v, FaceStyleLane lane)
     {
+        string title = GetLaneTitle(lane);
+        List<FacePartStyleDef> styles = GetStyles(lane);
+        bool showEyeDetailSideToggle = lane == FaceStyleLane.EyeDetails && ShouldShowEyeDetailSideToggle();
+        float panelHeight = MeasureStylePanelHeight(v.Bounds.width, styles?.Count ?? 0, showEyeDetailSideToggle);
+        Rect rect = v.Next(panelHeight, UIRectTag.PanelSoft, title + "Panel/Outer");
+
+        using var stylePanel = ctx.GroupPanel(title + "Panel", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
+        D2Section.Parts section = D2Section.Layout(ctx, stylePanel.Inner, new D2Section.Spec(title + "Section", headerHeight: SectionHeaderHeight, soft: false, pad: false, drawBackground: false));
+        DrawStylePanelHeader(ctx, section.Header, title, lane);
+
+        Texture2D headTexture = FacePreviewCache.ResolveHeadTexture(_pawn?.story?.headType);
+        var bodyStack = ctx.D2VStack(section.Body, label: title + "Section/BodyStack");
+        if (showEyeDetailSideToggle)
+        {
+            Rect toggleRowRect = bodyStack.Next(EyeDetailSideToggleRowHeight, UIRectTag.Group, title + "Section/SideToggleRow");
+            DrawEyeDetailSideToggleRow(ctx, toggleRowRect, "EyeDetails/SideToggleRow");
+        }
+
+        DrawTileGrid(ctx, ref bodyStack, styles, lane, headTexture);
+    }
+
+    private float MeasureStylePanelHeight(float availableWidth, int itemCount, bool includeEyeDetailSideToggle = false)
+    {
+        float innerWidth = Mathf.Max(0f, availableWidth - (Ctx.Style.Pad * 2f));
+        float bodyHeight = itemCount > 0
+            ? FacePreviewCache.MeasureGridHeight(innerWidth, itemCount, TileSize, TileGap)
+            : Ctx.Style.Line;
+
+        if (includeEyeDetailSideToggle)
+            bodyHeight += EyeDetailSideToggleRowHeight + Ctx.Style.Gap;
+
+        return (Ctx.Style.Pad * 2f) + SectionHeaderHeight + bodyHeight;
+    }
+
+    private void DrawTileGrid(UIContext ctx, ref D2VStack v, List<FacePartStyleDef> styles, FaceStyleLane lane, Texture2D headTexture)
+    {
+        string laneId = GetLaneIdPrefix(lane);
         if (styles == null || styles.Count == 0)
         {
-            v.NextTextBlock(ctx, "No styles available.", GameFont.Small, 0f, (forEyes ? "Eyes" : "Mouth") + "/Empty");
+            v.NextTextBlock(ctx, "No styles available.", GameFont.Small, 0f, laneId + "/Empty");
             return;
         }
 
@@ -289,12 +354,12 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         int rowIndex = 0;
         while (index < styles.Count)
         {
-            Rect rowRect = v.Next(TileSize, UIRectTag.Group, (forEyes ? "Eyes" : "Mouth") + "/GridRow[" + rowIndex + "]");
+            Rect rowRect = v.Next(TileSize, UIRectTag.Group, laneId + "/GridRow[" + rowIndex + "]");
             float x = rowRect.x;
             for (int col = 0; col < columns && index < styles.Count; col++, index++)
             {
                 Rect tileRect = new(x, rowRect.y, TileSize, TileSize);
-                DrawStyleTile(tileRect, styles[index], forEyes, index);
+                DrawStyleTile(tileRect, styles[index], lane, index, headTexture);
                 x += TileSize + TileGap;
             }
 
@@ -302,10 +367,11 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
         }
     }
 
-    private void DrawStyleTile(Rect rect, FacePartStyleDef style, bool forEyes, int index)
+    private void DrawStyleTile(Rect rect, FacePartStyleDef style, FaceStyleLane lane, int index, Texture2D headTexture)
     {
-        bool selected = style == (forEyes ? _comp?.eyeStyleDef : _comp?.mouthStyleDef);
-        string id = (forEyes ? "Eyes" : "Mouth") + "/Tile[" + index + "]";
+        bool selected = style == GetSelectedStyle(lane);
+        string laneId = GetLaneIdPrefix(lane);
+        string id = laneId + "/Tile[" + index + "]";
         Ctx.RecordRect(rect, UIRectTag.Button, id, selected ? "selected=1" : "selected=0");
 
         if (Ctx.Pass == UIPass.Draw)
@@ -319,62 +385,249 @@ public sealed class Dialog_D2FacePartsCustomizer : D2WindowBlueprint
             if (selected)
                 D2Widgets.HighlightSelected(Ctx, rect, id + "/Selected");
 
-            Texture2D texture = FacePreviewCache.ResolveFacePartTexture(_pawn, style);
-            FacePreviewCache.DrawCroppedTexture(Ctx, rect.ContractedBy(6f), texture, id + "/Preview", 0f, FacePreviewCache.PreviewAnchor.Center);
+            FacePartSideMode previewSideMode = GetPreviewSideModeForStyle(lane, style, selected);
+            string previewDebugLabel = lane == FaceStyleLane.EyeDetails ? ResolvePreferredPreviewDebugLabel("FacePart_EyeDetail_L", "FacePart_EyeDetail_R", style, previewSideMode) : null;
+            Texture2D styleTexture = FacePreviewCache.ResolveFacePartTexture(_pawn, style, previewDebugLabel, null, previewSideMode);
+            FacePreviewCache.DrawCroppedTexture(
+                Ctx,
+                rect.ContractedBy(4f),
+                styleTexture,
+                id + "/Preview",
+                0f,
+                FacePreviewCache.PreviewAnchor.Center);
 
             if (Widgets.ButtonInvisible(rect, false))
-                ApplyStyle(style, forEyes);
+                ApplyStyle(style, lane);
         }
     }
 
-    private List<FacePartStyleDef> GetStyles(bool forEyes)
+
+    private void DrawStylePanelHeader(UIContext ctx, Rect rect, string title, FaceStyleLane lane)
     {
-        string tag = forEyes ? "FacePart_Eye" : "FacePart_Mouth";
-        Gender? pawnGender = _pawn?.gender;
+        D2Section.DrawCaptionStrip(ctx, rect, title, title + "Section/Title", GameFont.Medium);
+    }
+
+    private bool ShouldShowEyeDetailSideToggle()
+    {
+        return _comp?.eyeDetailStyleDef?.allowSideSelection == true;
+    }
+
+    private FacePartSideMode GetPreviewSideModeForStyle(FaceStyleLane lane, FacePartStyleDef style, bool selected)
+    {
+        if (lane != FaceStyleLane.EyeDetails)
+            return FacePartSideMode.Both;
+
+        if (style?.allowSideSelection == true && _comp != null)
+            return NormalizeEyeDetailSideMode(_comp.eyeDetailSideMode);
+
+        if (selected && _comp != null)
+            return _comp.GetResolvedEyeDetailSideMode();
+
+        return CompFaceParts.ResolveStyleSideMode(style, style?.sideMode ?? FacePartSideMode.Both);
+    }
+
+    private static FacePartSideMode NormalizeEyeDetailSideMode(FacePartSideMode sideMode)
+    {
+        return sideMode == FacePartSideMode.RightOnly ? FacePartSideMode.RightOnly : FacePartSideMode.LeftOnly;
+    }
+
+    private void DrawEyeDetailSideToggle(UIContext ctx, Rect rect, string id)
+    {
+        FacePartSideMode currentSideMode = NormalizeEyeDetailSideMode(_comp?.eyeDetailSideMode ?? FacePartSideMode.LeftOnly);
+        float buttonWidth = Mathf.Max(0f, (rect.width - ctx.Style.GapXS) * 0.5f);
+        D2RectSplit.SplitVertical(rect, buttonWidth, ctx.Style.GapXS, out Rect leftRect, out Rect rightRect);
+
+        DrawEyeDetailSideButton(ctx, leftRect, "L", currentSideMode != FacePartSideMode.RightOnly, id + "/Left", FacePartSideMode.LeftOnly, "Render this detail on the left side.");
+        DrawEyeDetailSideButton(ctx, rightRect, "R", currentSideMode == FacePartSideMode.RightOnly, id + "/Right", FacePartSideMode.RightOnly, "Render this detail on the right side.");
+    }
+
+
+    private void DrawEyeDetailSideToggleRow(UIContext ctx, Rect rect, string id)
+    {
+        float maxToggleWidth = (Ctx.Style.ButtonHeight * 2f) + ctx.Style.GapXS;
+        float toggleWidth = Mathf.Min(rect.width, Mathf.Max(46f, maxToggleWidth));
+        float labelWidth = Mathf.Max(0f, rect.width - toggleWidth - ctx.Style.GapS);
+        D2RectSplit.SplitVertical(rect, labelWidth, ctx.Style.GapS, out Rect labelRect, out Rect toggleRect);
+        D2Widgets.LabelClippedAligned(ctx, labelRect, "Side", TextAnchor.MiddleLeft, id + "/Label", "Choose which side of the face this asymmetrical detail should use.");
+        DrawEyeDetailSideToggle(ctx, toggleRect, id + "/Buttons");
+    }
+
+    private void DrawEyeDetailSideButton(UIContext ctx, Rect rect, string text, bool selected, string id, FacePartSideMode sideMode, string tooltip)
+    {
+        ctx.RecordRect(rect, UIRectTag.Button, id, selected ? "selected=1" : "selected=0");
+        if (ctx.Pass == UIPass.Draw)
+        {
+            if (selected)
+                D2Widgets.HighlightSelected(ctx, rect, id + "/Selected");
+
+            if (!tooltip.NullOrEmpty())
+                TooltipHandler.TipRegion(rect, tooltip);
+
+            if (D2Widgets.ButtonText(ctx, rect, text, id))
+                ApplyEyeDetailSideMode(sideMode);
+        }
+    }
+
+    private void ApplyEyeDetailSideMode(FacePartSideMode sideMode)
+    {
+        if (_comp?.eyeDetailStyleDef?.allowSideSelection != true)
+            return;
+
+        FacePartSideMode normalizedSideMode = NormalizeEyeDetailSideMode(sideMode);
+        if (_comp.eyeDetailSideMode == normalizedSideMode)
+            return;
+
+        _comp.eyeDetailSideMode = normalizedSideMode;
+        _comp.InvalidateFaceStructure();
+        _comp.RefreshFaceHard(true);
+        ForceImmediatePawnVisualRefresh(_pawn, markPortraitDirty: true);
+        _previewPortraitDirty = true;
+
+        if (_previewComp != null)
+        {
+            _previewComp.eyeDetailSideMode = normalizedSideMode;
+            _previewComp.InvalidateFaceStructure();
+            _previewComp.RefreshFaceHard(false);
+            ForceImmediatePawnVisualRefresh(_previewPawn, markPortraitDirty: true);
+            _previewPortraitDirty = true;
+        }
+    }
+
+    private List<FacePartStyleDef> GetStyles(FaceStyleLane lane)
+    {
+        string tag = GetLaneRenderNodeTagDefName(lane);
 
         return DefDatabase<FacePartStyleDef>.AllDefsListForReading
             .Where(style => style != null && style.renderNodeTag != null && string.Equals(style.renderNodeTag.defName, tag, StringComparison.Ordinal))
-            .Where(style => style.requiredGender == null || (pawnGender != null && style.requiredGender.Value == (byte)pawnGender.Value))
-            .OrderBy(style => style.LabelCap.ToString())
+            .Where(style => lane != FaceStyleLane.EyeDetails || !CompFaceParts.IsRetiredEyeDetailStyle(style))
+            .Where(style => CompFaceParts.IsStyleEligibleForPawn(_pawn, style))
+            .OrderBy(style => GetStyleSortGroup(style, lane))
+            .ThenBy(style => style.LabelCap.ToString())
             .ThenBy(style => style.defName ?? string.Empty)
             .ToList();
     }
 
-    private void ApplyStyle(FacePartStyleDef style, bool forEyes)
+    private int GetStyleSortGroup(FacePartStyleDef style, FaceStyleLane lane)
     {
-        if (_comp == null || style == null)
+        if (style == null)
+            return 2;
+
+        if (lane == FaceStyleLane.EyeDetails
+            && string.Equals(style.texPath, CompFaceParts.EMPTY_DETAIL_TEX_PATH, StringComparison.OrdinalIgnoreCase))
+            return 0;
+
+        return 1;
+    }
+
+    private FacePartStyleDef GetSelectedStyle(FaceStyleLane lane)
+    {
+        return lane switch
+        {
+            FaceStyleLane.Eyes => _comp?.eyeStyleDef,
+            FaceStyleLane.Brows => _comp?.browStyleDef,
+            FaceStyleLane.Mouth => _comp?.mouthStyleDef,
+            FaceStyleLane.EyeDetails => _comp?.eyeDetailStyleDef,
+            _ => null
+        };
+    }
+
+    private string GetLaneTitle(FaceStyleLane lane)
+    {
+        return lane switch
+        {
+            FaceStyleLane.Eyes => "Eyes",
+            FaceStyleLane.Brows => "Brows",
+            FaceStyleLane.Mouth => "Mouth",
+            FaceStyleLane.EyeDetails => "Eye Details",
+            _ => "Styles"
+        };
+    }
+
+    private string GetLaneIdPrefix(FaceStyleLane lane)
+    {
+        return lane switch
+        {
+            FaceStyleLane.Eyes => "Eyes",
+            FaceStyleLane.Brows => "Brows",
+            FaceStyleLane.Mouth => "Mouth",
+            FaceStyleLane.EyeDetails => "EyeDetails",
+            _ => "Styles"
+        };
+    }
+
+    private string GetLaneRenderNodeTagDefName(FaceStyleLane lane)
+    {
+        return lane switch
+        {
+            FaceStyleLane.Eyes => "FacePart_Eye",
+            FaceStyleLane.Brows => "FacePart_Brow",
+            FaceStyleLane.Mouth => "FacePart_Mouth",
+            FaceStyleLane.EyeDetails => "FacePart_EyeDetail",
+            _ => string.Empty
+        };
+    }
+
+    private void ApplyStyle(FacePartStyleDef style, FaceStyleLane lane)
+    {
+        if (_comp == null || style == null || !CompFaceParts.IsStyleEligibleForPawn(_pawn, style))
             return;
 
-        if (forEyes)
-        {
-            if (_comp.eyeStyleDef == style)
-                return;
-            _comp.eyeStyleDef = style;
-        }
-        else
-        {
-            if (_comp.mouthStyleDef == style)
-                return;
-            _comp.mouthStyleDef = style;
-        }
+        if (GetSelectedStyle(lane) == style)
+            return;
 
+        SetStyleOnComp(_comp, lane, style);
+        if (lane == FaceStyleLane.EyeDetails && style.allowSideSelection)
+            _comp.eyeDetailSideMode = NormalizeEyeDetailSideMode(_comp.eyeDetailSideMode);
+        
         _comp.InvalidateFaceStructure();
         _comp.RefreshFaceHard(true);
+        ForceImmediatePawnVisualRefresh(_pawn, markPortraitDirty: true);
+        _previewPortraitDirty = true;
 
         if (_previewComp != null)
         {
-            if (forEyes)
-                _previewComp.eyeStyleDef = _comp.eyeStyleDef;
-            else
-                _previewComp.mouthStyleDef = _comp.mouthStyleDef;
-
+            SetStyleOnComp(_previewComp, lane, style);
+            if (lane == FaceStyleLane.EyeDetails && style.allowSideSelection)
+                _previewComp.eyeDetailSideMode = NormalizeEyeDetailSideMode(_previewComp.eyeDetailSideMode);
             _previewComp.InvalidateFaceStructure();
             _previewComp.RefreshFaceHard(false);
-            _previewPawn?.Drawer?.renderer?.SetAllGraphicsDirty();
-            if (_previewPawn != null)
-                PortraitsCache.SetDirty(_previewPawn);
-            _previewPortraitDirty = false;
+            ForceImmediatePawnVisualRefresh(_previewPawn, markPortraitDirty: true);
+            _previewPortraitDirty = true;
         }
+    }
+
+    private static void SetStyleOnComp(CompFaceParts comp, FaceStyleLane lane, FacePartStyleDef style)
+    {
+        if (comp == null)
+            return;
+
+        switch (lane)
+        {
+            case FaceStyleLane.Eyes:
+                comp.eyeStyleDef = style;
+                break;
+            case FaceStyleLane.Brows:
+                comp.browStyleDef = style;
+                break;
+            case FaceStyleLane.Mouth:
+                comp.mouthStyleDef = style;
+                break;
+            case FaceStyleLane.EyeDetails:
+                comp.eyeDetailStyleDef = style;
+                break;
+        }
+    }
+
+    private static void ForceImmediatePawnVisualRefresh(Pawn pawn, bool markPortraitDirty)
+    {
+        PawnRenderer renderer = pawn?.Drawer?.renderer;
+        if (renderer == null)
+            return;
+
+        renderer.SetAllGraphicsDirty();
+        GlobalTextureAtlasManager.TryMarkPawnFrameSetDirty(pawn);
+        if (markPortraitDirty)
+            PortraitsCache.SetDirty(pawn);
     }
 
     private string GetUnavailableReason()

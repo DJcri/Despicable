@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!--
+    Example installed variant for a bionic penis:
+
+    <Despicable.AnatomyPartVariantDef>
+      <defName>D2_ExampleBionicPenisVariant</defName>
+      <basePart>Genital_Penis</basePart>
+      <hediffDefs>
+        <li>SomeBionicPenisImplantHediff</li>
+      </hediffDefs>
+      <sizeMultiplier>1.1</sizeMultiplier>
+      <fluids>
+        <li>
+          <fluid>Fluid_Semen</fluid>
+          <capacityMultiplier>1.5</capacityMultiplier>
+          <refillRateMultiplier>1.25</refillRateMultiplier>
+        </li>
+      </fluids>
+    </Despicable.AnatomyPartVariantDef>
+
+    Example appearance override targeting the installed variant:
+
+    <Despicable.AnatomyAppearanceOverrideDef>
+      <defName>D2_ExampleBionicPenisAppearance</defName>
+      <variantDefs>
+        <li>D2_ExampleBionicPenisVariant</li>
+      </variantDefs>
+      <parts>
+        <li>
+          <part>Genital_Penis</part>
+          <texPath>Path/BionicPenis/neutral</texPath>
+          <texPathAroused>Path/BionicPenis/aroused</texPathAroused>
+        </li>
+      </parts>
+    </Despicable.AnatomyAppearanceOverrideDef>
+  -->
+
+</Defs>

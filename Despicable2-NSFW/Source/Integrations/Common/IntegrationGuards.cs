@@ -49,11 +49,26 @@ internal static class IntegrationGuards
         => IsIntimacyLoaded();
 
     /// <summary>
-    /// When Intimacy is installed, Despicable keeps its own ordered manual lovin flow
-    /// but borrows Intimacy's validation rules instead of using Despicable-only consent checks.
+    /// When Intimacy is installed, Despicable can borrow its validation rules for manual lovin,
+    /// but only while Despicable's own manual consent and ideology toggles are still fully enabled.
+    /// If either toggle is loosened, manual lovin should fall back to Despicable's native
+    /// setting-aware checks so "disabled" truly means disabled for ordered interactions.
+    /// Autonomous lovin uses a separate defer gate and is intentionally unaffected here.
     /// </summary>
     internal static bool ShouldUseIntimacyForLovinValidation()
-        => IsIntimacyLoaded();
+    {
+        if (!IsIntimacyLoaded())
+            return false;
+
+        object settings = CommonUtil.GetSettings();
+        if (settings == null)
+            return true;
+
+        var settingsType = settings.GetType();
+        bool lovinMutualConsent = ReadBool(settingsType, settings, "lovinMutualConsent", defaultValue: true);
+        bool lovinRespectIdeology = ReadBool(settingsType, settings, "lovinRespectIdeology", defaultValue: true);
+        return lovinMutualConsent && lovinRespectIdeology;
+    }
 
     internal static bool ShouldHideManualLovinOptionWithIntimacy()
     {
@@ -76,6 +91,19 @@ internal static class IntegrationGuards
         }
 
         return true;
+    }
+
+    private static bool ReadBool(System.Type settingsType, object settings, string memberName, bool defaultValue)
+    {
+        var field = settingsType.GetField(memberName);
+        if (field != null && field.FieldType == typeof(bool))
+            return (bool)field.GetValue(settings);
+
+        var prop = settingsType.GetProperty(memberName);
+        if (prop != null && prop.PropertyType == typeof(bool) && prop.CanRead)
+            return (bool)prop.GetValue(settings, null);
+
+        return defaultValue;
     }
 
     internal static bool IsBirdsOfAFeatherLoaded()

@@ -249,8 +249,12 @@ internal static class IntimacyValidationBridge
         if (Cache.HasTemporarilyPreventLovinHediff != null && Cache.HasTemporarilyPreventLovinHediff(pawn))
             return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
 
-        if (Cache.IsAlreadyDoingLovin != null && Cache.IsAlreadyDoingLovin(pawn))
+        if (!LovinUtil.IsActiveSelfLovinJob(pawn)
+            && Cache.IsAlreadyDoingLovin != null
+            && Cache.IsAlreadyDoingLovin(pawn))
+        {
             return BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
+        }
 
         if (Cache.CanCurrentlyDoLovin != null && !Cache.CanCurrentlyDoLovin(pawn))
         {

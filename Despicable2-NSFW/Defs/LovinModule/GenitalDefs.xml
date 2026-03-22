@@ -9,12 +9,30 @@
 	<Despicable.GenitalDef>
 		<defName>Genital_Penis</defName>
 		<gender>1</gender>
-		<texPathAroused>Genitals/Penis/erect</texPathAroused>
+		<slot>ExternalGenitals</slot>
+		<tags>
+			<li>Penis</li>
+		</tags>
+		<capabilities>
+			<li>Penetrative</li>
+		</capabilities>
+		<fluidTemplates>
+			<li>
+				<fluid>Fluid_Semen</fluid>
+				<baseCapacity>25</baseCapacity>
+				<minCapacity>15</minCapacity>
+				<maxCapacity>40</maxCapacity>
+				<initialFillPercent>1.0</initialFillPercent>
+				<refillPerDay>24</refillPerDay>
+			</li>
+		</fluidTemplates>
+		<showWhileAnimating>true</showWhileAnimating>
+		<texPathAroused>Anatomy/Penis/human/erect</texPathAroused>
 		<properties Class="PawnRenderNodeProperties">
 			<debugLabel>Penis</debugLabel>
 			<nodeClass>Despicable.PawnRenderNode_Genitals</nodeClass>
 			<workerClass>Despicable.PawnRenderNodeWorker_Genitals</workerClass>
-			<texPath>Genitals/Penis/flaccid</texPath>
+			<texPath>Anatomy/Penis/human/flaccid</texPath>
 			<tagDef>Genitals</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Skin</colorType>
@@ -25,12 +43,20 @@
 	<Despicable.GenitalDef>
 		<defName>Genital_Vagina</defName>
 		<gender>2</gender>
-		<texPathAroused>Genitals/Vagina/aroused</texPathAroused>
+		<slot>ExternalGenitals</slot>
+		<tags>
+			<li>Vagina</li>
+		</tags>
+		<capabilities>
+			<li>ReceptiveVaginal</li>
+		</capabilities>
+		<showWhileAnimating>false</showWhileAnimating>
+		<texPathAroused>Anatomy/Vagina/aroused</texPathAroused>
 		<properties Class="PawnRenderNodeProperties">
 			<debugLabel>Vagina</debugLabel>
 			<nodeClass>Despicable.PawnRenderNode_Genitals</nodeClass>
 			<workerClass>Despicable.PawnRenderNodeWorker_Genitals</workerClass>
-			<texPath>Genitals/Vagina/neutral</texPath>
+			<texPath>Anatomy/Vagina/neutral</texPath>
 			<tagDef>Genitals</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Skin</colorType>
@@ -38,25 +64,7 @@
 		</properties>
 	</Despicable.GenitalDef>
 	
-	<!-- Appendage offsets for each bodytype -->
-	<Despicable.BodyTypeGenitalsOffsetDef>
-		<defName>Hulk</defName>
-		<offset>(-0.08, 0, -0.18)</offset>
-	</Despicable.BodyTypeGenitalsOffsetDef>
-	
-	<Despicable.BodyTypeGenitalsOffsetDef>
-		<defName>Male</defName>
-		<offset>(0, 0, 0)</offset>
-	</Despicable.BodyTypeGenitalsOffsetDef>
-	
-	<Despicable.BodyTypeGenitalsOffsetDef>
-		<defName>Thin</defName>
-		<offset>(-0.1, 0, 0)</offset>
-	</Despicable.BodyTypeGenitalsOffsetDef>
-	
-	<Despicable.BodyTypeGenitalsOffsetDef>
-		<defName>Fat</defName>
-		<offset>(0.2, 0, -0.1)</offset>
-	</Despicable.BodyTypeGenitalsOffsetDef>
+
+	<!-- Built-in penis/vagina placement now lives in generic AnatomyPlacementDef defs. -->
 
 </Defs>

@@ -11,12 +11,12 @@ public static partial class HarmonyPatch_ExecutePrisoner
         __state = default;
         try
         {
-            if (!TryGetExecutionerAndVictim(__args, out Pawn executioner, out _))
+            if (!TryGetExecutionerAndVictim(__args, out Pawn executioner, out Pawn victim))
             {
                 return;
             }
 
-            if (!HKHookUtilSafe.ActorIsHero(executioner))
+            if (!HKHookUtilSafe.ActorIsHero(executioner) || !IsValidExecutionVictim(victim))
             {
                 return;
             }
@@ -46,7 +46,7 @@ public static partial class HarmonyPatch_ExecutePrisoner
                 return;
             }
 
-            if (!HKHookUtilSafe.ActorIsHero(executioner))
+            if (!HKHookUtilSafe.ActorIsHero(executioner) || !IsValidExecutionVictim(victim))
             {
                 return;
             }

@@ -1,38 +1,52 @@
 # Despicable2-Core
-Shared gameplay, animation, face-part, UI framework, and Hero Karma systems for the Despicable2 RimWorld 1.6 mod suite.
 
-This package is the Core half of the project. The optional explicit content lives in the separate `Despicable2-NSFW` package.
+Shared gameplay, animation, face-part, UI framework, and Hero Karma systems for the Despicable 2 RimWorld 1.6 mod suite.
 
-[-=! DISCLAIMER !=-]
+This package is the Core half of the project. The optional explicit-content and anatomy layer lives in the separate `Despicable2-NSFW` package.
 
-This repository can be used on its own for the shared systems it provides, but some feature descriptions below refer to optional integrations or the separate NSFW package.
+## What Core owns
 
-Unsubbing and resubbing will not always update the mod, use RimSort to update if anything is broken, or you're missing a feature after attempting to resub!
+- shared animation framework and Anim Group Studio
+- face parts, facial expressions, portrait warmup, and preview helpers
+- Hero Karma, local reputation, perks, and related UI
+- custom UI framework used across the suite
+- manual interaction menu infrastructure
+- compatibility-safe extension seams used by optional add-ons
 
-[-= ABOUT =-]
+## Standalone use
 
-A lightweight, bare-bones alternative to RJW and NAL's facial animations, built for maximum compatibility. Core includes the shared systems, optional integration hooks, Hero Karma, UI framework, and non-NSFW animation infrastructure used by the broader project.
+Core works on its own.
+You do **not** need the NSFW package for face parts, Hero Karma, Anim Group Studio, or the UI framework.
 
-[-= FEATURE SUMMARY =-]
+## Optional pairing
 
-- Shared animation framework and in-game animation authoring tools
-- Hero Karma (optional, select a hero and gain perks and debuffs)
-- Face parts and facial animation support
-- UI framework used by the mod's custom windows and tabs
+Pair this with `Despicable2-NSFW` only if you want the adult-only lovin', anatomy, and explicit-content features.
 
-[-= OPTIONAL PAIRING =-]
+## Feature notes
 
-Pair this with `Despicable2-NSFW` only if you want the adult-only lovin' features.
+### Face parts and facial animation
 
-[-= GUIDE =-]
+Core owns the face system and preview behavior.
+You can disable Despicable facial animation if you prefer another facial-animation mod path.
 
-[ Hero Karma ]
+### Anim Group Studio
 
-Set a hero to be responsible for your "deeds" good OR bad.
+Core includes the shared authoring and preview surfaces used for staged animation work.
+AGS preview uses detached preview pawns and workshop-scoped render state rather than normal gameplay playback.
 
-You do NOT need to set a hero for the other features to work, this is only for if you like to make self-inserts and want some balanced perks to go along with your play-style.
+### Hero Karma
 
-[ Facial expressions / Animations ]
+Hero Karma is optional inside Core.
+You can use the suite without assigning a hero, but the system is there if you want karma-driven perks, penalties, and standing/reputation behavior.
 
-You can turn facial animations off in favor of NL's facial animations, or default vanilla.
-The lovin' animation system and assets are a reworked and updated version of "c0ffeeee's rimworld animation framework" when the optional NSFW package is installed.
+## Docs
+
+- `Docs/README.md`
+- `Docs/AnimGroupStudio_Preview_Workflow.md`
+- `Docs/FaceParts_Preview_and_Portraits.md`
+- `Docs/Manual_Regression_Checklist.md`
+- `../Docs/DESPICABLE_SPEC.md`
+
+## Practical note
+
+If something seems missing after a workshop update, do not assume Steam actually refreshed the files cleanly. Verify the local mod contents before chasing phantom bugs.

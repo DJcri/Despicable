@@ -1,38 +1,18 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version='1.0' encoding='utf-8'?>
 <LanguageData>
-	<!-- DefInjected for Despicable.FacePartStyleDef (D2_Core) -->
-	<!-- Eye_Basic (label) -->
+	
+	
 	<Eye_Basic.label>Basic Eyes</Eye_Basic.label>
-	<!-- Eye_Cool (label) -->
-	<Eye_Cool.label>Cool</Eye_Cool.label>
-	<!-- Eye_Jovial (label) -->
-	<Eye_Jovial.label>Jovial</Eye_Jovial.label>
-	<!-- Eye_Serious (label) -->
-	<Eye_Serious.label>Serious</Eye_Serious.label>
-	<!-- Eye_Squint (label) -->
-	<Eye_Squint.label>Squint</Eye_Squint.label>
-	<!-- Eye_Thoughtful (label) -->
-	<Eye_Thoughtful.label>Thoughtful</Eye_Thoughtful.label>
-	<!-- Eye_Tilted (label) -->
-	<Eye_Tilted.label>Tilted</Eye_Tilted.label>
-	<!-- Mouth_Basic (label) -->
+	
 	<Mouth_Basic.label>Standard</Mouth_Basic.label>
-	<!-- Mouth_Derp (label) -->
-	<Mouth_Derp.label>Derp</Mouth_Derp.label>
-	<!-- Mouth_Frown (label) -->
+	
 	<Mouth_Frown.label>Frown</Mouth_Frown.label>
-	<!-- Mouth_Grin (label) -->
+	
 	<Mouth_Grin.label>Grin</Mouth_Grin.label>
-	<!-- Mouth_Indifferent (label) -->
-	<Mouth_Indifferent.label>Indifferent</Mouth_Indifferent.label>
-	<!-- Mouth_Monster (label) -->
-	<Mouth_Monster.label>Monster</Mouth_Monster.label>
-	<!-- Mouth_Overbite (label) -->
+	
 	<Mouth_Overbite.label>Overbite</Mouth_Overbite.label>
-	<!-- Mouth_Pretty (label) -->
-	<Mouth_Pretty.label>Pretty</Mouth_Pretty.label>
-	<!-- Mouth_Smirk (label) -->
+	
 	<Mouth_Smirk.label>Smirk</Mouth_Smirk.label>
-	<!-- Mouth_Smug (label) -->
+	
 	<Mouth_Smug.label>Smug</Mouth_Smug.label>
 </LanguageData>

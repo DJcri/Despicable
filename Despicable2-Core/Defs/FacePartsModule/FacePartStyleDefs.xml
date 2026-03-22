@@ -3,117 +3,130 @@
 	<!-- Eyes -->
 	<Despicable.FacePartStyleDef>
 		<defName>Eye_Basic</defName>
-		<label>Basic Eyes</label>
+		<label>Normal</label>
 		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_default</texPath>
+		<texPath>FaceParts/Eyes/eye_normal</texPath>
 		<weight>5</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
-		<defName>Eye_Jovial</defName>
-		<label>Jovial</label>
+		<defName>Eye_Halflid</defName>
+		<label>Halflid</label>
 		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_jovial</texPath>
+		<texPath>FaceParts/Eyes/eye_halflid</texPath>
 		<weight>2</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
-		<defName>Eye_Cool</defName>
-		<label>Cool</label>
+		<defName>Eye_Doe</defName>
+		<label>Doe</label>
 		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_cool</texPath>
+		<texPath>FaceParts/Eyes/eye_doe</texPath>
 		<weight>2</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
-		<defName>Eye_Squint</defName>
-		<label>Squint</label>
+		<defName>Eye_Dreamy</defName>
+		<label>Dreamy</label>
 		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_squint</texPath>
+		<texPath>FaceParts/Eyes/eye_dreamy</texPath>
 		<weight>1</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
-		<defName>Eye_Tilted</defName>
-		<label>Tilted</label>
+		<defName>Eye_Monolid</defName>
+		<label>Monolid</label>
 		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_tilted</texPath>
+		<texPath>FaceParts/Eyes/eye_monolid</texPath>
 		<weight>1</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
-		<defName>Eye_Serious</defName>
-		<label>Serious</label>
+		<defName>Eye_Seductive</defName>
+		<label>Seductive</label>
 		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_serious</texPath>
-		<weight>2</weight>
+		<texPath>FaceParts/Eyes/eye_seductive</texPath>
+		<weight>1</weight>
 	</Despicable.FacePartStyleDef>
+
+	<!-- Brows -->
 	<Despicable.FacePartStyleDef>
-		<defName>Eye_Thoughtful</defName>
-		<label>Thoughtful</label>
-		<renderNodeTag>FacePart_Eye</renderNodeTag>
-		<texPath>Gendered/eye_thoughtful</texPath>
+		<defName>Brow_Bushy</defName>
+		<label>Bushy</label>
+		<renderNodeTag>FacePart_Brow</renderNodeTag>
+		<texPath>FaceParts/Brows/Bushy/brow_bushy_flat</texPath>
 		<weight>3</weight>
 	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>Brow_Slit</defName>
+		<label>Slit</label>
+		<renderNodeTag>FacePart_Brow</renderNodeTag>
+		<texPath>FaceParts/Brows/Slit/brow_slit_flat</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>Brow_Thick</defName>
+		<label>Thick</label>
+		<renderNodeTag>FacePart_Brow</renderNodeTag>
+		<texPath>FaceParts/Brows/Thick/brow_thick_flat</texPath>
+		<weight>4</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>Brow_Thin</defName>
+		<label>Thin</label>
+		<renderNodeTag>FacePart_Brow</renderNodeTag>
+		<texPath>FaceParts/Brows/Thin/brow_thin_flat</texPath>
+		<weight>2</weight>
+	</Despicable.FacePartStyleDef>
+
 	<!-- Mouths -->
 	<Despicable.FacePartStyleDef>
 		<defName>Mouth_Basic</defName>
-		<label>Standard</label>
+		<label>Serious</label>
 		<renderNodeTag>FacePart_Mouth</renderNodeTag>
-		<texPath>FaceParts/Mouths/mouth_neutral</texPath>
+		<texPath>FaceParts/Mouths/mouth_serious</texPath>
 		<weight>8</weight>
-	</Despicable.FacePartStyleDef>
-	<Despicable.FacePartStyleDef>
-		<defName>Mouth_Indifferent</defName>
-		<label>Indifferent</label>
-		<renderNodeTag>FacePart_Mouth</renderNodeTag>
-		<texPath>FaceParts/Mouths/mouth_indifferent</texPath>
-		<weight>5</weight>
-	</Despicable.FacePartStyleDef>
-	<Despicable.FacePartStyleDef>
-		<defName>Mouth_Derp</defName>
-		<label>Derp</label>
-		<renderNodeTag>FacePart_Mouth</renderNodeTag>
-		<texPath>FaceParts/Mouths/mouth_derp</texPath>
-		<weight>2</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
 		<defName>Mouth_Frown</defName>
 		<label>Frown</label>
 		<renderNodeTag>FacePart_Mouth</renderNodeTag>
 		<texPath>FaceParts/Mouths/mouth_frown</texPath>
-		<weight>4</weight>
+		<weight>3</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
 		<defName>Mouth_Grin</defName>
 		<label>Grin</label>
 		<renderNodeTag>FacePart_Mouth</renderNodeTag>
 		<texPath>FaceParts/Mouths/mouth_grin</texPath>
-		<weight>5</weight>
+		<weight>3</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
-		<defName>Mouth_Pretty</defName>
-		<label>Pretty</label>
+		<defName>Mouth_Lipstick</defName>
+		<label>Lipstick</label>
 		<requiredGender>2</requiredGender>
 		<renderNodeTag>FacePart_Mouth</renderNodeTag>
-		<texPath>FaceParts/Mouths/mouth_pretty</texPath>
-		<weight>3</weight>
+		<texPath>FaceParts/Mouths/mouth_lipstick</texPath>
+		<weight>2</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
 		<defName>Mouth_Overbite</defName>
 		<label>Overbite</label>
 		<renderNodeTag>FacePart_Mouth</renderNodeTag>
 		<texPath>FaceParts/Mouths/mouth_overbite</texPath>
-		<weight>2</weight>
-	</Despicable.FacePartStyleDef>
-	<Despicable.FacePartStyleDef>
-		<defName>Mouth_Monster</defName>
-		<label>Monster</label>
-		<renderNodeTag>FacePart_Mouth</renderNodeTag>
-		<texPath>FaceParts/Mouths/mouth_monster</texPath>
 		<weight>1</weight>
 	</Despicable.FacePartStyleDef>
-		<Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>Mouth_Fangs</defName>
+		<label>Fangs</label>
+		<requiredGenes>
+			<li>Hemogenic</li>
+		</requiredGenes>
+		<renderNodeTag>FacePart_Mouth</renderNodeTag>
+		<texPath>FaceParts/Mouths/mouth_fangs</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
 		<defName>Mouth_Smirk</defName>
 		<label>Smirk</label>
 		<renderNodeTag>FacePart_Mouth</renderNodeTag>
 		<texPath>FaceParts/Mouths/mouth_smirk</texPath>
-		<weight>5</weight>
+		<weight>2</weight>
 	</Despicable.FacePartStyleDef>
 	<Despicable.FacePartStyleDef>
 		<defName>Mouth_Smug</defName>
@@ -122,4 +135,90 @@
 		<texPath>FaceParts/Mouths/mouth_smug</texPath>
 		<weight>1</weight>
 	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>Mouth_Sigmund</defName>
+		<label>Sigmund</label>
+		<renderNodeTag>FacePart_Mouth</renderNodeTag>
+		<texPath>FaceParts/Mouths/mouth_sigmund</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+
+	<!-- Eye details -->
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_None</defName>
+		<label>None</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/detail_empty</texPath>
+		<weight>12</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_CheekBlush</defName>
+		<label>Cheek blush</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/Eye/eyedetail_cheekblush</texPath>
+		<weight>2</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_DarkCircles</defName>
+		<label>Dark circles</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/Eye/eyedetail_darkcircles</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_Freckles</defName>
+		<label>Freckles</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/Eye/eyedetail_freckles</texPath>
+		<weight>2</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_Tears</defName>
+		<label>Tears</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/Eye/eyedetail_tears</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_Tired</defName>
+		<label>Tired</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/Eye/eyedetail_tired</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_Bandaid</defName>
+		<label>Bandaid</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<sideMode>LeftOnly</sideMode>
+		<allowSideSelection>true</allowSideSelection>
+		<texPath>FaceParts/Details/Eye/eye_bandaid</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_BeautyMark</defName>
+		<label>Beauty mark</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<sideMode>LeftOnly</sideMode>
+		<allowSideSelection>true</allowSideSelection>
+		<texPath>FaceParts/Details/Eye/eyedetail_beautymark</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_Dirt</defName>
+		<label>Dirt</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<texPath>FaceParts/Details/Eye/eyedetail_dirt</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+	<Despicable.FacePartStyleDef>
+		<defName>EyeDetail_Scar</defName>
+		<label>Scar</label>
+		<renderNodeTag>FacePart_EyeDetail</renderNodeTag>
+		<sideMode>LeftOnly</sideMode>
+		<allowSideSelection>true</allowSideSelection>
+		<texPath>FaceParts/Details/Eye/eyedetail_scar</texPath>
+		<weight>1</weight>
+	</Despicable.FacePartStyleDef>
+
 </Defs>

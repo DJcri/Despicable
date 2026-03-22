@@ -86,6 +86,88 @@ public partial class Dialog_AnimGroupStudio
         return isProp;
     }
 
+
+    private bool TryGetGraphicStateOptionsForNodeTag(string nodeTag, out List<string> stateIds)
+    {
+        stateIds = null;
+        if (nodeTag.NullOrEmpty()) return false;
+        if (graphicStateTagCache.TryGetValue(nodeTag, out var cached))
+        {
+            stateIds = cached;
+            return cached != null && cached.Count > 0;
+        }
+
+        var resolved = new List<string>();
+
+        try
+        {
+            var defs = DefDatabase<AnimationPropDef>.AllDefsListForReading;
+            if (!defs.NullOrEmpty())
+            {
+                for (int i = 0; i < defs.Count; i++)
+                {
+                    var def = defs[i];
+                    if (def?.animPropProperties?.tagDef?.defName != nodeTag) continue;
+
+                    if (def.animPropProperties is PawnRenderNodeProperties_GraphicVariants graphicProps
+                        && graphicProps.texPathVariantsDef != null)
+                    {
+                        var texPathVariantsDef = graphicProps.texPathVariantsDef;
+                        if (!texPathVariantsDef.stateIds.NullOrEmpty())
+                        {
+                            for (int si = 0; si < texPathVariantsDef.stateIds.Count; si++)
+                            {
+                                string stateId = texPathVariantsDef.stateIds[si];
+                                if (!stateId.NullOrEmpty())
+                                    resolved.Add(stateId);
+                            }
+                        }
+
+                        if (resolved.Count == 0 && !texPathVariantsDef.variants.NullOrEmpty())
+                        {
+                            for (int vi = 0; vi < texPathVariantsDef.variants.Count; vi++)
+                            {
+                                resolved.Add("variant_" + (vi + 1));
+                            }
+                        }
+                    }
+
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            resolved.Clear();
+            Despicable.Core.DebugLogger.WarnExceptionOnce(
+                "AgsState:GraphicStates",
+                "AgsState ignored a non-fatal graphic state lookup exception.",
+                ex);
+        }
+
+        if (resolved.Count > 1)
+            resolved = resolved.Distinct().ToList();
+
+        graphicStateTagCache[nodeTag] = resolved;
+        stateIds = resolved;
+        return resolved.Count > 0;
+    }
+
+    private static string FormatGraphicStateLabel(string stateId)
+    {
+        if (stateId.NullOrEmpty()) return "(Default)";
+
+        const string variantPrefix = "variant_";
+        if (stateId.StartsWith(variantPrefix, StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(stateId.Substring(variantPrefix.Length), out int variantIndex)
+            && variantIndex > 0)
+        {
+            return "Variant " + variantIndex;
+        }
+
+        return stateId;
+    }
+
     private static void EnsureTrackDefaults(AgsModel.Track tr, int durationTicks)
     {
         if (tr == null) return;

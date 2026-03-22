@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -10,7 +10,34 @@ namespace Despicable;
 
 internal static class AutoEyePatchGenerator
 {
+    private const float CamouflageDonorLumaThreshold = 0.50f;
+
+    [ThreadStatic] private static Queue<int> _scratchIndexQueue;
+    [ThreadStatic] private static List<int> _scratchIntListA;
+    [ThreadStatic] private static List<int> _scratchIntListB;
+
     private static bool ShouldEmitVerboseDiagnostics => Prefs.DevMode;
+
+    private static Queue<int> GetScratchIndexQueue()
+    {
+        _scratchIndexQueue ??= new Queue<int>();
+        _scratchIndexQueue.Clear();
+        return _scratchIndexQueue;
+    }
+
+    private static List<int> GetScratchIntListA()
+    {
+        _scratchIntListA ??= new List<int>();
+        _scratchIntListA.Clear();
+        return _scratchIntListA;
+    }
+
+    private static List<int> GetScratchIntListB()
+    {
+        _scratchIntListB ??= new List<int>();
+        _scratchIntListB.Clear();
+        return _scratchIntListB;
+    }
 
     public static AutoEyePatchHeadResult Generate(HeadTypeDef headType, AutoEyePatchEligibility.Result eligibility, AutoEyePatchTextureAnalysis southAnalysis, AutoEyePatchTextureAnalysis eastAnalysis)
     {
@@ -54,13 +81,47 @@ internal static class AutoEyePatchGenerator
             return variant;
         }
 
-        var leftCandidates = analysis.Candidates.Where(c => c.CenterUV.x <= 0.5f).OrderByDescending(ScoreCandidate).ToList();
-        var rightCandidates = analysis.Candidates.Where(c => c.CenterUV.x > 0.5f).OrderByDescending(ScoreCandidate).ToList();
-        bool havePair = leftCandidates.Count > 0 && rightCandidates.Count > 0;
+        AutoEyePatchDarkCandidate leftCandidate = null;
+        AutoEyePatchDarkCandidate rightCandidate = null;
+        AutoEyePatchDarkCandidate fallbackCandidate = null;
+        float bestLeftScore = float.MinValue;
+        float bestRightScore = float.MinValue;
+        float bestFallbackScore = float.MinValue;
+
+        List<AutoEyePatchDarkCandidate> candidates = analysis.Candidates;
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            AutoEyePatchDarkCandidate candidate = candidates[i];
+            if (candidate == null)
+                continue;
+
+            float score = ScoreCandidate(candidate);
+            if (score > bestFallbackScore)
+            {
+                bestFallbackScore = score;
+                fallbackCandidate = candidate;
+            }
+
+            if (candidate.CenterUV.x <= 0.5f)
+            {
+                if (score > bestLeftScore)
+                {
+                    bestLeftScore = score;
+                    leftCandidate = candidate;
+                }
+            }
+            else if (score > bestRightScore)
+            {
+                bestRightScore = score;
+                rightCandidate = candidate;
+            }
+        }
+
+        bool havePair = leftCandidate != null && rightCandidate != null;
         if (havePair)
         {
-            bool leftOk = TryBuildDescriptor(texture, analysis, leftCandidates[0], out AutoEyePatchDescriptor left, out AutoEyePatchSkipReason leftReasons);
-            bool rightOk = TryBuildDescriptor(texture, analysis, rightCandidates[0], out AutoEyePatchDescriptor right, out AutoEyePatchSkipReason rightReasons);
+            bool leftOk = TryBuildDescriptor(texture, analysis, leftCandidate, out AutoEyePatchDescriptor left, out AutoEyePatchSkipReason leftReasons);
+            bool rightOk = TryBuildDescriptor(texture, analysis, rightCandidate, out AutoEyePatchDescriptor right, out AutoEyePatchSkipReason rightReasons);
             if (leftOk && rightOk)
             {
                 variant.Status = AutoEyePatchVariantStatus.Generated;
@@ -71,7 +132,6 @@ internal static class AutoEyePatchGenerator
             }
         }
 
-        AutoEyePatchDarkCandidate fallbackCandidate = analysis.Candidates.OrderByDescending(ScoreCandidate).FirstOrDefault();
         if (fallbackCandidate == null)
         {
             variant.Status = AutoEyePatchVariantStatus.Skipped;
@@ -108,7 +168,22 @@ internal static class AutoEyePatchGenerator
             return variant;
         }
 
-        AutoEyePatchDarkCandidate candidate = eastAnalysis.Candidates.OrderByDescending(ScoreCandidate).FirstOrDefault();
+        AutoEyePatchDarkCandidate candidate = null;
+        float bestCandidateScore = float.MinValue;
+        List<AutoEyePatchDarkCandidate> eastCandidates = eastAnalysis.Candidates;
+        for (int i = 0; i < eastCandidates.Count; i++)
+        {
+            AutoEyePatchDarkCandidate next = eastCandidates[i];
+            if (next == null)
+                continue;
+
+            float score = ScoreCandidate(next);
+            if (score > bestCandidateScore)
+            {
+                bestCandidateScore = score;
+                candidate = next;
+            }
+        }
         if (candidate == null)
         {
             variant.Status = AutoEyePatchVariantStatus.Skipped;
@@ -166,13 +241,21 @@ internal static class AutoEyePatchGenerator
         if (!TryBuildCandidateFromRuntimeMask(southDescriptor.RuntimeTexture, out AutoEyePatchDarkCandidate candidate))
             return false;
 
-        if (!TryBuildFootprintOverlayTexture(eastTexture, eastAnalysis.OpaqueBounds, candidate, southDescriptor.FillColor, targetCenterOverride: null, allowAdaptiveInflation: false, out Texture2D runtimeTexture, out RectInt finalBoundsPx, out float featherPx))
+        if (!TryBuildFootprintOverlayTexture(eastTexture, eastAnalysis.OpaqueBounds, candidate, southDescriptor.FillColor, targetCenterOverride: null, allowAdaptiveInflation: false, out Texture2D runtimeTexture, out RectInt finalBoundsPx, out float featherPx, out Color[] runtimePixels))
             return false;
 
-        string preForensics = BuildEastOverlayForensics("pre", runtimeTexture, eastTexture, eastAnalysis.OpaqueBounds);
-        bool cullSucceeded = TryApplyContourSubtractionToOverlay(runtimeTexture, eastTexture, eastAnalysis, southDescriptor.FillColor, out Texture2D clippedTexture, out RectInt clippedBoundsPx);
+        Color[] contourPixels = null;
+        string preForensics = null;
+        if (AutoEyePatchAnalyzer.TryReadPixels(eastTexture, out contourPixels))
+            preForensics = BuildEastOverlayForensics("pre", runtimePixels, eastTexture.width, eastTexture.height, contourPixels, eastAnalysis.OpaqueBounds);
+        else
+            preForensics = BuildEastOverlayForensics("pre", runtimeTexture, eastTexture, eastAnalysis.OpaqueBounds);
+
+        bool cullSucceeded = TryApplyContourSubtractionToOverlay(runtimeTexture, eastTexture, eastAnalysis, southDescriptor.FillColor, out Texture2D clippedTexture, out RectInt clippedBoundsPx, out Color[] clippedPixels, contourPixels);
         string postForensics = cullSucceeded
-            ? BuildEastOverlayForensics("post", clippedTexture, eastTexture, eastAnalysis.OpaqueBounds)
+            ? (contourPixels != null
+                ? BuildEastOverlayForensics("post", clippedPixels, eastTexture.width, eastTexture.height, contourPixels, eastAnalysis.OpaqueBounds)
+                : BuildEastOverlayForensics("post", clippedTexture, eastTexture, eastAnalysis.OpaqueBounds))
             : "post[late_cull_failed]";
         if (ShouldEmitVerboseDiagnostics)
             Log.Message($"[Despicable] EAST-MASK-FORENSICS texture={eastTexture.name ?? "<unnamed>"} result={(cullSucceeded ? "ok" : "late_cull_failed")} {preForensics} {postForensics}");
@@ -203,8 +286,15 @@ internal static class AutoEyePatchGenerator
         if (!AutoEyePatchAnalyzer.TryReadPixels(runtimeMask, out Color[] pixels))
             return false;
 
-        int width = runtimeMask.width;
-        int height = runtimeMask.height;
+        return TryBuildCandidateFromRuntimeMaskPixels(pixels, runtimeMask.width, runtimeMask.height, out candidate);
+    }
+
+    private static bool TryBuildCandidateFromRuntimeMaskPixels(Color[] pixels, int width, int height, out AutoEyePatchDarkCandidate candidate)
+    {
+        candidate = null;
+        if (pixels == null || pixels.Length != width * height || width <= 0 || height <= 0)
+            return false;
+
         List<Vector2Int> footprint = new();
         int minX = width;
         int minY = height;
@@ -258,18 +348,23 @@ internal static class AutoEyePatchGenerator
         return true;
     }
 
-private static bool TryApplyContourSubtractionToOverlay(Texture2D overlayTexture, Texture2D contourTexture, AutoEyePatchTextureAnalysis contourAnalysis, Color fillColor, out Texture2D clippedOverlay, out RectInt finalBoundsPx)
+private static bool TryApplyContourSubtractionToOverlay(Texture2D overlayTexture, Texture2D contourTexture, AutoEyePatchTextureAnalysis contourAnalysis, Color fillColor, out Texture2D clippedOverlay, out RectInt finalBoundsPx, out Color[] clippedPixels, Color[] contourPixelsOverride = null)
 {
     clippedOverlay = null;
     finalBoundsPx = default;
+    clippedPixels = null;
 
     if (overlayTexture == null || contourTexture == null || contourAnalysis == null)
         return false;
 
     if (!AutoEyePatchAnalyzer.TryReadPixels(overlayTexture, out Color[] overlayPixels))
         return false;
-    if (!AutoEyePatchAnalyzer.TryReadPixels(contourTexture, out Color[] contourPixels))
-        return false;
+    Color[] contourPixels = contourPixelsOverride;
+    if (contourPixels == null)
+    {
+        if (!AutoEyePatchAnalyzer.TryReadPixels(contourTexture, out contourPixels))
+            return false;
+    }
 
     int width = overlayTexture.width;
     int height = overlayTexture.height;
@@ -340,6 +435,7 @@ private static bool TryApplyContourSubtractionToOverlay(Texture2D overlayTexture
         runtimeOverlay.Apply(false, false);
         UnityEngine.Object.Destroy(overlayTexture);
         clippedOverlay = runtimeOverlay;
+        clippedPixels = output;
         finalBoundsPx = new RectInt(finalMinX, finalMinY, (finalMaxX - finalMinX) + 1, (finalMaxY - finalMinY) + 1);
         return true;
     }
@@ -499,6 +595,14 @@ private static string BuildEastOverlayForensics(string stage, Texture2D overlayT
     int height = overlayTexture.height;
     if (contourTexture.width != width || contourTexture.height != height)
         return $"{stage}[size_mismatch overlay={width}x{height} contour={contourTexture.width}x{contourTexture.height}]";
+
+    return BuildEastOverlayForensics(stage, overlayPixels, width, height, contourPixels, safeInteriorBounds);
+}
+
+private static string BuildEastOverlayForensics(string stage, Color[] overlayPixels, int width, int height, Color[] contourPixels, RectInt safeInteriorBounds)
+{
+    if (overlayPixels == null || contourPixels == null || overlayPixels.Length != width * height || contourPixels.Length != width * height)
+        return $"{stage}[invalid_pixels]";
 
     const int alphaThresholdX100 = 20;
     const float hardKillLuma = 0.24f;
@@ -1182,7 +1286,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
 
     private static void BuildOpaqueDistanceField(Color[] contourPixels, int width, int height, bool[] opaqueMask, int[] edgeDistance)
     {
-        Queue<int> frontier = new();
+        Queue<int> frontier = GetScratchIndexQueue();
         for (int i = 0; i < edgeDistance.Length; i++)
         {
             edgeDistance[i] = int.MaxValue;
@@ -1376,7 +1480,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
         if (preferInsetContour && TryBuildEdgeAnchoredContourMask(contourPixels, opaqueMask, edgeDistance, width, height, outlineThicknessPx, outlineSearchDepthPx, protectedOutlineMask))
             return;
 
-        Queue<int> frontier = new();
+        Queue<int> frontier = GetScratchIndexQueue();
         float seedDarkThreshold = preferInsetContour ? 0.28f : 0.22f;
         float growDarkThreshold = preferInsetContour ? 0.46f : 0.34f;
         float seedContrastThreshold = preferInsetContour ? 0.07f : 0.10f;
@@ -1537,7 +1641,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
     {
         Array.Clear(protectedOutlineMask, 0, protectedOutlineMask.Length);
 
-        List<int> boundary = new();
+        List<int> boundary = GetScratchIntListA();
         float globalInteriorLuma = 0f;
         int globalInteriorCount = 0;
         for (int i = 0; i < opaqueMask.Length; i++)
@@ -1561,7 +1665,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
             return false;
 
         float fallbackInteriorLuma = globalInteriorCount > 0 ? (globalInteriorLuma / globalInteriorCount) : 0.65f;
-        Queue<int> frontier = new();
+        Queue<int> frontier = GetScratchIndexQueue();
 
         for (int i = 0; i < boundary.Count; i++)
         {
@@ -1712,7 +1816,13 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
             Array.Copy(expanded, protectedOutlineMask, protectedOutlineMask.Length);
         }
 
-        return protectedOutlineMask.Any(v => v);
+        for (int i = 0; i < protectedOutlineMask.Length; i++)
+        {
+            if (protectedOutlineMask[i])
+                return true;
+        }
+
+        return false;
     }
 
     private static bool TryGetInwardStep(bool[] opaqueMask, int width, int height, int x, int y, out int stepX, out int stepY)
@@ -1838,7 +1948,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
         int maxFloodSteps = Mathf.Clamp(Mathf.RoundToInt(outlineThicknessPx * 0.75f), 1, 4);
         int maxDistance = Mathf.Clamp(outlineSearchDepthPx + maxFloodSteps + 1, outlineSearchDepthPx, outlineSearchDepthPx + 5);
         float floodDarkThreshold = 0.52f;
-        Queue<int> frontier = new();
+        Queue<int> frontier = GetScratchIndexQueue();
         int[] floodSteps = new int[protectedOutlineMask.Length];
         Array.Fill(floodSteps, -1);
 
@@ -2007,6 +2117,8 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
 
     private static float ComputeLuma(Color c) => (0.2126f * c.r) + (0.7152f * c.g) + (0.0722f * c.b);
 
+    private static Color ResolveSkinFillColor() => Color.white;
+
     private static bool TryBuildDescriptor(Texture2D texture, AutoEyePatchTextureAnalysis analysis, AutoEyePatchDarkCandidate candidate, out AutoEyePatchDescriptor descriptor, out AutoEyePatchSkipReason reasons)
     {
         descriptor = null;
@@ -2018,19 +2130,11 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
             return false;
         }
 
-        Color fillColor = Color.white;
-        float colorStability = 0.5f;
-
-        if (TrySampleFillColor(texture, candidate, analysis.SafeInteriorBounds, out Color sampledFillColor, out float sampledStability))
-        {
-            fillColor = sampledFillColor;
-            colorStability = sampledStability;
-        }
-        else if (AutoEyePatchAnalyzer.TryReadPixels(texture, out Color[] sourcePixels))
-        {
-            Vector2 sourceCenter = candidate.BoundsPx.center;
-            fillColor = ResolveOverlayDonorColor(sourcePixels, texture.width, texture.height, candidate, sourceCenter, sourceCenter.x, sourceCenter.y, Color.white);
-        }
+        // The runtime auto eye patch now renders through CutoutSkin, so a neutral white fill lets the
+        // pawn's actual skin tint come from the shader at draw time instead of baking a head-texture
+        // average into the generated overlay.
+        Color fillColor = ResolveSkinFillColor();
+        float colorStability = 1f;
 
         if (!TryBuildFootprintOverlayTexture(texture, analysis.OpaqueBounds, candidate, fillColor, out Texture2D runtimeTexture, out RectInt finalBoundsPx, out float featherPx))
         {
@@ -2112,16 +2216,20 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
     }
 
     private static bool TryBuildFootprintOverlayTexture(Texture2D sourceTexture, RectInt safeInteriorBounds, AutoEyePatchDarkCandidate candidate, Color fillColor, out Texture2D overlay, out RectInt finalBoundsPx, out float featherPx)
-        => TryBuildFootprintOverlayTexture(sourceTexture, safeInteriorBounds, candidate, fillColor, null, allowAdaptiveInflation: true, out overlay, out finalBoundsPx, out featherPx);
+        => TryBuildFootprintOverlayTexture(sourceTexture, safeInteriorBounds, candidate, fillColor, null, allowAdaptiveInflation: true, out overlay, out finalBoundsPx, out featherPx, out _);
 
     private static bool TryBuildFootprintOverlayTexture(Texture2D sourceTexture, RectInt safeInteriorBounds, AutoEyePatchDarkCandidate candidate, Color fillColor, Vector2? targetCenterOverride, out Texture2D overlay, out RectInt finalBoundsPx, out float featherPx)
-        => TryBuildFootprintOverlayTexture(sourceTexture, safeInteriorBounds, candidate, fillColor, targetCenterOverride, allowAdaptiveInflation: true, out overlay, out finalBoundsPx, out featherPx);
+        => TryBuildFootprintOverlayTexture(sourceTexture, safeInteriorBounds, candidate, fillColor, targetCenterOverride, allowAdaptiveInflation: true, out overlay, out finalBoundsPx, out featherPx, out _);
 
     private static bool TryBuildFootprintOverlayTexture(Texture2D sourceTexture, RectInt safeInteriorBounds, AutoEyePatchDarkCandidate candidate, Color fillColor, Vector2? targetCenterOverride, bool allowAdaptiveInflation, out Texture2D overlay, out RectInt finalBoundsPx, out float featherPx)
+        => TryBuildFootprintOverlayTexture(sourceTexture, safeInteriorBounds, candidate, fillColor, targetCenterOverride, allowAdaptiveInflation, out overlay, out finalBoundsPx, out featherPx, out _);
+
+    private static bool TryBuildFootprintOverlayTexture(Texture2D sourceTexture, RectInt safeInteriorBounds, AutoEyePatchDarkCandidate candidate, Color fillColor, Vector2? targetCenterOverride, bool allowAdaptiveInflation, out Texture2D overlay, out RectInt finalBoundsPx, out float featherPx, out Color[] overlayPixels)
     {
         overlay = null;
         finalBoundsPx = default;
         featherPx = 0f;
+        overlayPixels = null;
 
         if (sourceTexture == null || candidate == null || candidate.CroppedAlpha == null || candidate.CroppedAlpha.Length == 0 || candidate.CroppedAlphaWidth <= 0 || candidate.CroppedAlphaHeight <= 0)
             return false;
@@ -2154,7 +2262,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
             if (allowAdaptiveInflation)
             {
                 ComputeAdaptiveFootprintInflation(candidate.FootprintPixels, opaqueMask, protectedOutlineMask, width, height, out inflateX, out inflateY);
-                const float overshootRetention = 0.30f;
+                const float overshootRetention = 0.10f;
                 inflateX = 1f + (Mathf.Max(0f, inflateX - 1f) * overshootRetention);
                 inflateY = 1f + (Mathf.Max(0f, inflateY - 1f) * overshootRetention);
             }
@@ -2163,13 +2271,7 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
             if (!allowAdaptiveInflation)
                 FitSideFootprintToContour(candidate, sourcePixels, opaqueMask, edgeDistance, protectedOutlineMask, width, height, outlineThicknessPx, fringeThicknessPx, ref targetCenter, ref inflateX, ref inflateY);
 
-            int eyeReference = Mathf.Max(candidate.BoundsPx.width, candidate.BoundsPx.height);
-            float featherReference = allowAdaptiveInflation
-                ? Mathf.Max(reference * 0.014f, eyeReference * 0.18f)
-                : Mathf.Max(reference * 0.020f, eyeReference * 0.24f);
-            featherPx = allowAdaptiveInflation
-                ? Mathf.Clamp(featherReference, 1.5f, 5.5f)
-                : Mathf.Clamp(featherReference, 2.0f, 7.0f);
+            featherPx = 0f;
 
             Vector2 sourceCenter = candidate.BoundsPx.center;
             int xShift = Mathf.RoundToInt(targetCenter.x - sourceCenter.x);
@@ -2226,7 +2328,8 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
                         continue;
 
                     int index = (y * width) + x;
-                    colors[index] = new Color(fillColor.r, fillColor.g, fillColor.b, alpha);
+                    Color overlayColor = ResolveCamouflageOverlayColor(sourcePixels, width, height, x, y, fillColor);
+                    colors[index] = new Color(overlayColor.r, overlayColor.g, overlayColor.b, alpha);
                     wroteAny = true;
                     if (x < finalMinX) finalMinX = x;
                     if (y < finalMinY) finalMinY = y;
@@ -2241,12 +2344,14 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
                 return false;
             }
 
+            ApplyOpaqueColorBlur(colors, width, height, iterations: 2, blendStrength: 0.60f);
             BleedTransparentPixels(colors, width, height, 1);
             FloodTransparentPixels(colors, fillColor);
             runtimeOverlay.wrapMode = TextureWrapMode.Clamp;
             runtimeOverlay.SetPixels(colors, 0);
             runtimeOverlay.Apply(false, false);
             overlay = runtimeOverlay;
+            overlayPixels = colors;
             finalBoundsPx = new RectInt(finalMinX, finalMinY, (finalMaxX - finalMinX) + 1, (finalMaxY - finalMinY) + 1);
             return true;
         }
@@ -2261,6 +2366,26 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
 
             return false;
         }
+    }
+
+
+    private static Color ResolveCamouflageOverlayColor(Color[] sourcePixels, int width, int height, int x, int y, Color fallbackColor)
+    {
+        if (sourcePixels == null || sourcePixels.Length != width * height || width <= 0 || height <= 0)
+            return fallbackColor;
+
+        if (x < 0 || x >= width || y < 0 || y >= height)
+            return fallbackColor;
+
+        Color donor = sourcePixels[(y * width) + x];
+        if (donor.a <= 0.10f)
+            return fallbackColor;
+
+        if (ComputeLuma(donor) <= CamouflageDonorLumaThreshold)
+            return fallbackColor;
+
+        donor.a = 1f;
+        return donor;
     }
 
 
@@ -2388,8 +2513,12 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
         if (footprintPixels == null || footprintPixels.Count == 0 || opaqueMask == null || protectedOutlineMask == null)
             return;
 
-        List<int> clearanceX = new(footprintPixels.Count);
-        List<int> clearanceY = new(footprintPixels.Count);
+        List<int> clearanceX = GetScratchIntListA();
+        List<int> clearanceY = GetScratchIntListB();
+        if (clearanceX.Capacity < footprintPixels.Count)
+            clearanceX.Capacity = footprintPixels.Count;
+        if (clearanceY.Capacity < footprintPixels.Count)
+            clearanceY.Capacity = footprintPixels.Count;
 
         for (int i = 0; i < footprintPixels.Count; i++)
         {
@@ -2616,10 +2745,12 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
 
     private static float ComputeOutwardFeatheredAlpha(float bestDistance, float featherNormalized)
     {
-        if (bestDistance == float.MaxValue || featherNormalized <= 0.001f)
+        if (bestDistance == float.MaxValue)
             return 0f;
         if (bestDistance <= 1f)
             return 1f;
+        if (featherNormalized <= 0.001f)
+            return 0f;
 
         float t = Mathf.Clamp01((bestDistance - 1f) / featherNormalized);
         const float fullOpacityUntil = 0.65f;
@@ -2675,6 +2806,80 @@ private static bool TryComputeNonZeroBounds(Color[] pixels, int width, int heigh
             if (pixels[i].a <= 0.001f)
                 pixels[i] = flood;
         }
+    }
+
+    private static void ApplyOpaqueColorBlur(Color[] pixels, int width, int height, int iterations, float blendStrength)
+    {
+        if (pixels == null || pixels.Length != width * height || iterations <= 0 || blendStrength <= 0.001f)
+            return;
+
+        blendStrength = Mathf.Clamp01(blendStrength);
+        Color[] working = new Color[pixels.Length];
+        Color[] scratch = new Color[pixels.Length];
+        Array.Copy(pixels, working, pixels.Length);
+
+        for (int pass = 0; pass < iterations; pass++)
+        {
+            Array.Copy(working, scratch, working.Length);
+            bool changed = false;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = (y * width) + x;
+                    Color current = working[index];
+                    if (current.a <= 0.001f)
+                        continue;
+
+                    float totalWeight = 0f;
+                    float totalR = 0f;
+                    float totalG = 0f;
+                    float totalB = 0f;
+
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        for (int dx = -1; dx <= 1; dx++)
+                        {
+                            int nx = x + dx;
+                            int ny = y + dy;
+                            if (nx < 0 || nx >= width || ny < 0 || ny >= height)
+                                continue;
+
+                            Color neighbor = working[(ny * width) + nx];
+                            if (neighbor.a <= 0.001f)
+                                continue;
+
+                            float kernelWeight = dx == 0 && dy == 0
+                                ? 4f
+                                : (dx == 0 || dy == 0 ? 2f : 1f);
+                            float weight = kernelWeight * neighbor.a;
+                            totalR += neighbor.r * weight;
+                            totalG += neighbor.g * weight;
+                            totalB += neighbor.b * weight;
+                            totalWeight += weight;
+                        }
+                    }
+
+                    if (totalWeight <= 0.0001f)
+                        continue;
+
+                    Color blurred = new(totalR / totalWeight, totalG / totalWeight, totalB / totalWeight, current.a);
+                    scratch[index] = new Color(
+                        Mathf.Lerp(current.r, blurred.r, blendStrength),
+                        Mathf.Lerp(current.g, blurred.g, blendStrength),
+                        Mathf.Lerp(current.b, blurred.b, blendStrength),
+                        current.a);
+                    changed = true;
+                }
+            }
+
+            Array.Copy(scratch, working, working.Length);
+            if (!changed)
+                break;
+        }
+
+        Array.Copy(working, pixels, pixels.Length);
     }
 
     private static void ApplyCutoutMipChain(Texture2D texture, Color[] basePixels, int width, int height, Color fillColor)

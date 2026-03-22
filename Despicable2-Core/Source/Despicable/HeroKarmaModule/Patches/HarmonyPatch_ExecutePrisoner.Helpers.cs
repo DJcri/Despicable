@@ -10,6 +10,8 @@ namespace Despicable.HeroKarma.Patches.HeroKarma;
 public static partial class HarmonyPatch_ExecutePrisoner
 {
     private const string PatchId = "HKPatch.ExecutePrisoner";
+    private const string ExecutionUtilityTypeName = "RimWorld.ExecutionUtility";
+    private const string ExecutionMethodName = "DoExecutionByCut";
     // Guardrail-Allow-Static: Cached Harmony target list for this patch class; populated during Prepare and reused for patch registration within the current load.
     private static List<MethodBase> _targets;
 
@@ -34,15 +36,9 @@ public static partial class HarmonyPatch_ExecutePrisoner
     private static IEnumerable<MethodBase> FindTargets()
     {
         HashSet<MethodBase> seen = new();
+        Type utilityType = AccessTools.TypeByName(ExecutionUtilityTypeName);
 
-        Type utilityType = AccessTools.TypeByName("RimWorld.ExecutionUtility");
         foreach (MethodBase method in HKPatchTargetUtil.FindDeclaredMethods(utilityType, ShouldYieldExecutionMethod))
-        {
-            if (seen.Add(method))
-                yield return method;
-        }
-
-        foreach (MethodBase method in HKPatchTargetUtil.FindDeclaredMethods(IsRimWorldExecutionType, ShouldYieldExecutionMethod))
         {
             if (seen.Add(method))
                 yield return method;
@@ -52,15 +48,8 @@ public static partial class HarmonyPatch_ExecutePrisoner
     private static bool ShouldYieldExecutionMethod(MethodInfo method)
     {
         return method != null
-            && method.Name.IndexOf("Execution", StringComparison.OrdinalIgnoreCase) >= 0
+            && string.Equals(method.Name, ExecutionMethodName, StringComparison.Ordinal)
             && HasAtLeastTwoPawnParameters(method);
-    }
-
-    private static bool IsRimWorldExecutionType(Type type)
-    {
-        return type != null
-            && string.Equals(type.Namespace, "RimWorld", StringComparison.Ordinal)
-            && type.Name.IndexOf("Execution", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     private static bool HasAtLeastTwoPawnParameters(MethodBase method)
@@ -83,53 +72,61 @@ public static partial class HarmonyPatch_ExecutePrisoner
     }
 
     private static bool TryGetExecutionerAndVictim(object[] args, out Pawn executioner, out Pawn victim)
-{
-    executioner = null;
-    victim = null;
-
-    if (!TryGetFirstTwoPawns(args, out Pawn first, out Pawn second))
     {
-        return false;
-    }
+        executioner = null;
+        victim = null;
 
-    // Be resilient to argument order differences across execution helpers.
-    // If either of the first two pawns is the hero, treat that pawn as the executioner.
-    if (HKHookUtilSafe.ActorIsHero(second) && !HKHookUtilSafe.ActorIsHero(first))
-    {
-        executioner = second;
-        victim = first;
-        return true;
-    }
-
-    executioner = first;
-    victim = second;
-    return true;
-}
-
-private static bool TryGetFirstTwoPawns(object[] args, out Pawn first, out Pawn second)
-{
-    first = null;
-    second = null;
-    if (args == null)
-        return false;
-
-    foreach (object arg in args)
-    {
-        if (!(arg is Pawn pawn))
-            continue;
-
-        if (first == null)
+        if (!TryGetFirstTwoPawns(args, out Pawn first, out Pawn second))
         {
-            first = pawn;
-            continue;
+            return false;
         }
 
-        second = pawn;
+        // Be resilient to argument order differences across execution helpers.
+        // If either of the first two pawns is the hero, treat that pawn as the executioner.
+        if (HKHookUtilSafe.ActorIsHero(second) && !HKHookUtilSafe.ActorIsHero(first))
+        {
+            executioner = second;
+            victim = first;
+            return true;
+        }
+
+        executioner = first;
+        victim = second;
         return true;
     }
 
-    return false;
-}
+    private static bool TryGetFirstTwoPawns(object[] args, out Pawn first, out Pawn second)
+    {
+        first = null;
+        second = null;
+        if (args == null)
+            return false;
+
+        foreach (object arg in args)
+        {
+            if (!(arg is Pawn pawn))
+                continue;
+
+            if (first == null)
+            {
+                first = pawn;
+                continue;
+            }
+
+            second = pawn;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsValidExecutionVictim(Pawn victim)
+    {
+        return victim != null
+            && victim.RaceProps != null
+            && victim.RaceProps.Humanlike
+            && HKHookUtil.IsPrisonerLike(victim);
+    }
 }
 
 

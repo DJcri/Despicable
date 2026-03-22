@@ -2,7 +2,7 @@
 
 ![Despicable 2 preview](Despicable2-Core/About/preview.png)
 
-A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, and shared animation systems.
+A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, shared animation systems, and an optional NSFW anatomy/content layer.
 
 ## Overview
 
@@ -10,7 +10,7 @@ A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, 
 
 The repository is centered on **Despicable 2 (Core)**, which works as a standalone mod and as the required foundation for optional add-ons. Core adds face parts, facial expressions, shared animation systems, Hero Karma, custom UI tools, and supporting infrastructure designed for compatibility and long-term maintainability.
 
-An optional **Despicable 2 (NSFW)** add-on extends Core with adult-only intimacy content, extra animation hooks, additional rendering features, sound, and expression support. It is intentionally separated from Core by design.
+An optional **Despicable 2 (NSFW)** add-on extends Core with adult-only intimacy content, anatomy, additional rendering behavior, sound, and integration hooks. It is intentionally separated from Core by design.
 
 ## Modules
 
@@ -21,12 +21,12 @@ The Core package is the backbone of the suite.
 It includes:
 - face parts and facial expression systems for more expressive pawns
 - facial animation support with reusable animation definitions and render nodes
+- Anim Group Studio authoring / preview surfaces and shared animation infrastructure
 - Hero Karma systems with faction standing, reputation effects, perks, and dedicated UI
 - a custom UI framework for windows, tabs, tables, rulers, forms, search, and debug-friendly layouts
-- shared animation infrastructure for playback, offsets, visual events, and authoring workflows
 - manual interaction menu systems for cleaner interaction-driven UX
 - localization support with English source strings and translated language folders
-- compatibility-first architecture with runtime guards, isolated integrations, and soft-fail behavior where possible
+- compatibility-first architecture with guarded integrations and documented seams
 
 ### Despicable 2 (NSFW)
 
@@ -34,6 +34,7 @@ The NSFW package is an optional adult-only add-on that depends on Core.
 
 It includes:
 - explicit intimacy content and related job logic
+- anatomy framework, logical anatomy persistence, and genital rendering
 - additional animations, sounds, expressions, and render features
 - compatibility bridges for supported adult-content integrations
 - a separate dependency boundary so Core remains modular and clean
@@ -41,11 +42,16 @@ It includes:
 ## Feature summary
 
 ### Core highlights
-- **FacePartsModule** for face styles, customizers, expressions, and rendering
+- **FacePartsModule** for face styles, customizers, expressions, preview support, and rendering
 - **HeroKarmaModule** for karma events, faction standing, local reputation, perks, diagnostics, and UI
-- **AnimModule** for shared animation logic, playback, render support, and tooling
+- **AnimModule** for shared animation logic, playback, render support, Anim Group Studio, and tooling
 - **UIFramework** for reusable layout helpers, widgets, shells, tables, search, and overlays
 - **ManualInteraction** for structured manual interaction flows and request handling
+
+### NSFW highlights
+- **Anatomy framework** for logical part resolution, variants, fluid state, appearance overrides, and placement
+- **LovinModule** for explicit interactions, jobs, hooks, and runtime state
+- **Integration layer** for optional adult-content mod bridges such as GenderWorks
 
 ### Design goals
 - modular growth without turning the codebase into a knot
@@ -78,7 +84,6 @@ This suite is built with a compatibility-first approach.
 
 - **Core is standalone** and can be used by itself.
 - **NSFW requires Core**.
-- The mod metadata includes explicit `loadAfter` hints for **Harmony** and selected optional targets.
 - Optional integrations are kept isolated where possible to reduce hard failures when other mods are absent.
 - The codebase favors guarded integrations and stable seams over brittle hard assumptions.
 
@@ -123,22 +128,29 @@ Despicable2-NSFW/
   Textures/
 ```
 
+## Documentation map
+
+- `Docs/README.md`
+  - repo-wide docs map
+- `Docs/DESPICABLE_SPEC.md`
+  - ownership, flow, and handoff field manual
+- `Docs/ModderGuides/00_Start_Here.md`
+  - outside-modder entry point
+- `Despicable2-Core/Docs/README.md`
+  - Core docs map
+- `Despicable2-NSFW/Docs/README.md`
+  - NSFW docs map
+
 ## Development notes
 
 This repository is strongly oriented toward modular growth, additive changes, and documented guardrails.
-
-Some of the included development docs in `Despicable2-Core/Docs/`, plus the shared repo-root `Tools/` guardrails, cover:
-- architecture and extension rules
-- consistency and maintenance guardrails
-- UI framework guidance and layout rules
-- localization workflow and validation guardrails
-- smoke test expectations
 
 The project generally prefers:
 - framework-driven UI layout instead of brittle hardcoded positioning
 - isolated optional integrations
 - localization as a first-class pipeline
 - extending stable systems rather than rewriting broad surfaces at random
+- keeping feature notes inside the package that owns the behavior
 
 ## Release channels
 
@@ -156,7 +168,7 @@ Example tags:
 
 **Description**
 
-A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, and shared animation systems.
+A modular RimWorld 1.6 mod suite with face parts, facial animation, Hero Karma, custom UI, shared animation systems, and an optional NSFW anatomy layer.
 
 **Tagline**
 

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!--
+    Example gene-driven appearance override:
+
+    <Despicable.AnatomyAppearanceOverrideDef>
+      <defName>D2_ExampleGeneBreastAppearance</defName>
+      <geneDefs>
+        <li>SomeGeneDef</li>
+      </geneDefs>
+      <parts>
+        <li>
+          <part>AnatomyPart_Breasts</part>
+          <sizeTextureVariants>
+            <li>
+              <minSize>0.0</minSize>
+              <maxSize>0.95</maxSize>
+              <texPath>Path/Small</texPath>
+            </li>
+            <li>
+              <minSize>0.95</minSize>
+              <maxSize>999</maxSize>
+              <texPath>Path/Large</texPath>
+            </li>
+          </sizeTextureVariants>
+        </li>
+      </parts>
+    </Despicable.AnatomyAppearanceOverrideDef>
+
+    Example gene-driven size / fluid generation modifier:
+
+    <Despicable.AnatomyGeneModifierDef>
+      <defName>D2_ExampleGeneBreastMilkModifier</defName>
+      <geneDefs>
+        <li>SomeGeneDef</li>
+      </geneDefs>
+      <parts>
+        <li>
+          <part>AnatomyPart_Breasts</part>
+          <sizeMultiplier>1.15</sizeMultiplier>
+          <fluids>
+            <li>
+              <fluid>Fluid_Milk</fluid>
+              <capacityMultiplier>1.5</capacityMultiplier>
+              <initialAmountMultiplier>1.2</initialAmountMultiplier>
+              <refillRateMultiplier>2.0</refillRateMultiplier>
+            </li>
+          </fluids>
+        </li>
+      </parts>
+    </Despicable.AnatomyGeneModifierDef>
+  -->
+
+</Defs>

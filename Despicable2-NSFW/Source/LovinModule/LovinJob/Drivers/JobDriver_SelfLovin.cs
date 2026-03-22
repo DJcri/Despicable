@@ -12,6 +12,7 @@ public class JobDriver_SelfLovin : JobDriver
     private readonly List<Pawn> participants = new();
     private int durationTicks = LovinUtil.SelfLovinDefaultDurationTicks;
     private bool hasStartedAnimation;
+    private bool selfLovinPlaybackActive;
 
     public override bool TryMakePreToilReservations(bool errorOnFailed)
     {
@@ -23,7 +24,10 @@ public class JobDriver_SelfLovin : JobDriver
         base.ExposeData();
         Scribe_Values.Look(ref durationTicks, "durationTicks", LovinUtil.SelfLovinDefaultDurationTicks);
         Scribe_Values.Look(ref hasStartedAnimation, "hasStartedAnimation", defaultValue: false);
+        Scribe_Values.Look(ref selfLovinPlaybackActive, "selfLovinPlaybackActive", defaultValue: false);
     }
+
+    internal bool IsSelfLovinPlaybackActive => selfLovinPlaybackActive;
 
     protected override IEnumerable<Toil> MakeNewToils()
     {
@@ -70,12 +74,17 @@ public class JobDriver_SelfLovin : JobDriver
 
             durationTicks = LovinUtil.SelfLovinDefaultDurationTicks;
             hasStartedAnimation = false;
-            LovinVisualRuntime.SetLovinVisualActive(pawn, true);
+            selfLovinPlaybackActive = true;
+            ReapplySelfLovinRuntimeState(refreshVisuals: true);
             hasStartedAnimation = TryStartSelfLovinAnimation();
         };
         toil.AddPreTickAction(delegate
         {
             durationTicks--;
+
+            if (selfLovinPlaybackActive)
+                ReapplySelfLovinRuntimeState(refreshVisuals: false);
+
             TickParticipant();
             if (ShouldFinishSelfLovin())
                 ReadyForNextToil();
@@ -85,6 +94,8 @@ public class JobDriver_SelfLovin : JobDriver
         });
         toil.AddFinishAction(delegate
         {
+            selfLovinPlaybackActive = false;
+            hasStartedAnimation = false;
             LovinVisualRuntime.SetLovinVisualActive(pawn, false);
             AnimUtil.ResetAnimatorsForGroup(participants);
         });
@@ -134,10 +145,27 @@ public class JobDriver_SelfLovin : JobDriver
 
     private bool TryStartSelfLovinAnimation()
     {
+        ReapplySelfLovinRuntimeState(refreshVisuals: false);
+
         if (!CommonUtil.GetSettings().animationExtensionEnabled)
             return false;
 
         return SelfLovinStagePlayback.TryStartForJob(job, pawn, pawn, participants, out durationTicks);
+    }
+
+    internal void ReapplySelfLovinRuntimeState(bool refreshVisuals = true)
+    {
+        if (!selfLovinPlaybackActive)
+            return;
+
+        participants.Clear();
+        participants.Add(pawn);
+
+        LovinVisualRuntime.SetLovinVisualActive(pawn, true, refreshVisuals);
+
+        if (pawn?.jobs?.curDriver != null)
+            pawn.jobs.curDriver.asleep = false;
+        pawn?.pather?.StopDead();
     }
 
     private void TickParticipant()

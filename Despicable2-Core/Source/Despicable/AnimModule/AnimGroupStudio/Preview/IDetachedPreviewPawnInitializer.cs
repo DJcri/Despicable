@@ -9,3 +9,12 @@ public interface IDetachedPreviewPawnInitializer
 {
     void InitializeForDetachedPreview();
 }
+
+/// <summary>
+/// Implement on comps that need to mirror source-pawn state into a detached preview pawn
+/// instead of relying on fresh random generation.
+/// </summary>
+public interface IDetachedPreviewPawnMirrorFromSource
+{
+    void MirrorDetachedPreviewFrom(Verse.Pawn source);
+}

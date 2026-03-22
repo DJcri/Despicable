@@ -55,6 +55,7 @@ public static class WorkshopAnimationImporter
                             // ExtendedKeyframe carries the fields the Workshop cares about.
                             if (kf is ExtendedKeyframe ek)
                             {
+                                int legacyVariant = ek.variant ?? -1;
                                 t.keyframes.Add(new WorkshopExtKeyframe
                                 {
                                     tick = ek.tick,
@@ -63,8 +64,8 @@ public static class WorkshopAnimationImporter
                                     rotation = ek.rotation,
                                     scale = VerseKeyframeCompat.GetScaleOrDefault(ek),
                                     visible = ek.visible,
-                                    graphicState = ek.graphicState,
-                                    variant = ek.variant ?? -1,
+                                    graphicState = !ek.graphicState.NullOrEmpty() ? ek.graphicState : (legacyVariant >= 0 ? "variant_" + legacyVariant : null),
+                                    variant = -1,
                                     soundDefName = ek.sound?.defName,
                                     facialAnimDefName = ek.facialAnim?.defName,
                                     layerBias = ek.layerBias

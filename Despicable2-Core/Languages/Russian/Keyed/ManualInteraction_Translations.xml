@@ -6,4 +6,19 @@
   <InteractionOption_Insult>Оскорбить: {0}</InteractionOption_Insult>
   <InteractionOption_Chat>Поболтать: {0}</InteractionOption_Chat>
   <InteractionOption_Marriage>Сделать предложение: {0}</InteractionOption_Marriage>
+
+  <InteractionOption_VSIE_Vent>Выговориться {0}</InteractionOption_VSIE_Vent>
+  <InteractionOption_VSIE_Vent_Disabled>Выговориться {0} ({1})</InteractionOption_VSIE_Vent_Disabled>
+  <InteractionOption_VSIE_Teach>Учить {0}</InteractionOption_VSIE_Teach>
+  <InteractionOption_VSIE_Teach_Disabled>Учить {0} ({1})</InteractionOption_VSIE_Teach_Disabled>
+  <InteractionReason_VSIE_NotInstalled>VSIE не установлен</InteractionReason_VSIE_NotInstalled>
+  <InteractionReason_VSIE_FeatureDisabled>функция отключена в настройках VSIE</InteractionReason_VSIE_FeatureDisabled>
+  <InteractionReason_VSIE_TooFarAway>слишком далеко</InteractionReason_VSIE_TooFarAway>
+  <InteractionReason_VSIE_NotFriends>недостаточно близки</InteractionReason_VSIE_NotFriends>
+  <InteractionReason_VSIE_NotAvailable>сейчас недоступно</InteractionReason_VSIE_NotAvailable>
+  <InteractionReason_VSIE_NoLesson>нечему учить</InteractionReason_VSIE_NoLesson>
+  <InteractionOption_VSIE_TeachSkill_Tooltip>Обучить {1} навыку {0}</InteractionOption_VSIE_TeachSkill_Tooltip>
+  <InteractionOption_VSIE_ActivityMenu>Заняться чем-нибудь с {0}</InteractionOption_VSIE_ActivityMenu>
+  <InteractionOption_VSIE_ActivityMenu_Disabled>Заняться чем-нибудь с {0} ({1})</InteractionOption_VSIE_ActivityMenu_Disabled>
+  <InteractionReason_VSIE_NoActivity>нет доступных свиданий или занятий</InteractionReason_VSIE_NoActivity>
 </LanguageData>

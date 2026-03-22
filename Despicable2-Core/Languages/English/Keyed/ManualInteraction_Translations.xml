@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
   <!-- Manual interaction menu (Core) -->
   <InteractionCategory>Interact with {0}</InteractionCategory>
@@ -9,4 +9,19 @@
   <!-- Removed trailing apostrophe -->
   <InteractionOption_Chat>Chat with {0}</InteractionOption_Chat>
   <InteractionOption_Marriage>Propose to {0}</InteractionOption_Marriage>
+
+  <InteractionOption_VSIE_Vent>Vent to {0}</InteractionOption_VSIE_Vent>
+  <InteractionOption_VSIE_Vent_Disabled>Vent to {0} ({1})</InteractionOption_VSIE_Vent_Disabled>
+  <InteractionOption_VSIE_Teach>Teach {0}</InteractionOption_VSIE_Teach>
+  <InteractionOption_VSIE_Teach_Disabled>Teach {0} ({1})</InteractionOption_VSIE_Teach_Disabled>
+  <InteractionReason_VSIE_NotInstalled>VSIE not installed</InteractionReason_VSIE_NotInstalled>
+  <InteractionReason_VSIE_FeatureDisabled>feature disabled in VSIE settings</InteractionReason_VSIE_FeatureDisabled>
+  <InteractionReason_VSIE_TooFarAway>too far away</InteractionReason_VSIE_TooFarAway>
+  <InteractionReason_VSIE_NotFriends>not close enough</InteractionReason_VSIE_NotFriends>
+  <InteractionReason_VSIE_NotAvailable>currently unavailable</InteractionReason_VSIE_NotAvailable>
+  <InteractionReason_VSIE_NoLesson>no skill to teach</InteractionReason_VSIE_NoLesson>
+  <InteractionOption_VSIE_TeachSkill_Tooltip>Teach {0} to {1}</InteractionOption_VSIE_TeachSkill_Tooltip>
+  <InteractionOption_VSIE_ActivityMenu>Activity with {0}</InteractionOption_VSIE_ActivityMenu>
+  <InteractionOption_VSIE_ActivityMenu_Disabled>Activity with {0} ({1})</InteractionOption_VSIE_ActivityMenu_Disabled>
+  <InteractionReason_VSIE_NoActivity>no date or activity available</InteractionReason_VSIE_NoActivity>
 </LanguageData>

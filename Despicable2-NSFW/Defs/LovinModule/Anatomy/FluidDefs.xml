@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <Despicable.FluidDef>
+    <defName>Fluid_Milk</defName>
+    <label>milk</label>
+    <description>Milk stored in an anatomy part.</description>
+    <tags>
+      <li>Lactation</li>
+    </tags>
+  </Despicable.FluidDef>
+
+  <Despicable.FluidDef>
+    <defName>Fluid_Semen</defName>
+    <label>semen</label>
+    <description>Semen stored in an anatomy part.</description>
+    <tags>
+      <li>Reproductive</li>
+    </tags>
+  </Despicable.FluidDef>
+
+</Defs>

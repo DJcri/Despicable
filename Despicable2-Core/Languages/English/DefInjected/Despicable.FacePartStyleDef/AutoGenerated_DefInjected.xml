@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LanguageData>
+  <Brow_Bushy.label>Bushy</Brow_Bushy.label>
+  <Brow_Slit.label>Slit</Brow_Slit.label>
+  <Brow_Thick.label>Thick</Brow_Thick.label>
+  <Brow_Thin.label>Thin</Brow_Thin.label>
+  <Eye_Doe.label>Doe</Eye_Doe.label>
+  <Eye_Dreamy.label>Dreamy</Eye_Dreamy.label>
+  <Eye_Halflid.label>Halflid</Eye_Halflid.label>
+  <Eye_Monolid.label>Monolid</Eye_Monolid.label>
+  <Eye_Seductive.label>Seductive</Eye_Seductive.label>
+  <EyeDetail_Bandaid.label>Bandaid</EyeDetail_Bandaid.label>
+  <EyeDetail_BeautyMark.label>Beauty mark</EyeDetail_BeautyMark.label>
+  <EyeDetail_CheekBlush.label>Cheek blush</EyeDetail_CheekBlush.label>
+  <EyeDetail_DarkCircles.label>Dark circles</EyeDetail_DarkCircles.label>
+  <EyeDetail_Dirt.label>Dirt</EyeDetail_Dirt.label>
+  <EyeDetail_Freckles.label>Freckles</EyeDetail_Freckles.label>
+  <EyeDetail_None.label>None</EyeDetail_None.label>
+  <EyeDetail_Scar.label>Scar</EyeDetail_Scar.label>
+  <EyeDetail_Tears.label>Tears</EyeDetail_Tears.label>
+  <EyeDetail_Tired.label>Tired</EyeDetail_Tired.label>
+  <Mouth_Fangs.label>Fangs</Mouth_Fangs.label>
+  <Mouth_Lipstick.label>Lipstick</Mouth_Lipstick.label>
+  <Mouth_Sigmund.label>Sigmund</Mouth_Sigmund.label>
+</LanguageData>

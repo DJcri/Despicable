@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <Despicable.AnatomyPartDef>
+    <defName>AnatomyPart_Breasts</defName>
+    <slot>Chest</slot>
+    <tags>
+      <li>Breasts</li>
+    </tags>
+    <capabilities>
+      <li>Chest</li>
+    </capabilities>
+    <visibleByDefault>false</visibleByDefault>
+    <baseSize>1.0</baseSize>
+    <minSize>0.85</minSize>
+    <maxSize>1.25</maxSize>
+    <fluidTemplates>
+      <li>
+        <fluid>Fluid_Milk</fluid>
+        <baseCapacity>40</baseCapacity>
+        <minCapacity>20</minCapacity>
+        <maxCapacity>80</maxCapacity>
+        <initialFillPercent>0.0</initialFillPercent>
+        <refillPerDay>12</refillPerDay>
+      </li>
+    </fluidTemplates>
+  </Despicable.AnatomyPartDef>
+
+</Defs>

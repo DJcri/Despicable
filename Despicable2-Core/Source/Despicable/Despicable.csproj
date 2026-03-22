@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -155,6 +155,10 @@
     <Compile Include="Core\Compatibility\PerspectiveShiftCompat\HarmonyPatch_PerspectiveShift_AvatarInteractionProviders.cs" />
     <Compile Include="Core\Compatibility\PerspectiveShiftCompat\HarmonyPatch_PerspectiveShift_State_SetAvatar.cs" />
     <Compile Include="Core\Compatibility\PerspectiveShiftCompat\PerspectiveShiftCompatUtility.cs" />
+    <Compile Include="Core\Compatibility\VSIECompat\VSIECompatUtility.cs" />
+    <Compile Include="Core\Compatibility\VSIECompat\VSIECompatActivities.cs" />
+    <Compile Include="Core\Compatibility\VSIECompat\VSIECompatForcedPairWorker.cs" />
+    <Compile Include="Core\Compatibility\VSIECompat\HarmonyPatch_InteractionMenu_VSIE.cs" />
     <Compile Include="Core\Constants\Channels.cs" />
     <Compile Include="Core\Constants\Commands.cs" />
     <Compile Include="Core\ContentAvailability.cs" />
@@ -194,6 +198,8 @@
     <Compile Include="Core\Runtime\ReentryGuard.cs" />
     <Compile Include="Core\Runtime\SingleFrameDialogGate.cs" />
     <Compile Include="Core\Runtime\GameComponent_DespicableRuntimeReset.cs" />
+    <Compile Include="Core\Runtime\GameComponent_FacePartsTick.cs" />
+    <Compile Include="Core\Runtime\FaceRuntimeActivityManager.cs" />
     <Compile Include="Core\Staging\BasicStagePawnTags.cs" />
     <Compile Include="Core\Staging\IStagePawnTagProvider.cs" />
     <Compile Include="Core\Staging\IStagePlanHook.cs" />
@@ -234,12 +240,18 @@
     <Compile Include="FacePartsModule\Defs\FacialAnimKeyframeDef.cs" />
     <Compile Include="FacePartsModule\Runtime\FacePartsEventRuntime.cs" />
     <Compile Include="FacePartsModule\Patches\HarmonyPatch_FaceParts_Events.cs" />
+    <Compile Include="FacePartsModule\Patches\HarmonyPatch_ForeignEyeGeneGraphics.cs" />
+    <Compile Include="FacePartsModule\Patches\HarmonyPatch_PawnRenderer_RenderPawnAt.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchModels.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchEligibility.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchAnalyzer.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchGenerator.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchDiagnostics.cs" />
     <Compile Include="FacePartsModule\Runtime\AutoEyePatch\AutoEyePatchRuntime.cs" />
+    <Compile Include="FacePartsModule\Runtime\FaceDetailBoundary\FaceDetailBoundaryRuntime.cs" />
+    <Compile Include="FacePartsModule\Runtime\FacePartCompositeRuntime.cs" />
+    <Compile Include="FacePartsModule\Runtime\FacePartTextureRuntime.cs" />
+    <Compile Include="FacePartsModule\Runtime\FacePartRuntimeGraphicCache.cs" />
     <Compile Include="FacePartsModule\UI\Dialog_D2FacePartsCustomizer.cs" />
     <Compile Include="FacePartsModule\UI\Dialog_D2HeadtypeBlacklist.cs" />
     <Compile Include="FacePartsModule\UI\FacePreviewCache.cs" />
@@ -250,6 +262,7 @@
     <Compile Include="FacePartsModule\RenderNodes\Mouth\PawnRenderNodeWorker_Mouth.cs" />
     <Compile Include="FacePartsModule\RenderNodes\Mouth\PawnRenderNode_Mouth.cs" />
     <Compile Include="FacePartsModule\RenderNodes\PawnRenderNodeWorker_FacePart.cs" />
+    <Compile Include="FacePartsModule\RenderNodes\FacePartRenderNodeContextCache.cs" />
     <Compile Include="HeroKarmaModule\Bridge\HeroKarmaBridge.cs" />
     <Compile Include="HeroKarmaModule\Core\GameComponent_HeroKarma.cs" />
     <Compile Include="HeroKarmaModule\Core\GameComponent_HeroKarma.Helpers.cs" />

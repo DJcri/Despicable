@@ -11,12 +11,14 @@ internal sealed class GameComponent_DespicableNsfwRuntimeReset : GameComponent
     {
         base.StartedNewGame();
         DespicableNsfwRuntimeState.ResetRuntimeState();
+        global::Despicable.LegacyAnatomyDefLookup.ResetCache();
     }
 
     public override void LoadedGame()
     {
         base.LoadedGame();
         DespicableNsfwRuntimeState.ResetRuntimeState();
+        global::Despicable.LegacyAnatomyDefLookup.ResetCache();
         LongEventHandler.ExecuteWhenFinished(global::Despicable.CompLovinParts.RehydrateAllLovinPartsAfterRuntimeReset);
     }
 }

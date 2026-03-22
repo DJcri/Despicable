@@ -8,4 +8,19 @@
   <!-- Removed trailing apostrophe -->
   <InteractionOption_Chat>Mit {0} plaudern</InteractionOption_Chat>
   <InteractionOption_Marriage>{0} einen Heiratsantrag machen</InteractionOption_Marriage>
+
+  <InteractionOption_VSIE_Vent>Sich bei {0} aussprechen</InteractionOption_VSIE_Vent>
+  <InteractionOption_VSIE_Vent_Disabled>Sich bei {0} aussprechen ({1})</InteractionOption_VSIE_Vent_Disabled>
+  <InteractionOption_VSIE_Teach>{0} etwas beibringen</InteractionOption_VSIE_Teach>
+  <InteractionOption_VSIE_Teach_Disabled>{0} etwas beibringen ({1})</InteractionOption_VSIE_Teach_Disabled>
+  <InteractionReason_VSIE_NotInstalled>VSIE nicht installiert</InteractionReason_VSIE_NotInstalled>
+  <InteractionReason_VSIE_FeatureDisabled>Funktion in den VSIE-Einstellungen deaktiviert</InteractionReason_VSIE_FeatureDisabled>
+  <InteractionReason_VSIE_TooFarAway>zu weit entfernt</InteractionReason_VSIE_TooFarAway>
+  <InteractionReason_VSIE_NotFriends>nicht eng genug verbunden</InteractionReason_VSIE_NotFriends>
+  <InteractionReason_VSIE_NotAvailable>derzeit nicht verfügbar</InteractionReason_VSIE_NotAvailable>
+  <InteractionReason_VSIE_NoLesson>nichts zu lehren</InteractionReason_VSIE_NoLesson>
+  <InteractionOption_VSIE_TeachSkill_Tooltip>{1} {0} beibringen</InteractionOption_VSIE_TeachSkill_Tooltip>
+  <InteractionOption_VSIE_ActivityMenu>Aktivität mit {0}</InteractionOption_VSIE_ActivityMenu>
+  <InteractionOption_VSIE_ActivityMenu_Disabled>Aktivität mit {0} ({1})</InteractionOption_VSIE_ActivityMenu_Disabled>
+  <InteractionReason_VSIE_NoActivity>keine Verabredung oder Aktivität verfügbar</InteractionReason_VSIE_NoActivity>
 </LanguageData>

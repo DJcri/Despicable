@@ -1,4 +1,4 @@
-using Despicable;
+﻿using Despicable;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -15,34 +15,68 @@ public class PawnRenderNode_EyeAddon : PawnRenderNode
     private sealed class RuntimeEyeBaseMultiGraphic : Graphic_Single
     {
         private Material _southMaterial;
-        private Material _sideMaterial;
+        private Material _eastMaterial;
+        private Material _westMaterial;
 
-        public void Initialize(Graphic_Single template, Material southMaterial, Material sideMaterial)
+        public void Initialize(Graphic_Single template, Material southMaterial, Material eastMaterial, Material westMaterial)
         {
             CopyInstanceFields(template, this);
             _southMaterial = southMaterial;
-            _sideMaterial = sideMaterial;
+            _eastMaterial = eastMaterial;
+            _westMaterial = westMaterial;
         }
 
-        public override Material MatSingle => _southMaterial ?? base.MatSingle;
+        public override Material MatSingle => _southMaterial ?? _eastMaterial ?? _westMaterial ?? base.MatSingle;
 
         public override Material MatAt(Rot4 rot, Thing thing = null)
         {
-            if (rot == Rot4.East || rot == Rot4.West)
-                return _sideMaterial ?? _southMaterial ?? base.MatSingle;
+            if (rot == Rot4.East)
+                return _eastMaterial ?? _southMaterial ?? _westMaterial ?? base.MatSingle;
 
-            return _southMaterial ?? base.MatSingle;
+            if (rot == Rot4.West)
+                return _westMaterial ?? _eastMaterial ?? _southMaterial ?? base.MatSingle;
+
+            return _southMaterial ?? _eastMaterial ?? _westMaterial ?? base.MatSingle;
         }
     }
 
-    CompFaceParts compFaceParts;
-    private readonly Dictionary<string, Verse.Graphic> _runtimeGraphicsByKey = new();
-    private Verse.Graphic _cachedEyeBaseMultiGraphic;
-    private int _cachedEyeBaseMultiKey = int.MinValue;
+    private readonly CompFaceParts compFaceParts;
+    private readonly string debugLabel;
+    private readonly bool isRightCounterpartNodeCached;
+    private readonly bool isLeftCounterpartNodeCached;
+    private readonly bool isBrowNodeCached;
+    private readonly bool isEyeFacingNodeCached;
+    private readonly FacePartExpressionOffsetKind expressionOffsetKind;
+    public CompFaceParts CompFaceParts => compFaceParts;
+    public string DebugLabel => debugLabel;
+    public bool IsRightCounterpartNodeCached => isRightCounterpartNodeCached;
+    public bool IsLeftCounterpartNodeCached => isLeftCounterpartNodeCached;
+    public bool IsBrowNodeCached => isBrowNodeCached;
+    public bool IsEyeFacingNodeCached => isEyeFacingNodeCached;
+    internal FacePartExpressionOffsetKind ExpressionOffsetKind => expressionOffsetKind;
+    private readonly bool isEyeBaseNode;
+    private readonly bool isAutoEyePatchNode;
+    private readonly bool isRightEyeBaseNode;
+    private readonly bool isEyeDetailNode;
+    private readonly bool isEyeGraphicNode;
 
     public PawnRenderNode_EyeAddon(Pawn pawn, PawnRenderNodeProperties props, PawnRenderTree tree) : base(pawn, props, tree)
     {
         compFaceParts = pawn.TryGetComp<CompFaceParts>();
+        debugLabel = props?.debugLabel ?? string.Empty;
+        isRightCounterpartNodeCached = debugLabel.EndsWith("_R", StringComparison.OrdinalIgnoreCase);
+        isLeftCounterpartNodeCached = debugLabel.EndsWith("_L", StringComparison.OrdinalIgnoreCase);
+        isBrowNodeCached = FacePartRenderNodeContextCache.IsBrowDebugLabel(debugLabel);
+        isEyeFacingNodeCached = FacePartRenderNodeContextCache.MatchesEyeFacingDebugLabel(debugLabel);
+        expressionOffsetKind = FacePartRenderNodeContextCache.ResolveOffsetKind(debugLabel);
+        isEyeBaseNode = debugLabel.StartsWith("FacePart_EyeBase", StringComparison.OrdinalIgnoreCase)
+            || debugLabel.StartsWith("FacePart_AutoEyePatch", StringComparison.OrdinalIgnoreCase);
+        isAutoEyePatchNode = debugLabel.StartsWith("FacePart_AutoEyePatch", StringComparison.OrdinalIgnoreCase);
+        isRightEyeBaseNode = isRightCounterpartNodeCached;
+        isEyeDetailNode = debugLabel.Equals("FacePart_EyeDetail_L", StringComparison.OrdinalIgnoreCase)
+            || debugLabel.Equals("FacePart_EyeDetail_R", StringComparison.OrdinalIgnoreCase);
+        isEyeGraphicNode = debugLabel.Equals("FacePart_Eye_L", StringComparison.OrdinalIgnoreCase)
+            || debugLabel.Equals("FacePart_Eye_R", StringComparison.OrdinalIgnoreCase);
     }
 
     public override GraphicMeshSet MeshSetFor(Pawn pawn)
@@ -110,18 +144,10 @@ public class PawnRenderNode_EyeAddon : PawnRenderNode
     }
 
 
-    private bool IsEyeBaseNode()
-    {
-        string label = props?.debugLabel;
-        return !label.NullOrEmpty() && (label.StartsWith("FacePart_EyeBase", StringComparison.OrdinalIgnoreCase) || label.StartsWith("FacePart_AutoEyePatch", StringComparison.OrdinalIgnoreCase));
-    }
+    private bool IsEyeBaseNode() => isEyeBaseNode;
 
 
-    private bool IsAutoEyePatchNode()
-    {
-        string label = props?.debugLabel;
-        return !label.NullOrEmpty() && label.StartsWith("FacePart_AutoEyePatch", StringComparison.OrdinalIgnoreCase);
-    }
+    private bool IsAutoEyePatchNode() => isAutoEyePatchNode;
 
     public static Vector2 ResolveHeadOverlayDrawSize(Pawn pawn, Vector2 fallback)
     {
@@ -186,83 +212,128 @@ public class PawnRenderNode_EyeAddon : PawnRenderNode
         return string.Concat(runtimeTexture.GetInstanceID().ToString(), "|", drawSize.x.ToString("R"), "x", drawSize.y.ToString("R"), "|", tint.GetHashCode().ToString());
     }
 
-    private bool IsRightEyeBaseNode()
+    private bool IsRightEyeBaseNode() => isRightEyeBaseNode;
+
+    private bool IsEyeDetailNode() => isEyeDetailNode;
+
+    private bool IsEyeGraphicNode() => isEyeGraphicNode;
+
+    private Color ResolveTintForNode(Pawn pawn)
     {
-        string label = props?.debugLabel;
-        return !label.NullOrEmpty() && label.EndsWith("_R", StringComparison.OrdinalIgnoreCase);
+        if (pawn == null)
+            return Color.white;
+
+        if (IsEyeGraphicNode())
+        {
+            Color overrideTint = compFaceParts?.GetResolvedEyeTintThisTick() ?? Color.black;
+            if (overrideTint.a <= 0f)
+                overrideTint.a = 1f;
+            return overrideTint;
+        }
+
+        Color tint = ColorFor(pawn);
+        if (tint.a <= 0f)
+            tint = Color.white;
+        return tint;
     }
 
-    private Verse.Graphic BuildRuntimeGraphic(Pawn pawn, Texture2D runtimeTexture)
+    private Verse.Graphic BuildRuntimeGraphic(Pawn pawn, Texture2D runtimeTexture, Shader shader = null)
     {
         if (runtimeTexture == null)
             return null;
 
         Vector2 drawSize = ResolveRuntimeDrawSize(pawn);
-        Color tint = pawn != null ? ColorFor(pawn) : Color.white;
-        if (tint.a <= 0f)
-            tint = Color.white;
+        Color tint = ResolveTintForNode(pawn);
 
-        string cacheKey = BuildRuntimeGraphicKey(runtimeTexture, drawSize, tint);
-        if (_runtimeGraphicsByKey.TryGetValue(cacheKey, out Verse.Graphic cachedGraphic))
-            return cachedGraphic;
+        string cacheKey = string.Concat("EyeAddon.Single|", BuildRuntimeGraphicKey(runtimeTexture, drawSize, tint), "|", (shader ?? ShaderDatabase.CutoutSkinOverlay).name);
+        return FacePartRuntimeGraphicCache.GetOrCreate(cacheKey, () =>
+        {
+            shader ??= ShaderDatabase.CutoutSkinOverlay;
 
-        Shader shader = ShaderDatabase.CutoutSkinOverlay;
+            Graphic_Single template = GraphicDatabase.Get<Graphic_Single>("FaceParts/Details/detail_empty", shader, drawSize, tint) as Graphic_Single;
+            if (template == null || template.MatSingle == null)
+                return ((Verse.Graphic)null, (Material[])null);
 
-        Graphic_Single template = GraphicDatabase.Get<Graphic_Single>("FaceParts/Details/detail_empty", shader, drawSize, tint) as Graphic_Single;
-        if (template == null || template.MatSingle == null)
-            return null;
+            Graphic_Single clone = (Graphic_Single)FormatterServices.GetUninitializedObject(typeof(Graphic_Single));
+            CopyInstanceFields(template, clone);
 
-        Graphic_Single clone = (Graphic_Single)FormatterServices.GetUninitializedObject(typeof(Graphic_Single));
-        CopyInstanceFields(template, clone);
+            Material runtimeMat = new Material(template.MatSingle);
+            runtimeMat.mainTexture = runtimeTexture;
+            AssignMaterialFields(clone, runtimeMat);
 
-        Material runtimeMat = new Material(template.MatSingle);
-        runtimeMat.mainTexture = runtimeTexture;
-        AssignMaterialFields(clone, runtimeMat);
-
-        _runtimeGraphicsByKey[cacheKey] = clone;
-        return clone;
+            return ((Verse.Graphic)clone, new[] { runtimeMat });
+        });
     }
 
-    private Verse.Graphic BuildRuntimeMultiGraphic(Pawn pawn, Texture2D southTexture, Texture2D sideTexture)
+    private static void ResolveBlankFacingTextures(out Texture2D southTexture, out Texture2D eastTexture, out Texture2D westTexture)
     {
-        if (southTexture == null || sideTexture == null)
+        if (!FacePartTextureRuntime.TryResolvePreparedMultiFacingTextures(CompFaceParts.EMPTY_DETAIL_TEX_PATH, ShaderDatabase.CutoutSkinOverlay, out southTexture, out eastTexture, out westTexture, "PawnRenderNode_EyeAddon.BlankTextures", CompFaceParts.EMPTY_DETAIL_TEX_PATH))
+        {
+            southTexture = null;
+            eastTexture = null;
+            westTexture = null;
+        }
+    }
+
+    private Verse.Graphic BuildRuntimeMultiGraphic(Pawn pawn, Texture2D southTexture, Texture2D eastTexture, Texture2D westTexture, bool allowFacingFallback = true)
+    {
+        if (southTexture == null && eastTexture == null && westTexture == null)
             return null;
 
-        Color tint = pawn != null ? ColorFor(pawn) : Color.white;
-        if (tint.a <= 0f)
-            tint = Color.white;
+        Color tint = ResolveTintForNode(pawn);
 
-        unchecked
+        Vector2 drawSize = ResolveRuntimeDrawSize(pawn);
+        string cacheKey = string.Concat(
+            "EyeAddon.Multi|",
+            allowFacingFallback ? "fallback" : "strict",
+            "|",
+            southTexture != null ? southTexture.GetInstanceID().ToString() : "0",
+            "|",
+            eastTexture != null ? eastTexture.GetInstanceID().ToString() : "0",
+            "|",
+            westTexture != null ? westTexture.GetInstanceID().ToString() : "0",
+            "|",
+            drawSize.x.ToString("R"),
+            "x",
+            drawSize.y.ToString("R"),
+            "|",
+            tint.GetHashCode().ToString(),
+            "|",
+            ShaderDatabase.CutoutSkinOverlay.name);
+
+        return FacePartRuntimeGraphicCache.GetOrCreate(cacheKey, () =>
         {
-            Vector2 drawSize = ResolveRuntimeDrawSize(pawn);
-
-            int key = 17;
-            key = (key * 31) + southTexture.GetInstanceID();
-            key = (key * 31) + sideTexture.GetInstanceID();
-            key = (key * 31) + tint.GetHashCode();
-            key = (key * 31) + drawSize.GetHashCode();
-
-            if (_cachedEyeBaseMultiGraphic != null && _cachedEyeBaseMultiKey == key)
-                return _cachedEyeBaseMultiGraphic;
-
             Shader shader = ShaderDatabase.CutoutSkinOverlay;
             Graphic_Single template = GraphicDatabase.Get<Graphic_Single>("FaceParts/Details/detail_empty", shader, drawSize, tint) as Graphic_Single;
             if (template == null || template.MatSingle == null)
-                return null;
+                return ((Verse.Graphic)null, (Material[])null);
+
+            Texture2D blankSouth = null;
+            Texture2D blankEast = null;
+            Texture2D blankWest = null;
+            if (!allowFacingFallback)
+                ResolveBlankFacingTextures(out blankSouth, out blankEast, out blankWest);
 
             Material southMat = new Material(template.MatSingle);
-            southMat.mainTexture = southTexture;
+            southMat.mainTexture = allowFacingFallback
+                ? southTexture ?? eastTexture ?? westTexture
+                : southTexture ?? blankSouth ?? blankEast ?? blankWest;
 
-            Material sideMat = new Material(template.MatSingle);
-            sideMat.mainTexture = sideTexture;
+            Material eastMat = new Material(template.MatSingle);
+            eastMat.mainTexture = allowFacingFallback
+                ? eastTexture ?? southTexture ?? westTexture
+                : eastTexture ?? blankEast ?? blankSouth ?? blankWest;
+
+            Material westMat = new Material(template.MatSingle);
+            westMat.mainTexture = allowFacingFallback
+                ? westTexture ?? eastTexture ?? southTexture
+                : westTexture ?? blankWest ?? blankEast ?? blankSouth;
 
             RuntimeEyeBaseMultiGraphic graphic = new();
-            graphic.Initialize(template, southMat, sideMat);
+            graphic.Initialize(template, southMat, eastMat, westMat);
 
-            _cachedEyeBaseMultiGraphic = graphic;
-            _cachedEyeBaseMultiKey = key;
-            return graphic;
-        }
+            return ((Verse.Graphic)graphic, new[] { southMat, eastMat, westMat });
+        });
     }
 
     private Verse.Graphic TryBuildRuntimeEyeBaseGraphic(Pawn pawn)
@@ -296,7 +367,7 @@ public class PawnRenderNode_EyeAddon : PawnRenderNode
             return null;
         }
 
-        return BuildRuntimeMultiGraphic(pawn, southSelection.RuntimeTexture, sideSelection.RuntimeTexture);
+        return BuildRuntimeMultiGraphic(pawn, southSelection.RuntimeTexture, sideSelection.RuntimeTexture, sideSelection.RuntimeTexture);
     }
 
     public override Verse.Graphic GraphicFor(Pawn pawn)
@@ -332,40 +403,83 @@ public class PawnRenderNode_EyeAddon : PawnRenderNode
                 return runtimeEyeBaseGraphic;
         }
 
-        if (compFaceParts != null)
+        if (IsEyeDetailNode() && compFaceParts != null)
         {
-            ExpressionDef baseExpression = compFaceParts?.baseExpression;
-            ExpressionDef animExpression = compFaceParts?.animExpression;
+            string styleTexPath = compFaceParts.ResolveEyeDetailBaseStyleTexturePath(texPath);
+            string stateTexPath = compFaceParts.ResolveEyeDetailStateTexturePath();
+            string activeTexPath = !stateTexPath.NullOrEmpty() && !string.Equals(stateTexPath, CompFaceParts.EMPTY_DETAIL_TEX_PATH, StringComparison.OrdinalIgnoreCase)
+                ? stateTexPath
+                : styleTexPath;
 
-            switch (this.props.debugLabel)
+            bool hasStyle = !styleTexPath.NullOrEmpty() && !string.Equals(styleTexPath, CompFaceParts.EMPTY_DETAIL_TEX_PATH, StringComparison.OrdinalIgnoreCase);
+            bool hasState = !stateTexPath.NullOrEmpty() && !string.Equals(stateTexPath, CompFaceParts.EMPTY_DETAIL_TEX_PATH, StringComparison.OrdinalIgnoreCase);
+
+            if (hasStyle || hasState)
             {
-                case "FacePart_Eye_L":
-                case "FacePart_Eye_R":
-                    if (animExpression?.texPathEyes != null)
-                        texPath = animExpression.texPathEyes;
-                    else if (baseExpression?.texPathEyes != null)
-                        texPath = baseExpression.texPathEyes;
-                    else if (compFaceParts.eyeStyleDef != null && !compFaceParts.eyeStyleDef.texPath.NullOrEmpty())
-                        texPath = compFaceParts.eyeStyleDef.texPath;
-                    break;
-                case "FacePart_Detail_L":
-                case "FacePart_Detail_R":
-                    texPath = compFaceParts.GetBaseDetailTexPath();
-                    break;
-                case "FacePart_SecondaryDetail_L":
-                case "FacePart_SecondaryDetail_R":
-                    if (compFaceParts.animExpression != null)
-                        texPath = animExpression?.texPathDetail ?? "FaceParts/Details/detail_empty";
-                    else
-                        texPath = "FaceParts/Details/detail_empty";
-                    break;
+                Texture2D styleSouth = null;
+                Texture2D styleEast = null;
+                Texture2D styleWest = null;
+                Texture2D stateSouth = null;
+                Texture2D stateEast = null;
+                Texture2D stateWest = null;
+
+                bool styleReady = !hasStyle || FacePartTextureRuntime.TryResolvePreparedMultiFacingTextures(styleTexPath, ShaderDatabase.CutoutSkinOverlay, out styleSouth, out styleEast, out styleWest, "PawnRenderNode_EyeAddon.EyeDetailStyle", props?.debugLabel ?? styleTexPath);
+                bool stateReady = !hasState || FacePartTextureRuntime.TryResolvePreparedMultiFacingTextures(stateTexPath, ShaderDatabase.CutoutSkinOverlay, out stateSouth, out stateEast, out stateWest, "PawnRenderNode_EyeAddon.EyeDetailState", props?.debugLabel ?? stateTexPath);
+
+                if (styleReady)
+                {
+                    if (!compFaceParts.ShouldRenderEyeDetailStyleForFacing(this.props.debugLabel, Rot4.South))
+                        styleSouth = null;
+                    if (!compFaceParts.ShouldRenderEyeDetailStyleForFacing(this.props.debugLabel, Rot4.East))
+                        styleEast = null;
+                    if (!compFaceParts.ShouldRenderEyeDetailStyleForFacing(this.props.debugLabel, Rot4.West))
+                        styleWest = null;
+                }
+
+                if (styleReady && stateReady)
+                {
+                    Texture2D finalSouth = null;
+                    Texture2D finalEast = null;
+                    Texture2D finalWest = null;
+
+                    string cacheStem = string.Concat(
+                        pawn?.story?.headType?.defName ?? string.Empty,
+                        "|",
+                        props?.debugLabel ?? string.Empty,
+                        "|",
+                        styleTexPath ?? string.Empty,
+                        "|",
+                        compFaceParts.GetResolvedEyeDetailSideMode().ToString(),
+                        "|",
+                        stateTexPath ?? string.Empty);
+                    FacePartCompositeRuntime.TryResolveCompositeTexture(styleSouth, stateSouth, cacheStem + "|south", out finalSouth);
+                    FacePartCompositeRuntime.TryResolveCompositeTexture(styleEast, stateEast, cacheStem + "|east", out finalEast);
+                    FacePartCompositeRuntime.TryResolveCompositeTexture(styleWest, stateWest, cacheStem + "|west", out finalWest);
+
+                    Verse.Graphic runtimeGraphic = BuildRuntimeMultiGraphic(pawn, finalSouth, finalEast, finalWest, allowFacingFallback: false);
+                    if (runtimeGraphic != null)
+                        return runtimeGraphic;
+                }
             }
+
+            texPath = activeTexPath;
+        }
+        else if (compFaceParts != null)
+        {
+            texPath = compFaceParts.ResolveTexturePathForDebugLabel(this.props.debugLabel, texPath);
         }
 
         if (texPath.NullOrEmpty())
-            texPath = "FaceParts/Details/detail_empty";
+            texPath = CompFaceParts.EMPTY_DETAIL_TEX_PATH;
 
-        texPath = FacePartsUtil.GetEyePath(pawn, texPath); // Ensures it's a valid path
-        return GraphicDatabase.Get<Graphic_Multi>(texPath, ShaderDatabase.CutoutSkinOverlay, ResolveRuntimeDrawSize(pawn), ColorFor(pawn));
+        texPath = FacePartsUtil.GetEyePath(pawn, texPath);
+        if (FacePartTextureRuntime.TryResolvePreparedMultiFacingTextures(texPath, ShaderDatabase.CutoutSkinOverlay, out Texture2D southTexture, out Texture2D eastTexture, out Texture2D westTexture, "PawnRenderNode_EyeAddon.PreparedTextures", props?.debugLabel ?? texPath))
+        {
+            Verse.Graphic runtimeGraphic = BuildRuntimeMultiGraphic(pawn, southTexture, eastTexture, westTexture);
+            if (runtimeGraphic != null)
+                return runtimeGraphic;
+        }
+
+        return GraphicDatabase.Get<Graphic_Multi>(texPath, ShaderDatabase.CutoutSkinOverlay, ResolveRuntimeDrawSize(pawn), ResolveTintForNode(pawn));
     }
 }

@@ -120,7 +120,12 @@ public static class Interactions
         }
 
         pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
-        pawn.jobs.TryTakeOrderedJob(job);
+        bool started = pawn.jobs.TryTakeOrderedJob(job);
+        if (!started)
+        {
+            store?.Clear(job.loadID);
+            Core.DebugLogger.Debug($"Ordered job failed to start def={jobDef.defName} pawn={pawn.ThingID}:{pawn.LabelShort} jobId={job.loadID} channel={req?.Channel}");
+        }
     }
 
 }

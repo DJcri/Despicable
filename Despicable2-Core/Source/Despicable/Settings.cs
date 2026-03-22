@@ -7,6 +7,11 @@ public class Settings : ModSettings
     // Player settings
     public bool animationExtensionEnabled = true;
     public bool facialPartsExtensionEnabled = true;
+    public bool facialDynamicsInPortraits = false;
+    public bool runtimeFacialDynamicsZoomGateEnabled = true;
+    public bool runtimeFacialDynamicsGateHostilePawns = false;
+    public bool runtimeFacialDynamicsGateVisitorsAndTraders = false;
+    public float runtimeFacialDynamicsMaxZoomRootSize = 10f;
     public bool experimentalAutoEyePatchEnabled = true;
 
     // NSFW module settings are persisted here in Core so the player has one central settings source.
@@ -80,6 +85,11 @@ public class Settings : ModSettings
     {
         Scribe_Values.Look(ref animationExtensionEnabled, "animationExtensionEnabled", true);
         Scribe_Values.Look(ref facialPartsExtensionEnabled, "facialPartsExtensionEnabled", true);
+        Scribe_Values.Look(ref facialDynamicsInPortraits, "facialDynamicsInPortraits", false);
+        Scribe_Values.Look(ref runtimeFacialDynamicsZoomGateEnabled, "runtimeFacialDynamicsZoomGateEnabled", true);
+        Scribe_Values.Look(ref runtimeFacialDynamicsGateHostilePawns, "runtimeFacialDynamicsGateHostilePawns", false);
+        Scribe_Values.Look(ref runtimeFacialDynamicsGateVisitorsAndTraders, "runtimeFacialDynamicsGateVisitorsAndTraders", false);
+        Scribe_Values.Look(ref runtimeFacialDynamicsMaxZoomRootSize, "runtimeFacialDynamicsMaxZoomRootSize", 10f);
         Scribe_Values.Look(ref experimentalAutoEyePatchEnabled, "experimentalAutoEyePatchEnabled", true);
         Scribe_Values.Look(ref lovinExtensionEnabled, "lovinExtensionEnabled", true);
         Scribe_Values.Look(ref lovinMutualConsent, "lovinMutualConsent", true);

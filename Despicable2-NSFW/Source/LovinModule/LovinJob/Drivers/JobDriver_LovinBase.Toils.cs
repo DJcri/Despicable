@@ -18,9 +18,16 @@ public partial class JobDriver_LovinBase
         {
             try
             {
-                LovinVisualRuntime.SetLovinVisualActive(pawn, true);
-                LovinVisualRuntime.SetLovinVisualActive(Partner, true);
-                TryStartLovinAnimation();
+                participants.Clear();
+                if (pawn != null)
+                    participants.Add(pawn);
+                if (Partner != null && Partner != pawn && !participants.Contains(Partner))
+                    participants.Add(Partner);
+
+                lovinPlaybackActive = true;
+                hasStartedAnimation = false;
+                ReapplyLovinRuntimeState(refreshVisuals: true);
+                hasStartedAnimation = TryStartLovinAnimation();
             }
             catch (Exception e)
             {
@@ -44,6 +51,9 @@ public partial class JobDriver_LovinBase
 
             try
             {
+                if (lovinPlaybackActive)
+                    ReapplyLovinRuntimeState(refreshVisuals: false);
+
                 TickParticipants();
 
                 if (ShouldFinishLovin())
@@ -60,6 +70,8 @@ public partial class JobDriver_LovinBase
         });
         lovinToil.AddFinishAction(delegate
         {
+            lovinPlaybackActive = false;
+            hasStartedAnimation = false;
             LovinVisualRuntime.SetLovinVisualActive(pawn, false);
             LovinVisualRuntime.SetLovinVisualActive(Partner, false);
             ResumePartnerAndResetAnimators();
@@ -265,20 +277,16 @@ public partial class JobDriver_LovinBase
         orderedPawn.needs?.mood?.thoughts?.memories?.TryGainMemory(memory, otherPawn);
     }
 
-    private void TryStartLovinAnimation()
+    private bool TryStartLovinAnimation()
     {
-        // Face each other, in case there's no animation
-        pawn.rotationTracker.FaceTarget(Partner);
-        Partner.rotationTracker.FaceTarget(pawn);
-
-        // Stop partner's pathing
-        Partner.jobs.curDriver.asleep = false;
-        Partner.pather.StopDead();
+        ReapplyLovinRuntimeState(refreshVisuals: false);
 
         // ANIMATION (Core staging planner + playback backend)
         durationTicks = LovinUtil.DefaultDurationTicks;
-        if (CommonUtil.GetSettings().animationExtensionEnabled)
-            LovinStagePlayback.TryStartForJob(job, pawn, Partner, Bed, participants, out durationTicks);
+        if (!CommonUtil.GetSettings().animationExtensionEnabled)
+            return false;
+
+        return LovinStagePlayback.TryStartForJob(job, pawn, Partner, Bed, participants, out durationTicks);
     }
 
     private void TickParticipants()
@@ -295,19 +303,51 @@ public partial class JobDriver_LovinBase
 
     private bool ShouldFinishLovin()
     {
-        CompExtendedAnimator animator = pawn.TryGetComp<CompExtendedAnimator>();
-        if ((animator.animQueue.Count <= 0 && !animator.hasAnimPlaying)
-            || (!animator.hasAnimPlaying && durationTicks <= 0))
-        {
+        if (durationTicks <= 0)
             return true;
-        }
 
-        return durationTicks <= 0;
+        if (!hasStartedAnimation)
+            return false;
+
+        CompExtendedAnimator animator = pawn.TryGetComp<CompExtendedAnimator>();
+        if (animator == null)
+            return false;
+
+        return animator.animQueue.Count <= 0 && !animator.hasAnimPlaying;
+    }
+
+    internal void ReapplyLovinRuntimeState(bool refreshVisuals = true)
+    {
+        if (!lovinPlaybackActive)
+            return;
+
+        Pawn partner = Partner;
+
+        participants.Clear();
+        if (pawn != null)
+            participants.Add(pawn);
+        if (partner != null && partner != pawn && !participants.Contains(partner))
+            participants.Add(partner);
+
+        LovinVisualRuntime.SetLovinVisualActive(pawn, true, refreshVisuals);
+        LovinVisualRuntime.SetLovinVisualActive(partner, true, refreshVisuals);
+
+        if (pawn?.rotationTracker != null && partner != null)
+            pawn.rotationTracker.FaceTarget(partner);
+        if (partner?.rotationTracker != null && pawn != null)
+            partner.rotationTracker.FaceTarget(pawn);
+
+        if (pawn?.jobs?.curDriver != null)
+            pawn.jobs.curDriver.asleep = false;
+        pawn?.pather?.StopDead();
+
+        if (partner?.jobs?.curDriver != null)
+            partner.jobs.curDriver.asleep = false;
+        partner?.pather?.StopDead();
     }
 
     private void ResumePartnerAndResetAnimators()
     {
-        Partner.pather.StartPath(Target, PathEndMode.OnCell);
         AnimUtil.ResetAnimatorsForGroup(participants);
     }
 }

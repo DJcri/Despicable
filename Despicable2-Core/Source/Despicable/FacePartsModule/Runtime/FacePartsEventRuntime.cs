@@ -33,9 +33,16 @@ internal static class FacePartsEventRuntime
 
         int pawnId = pawn.thingIDNumber;
         if (PendingEventsByPawnId.TryGetValue(pawnId, out FacePartsEventMask existing))
+        {
+            if ((existing & mask) == mask)
+                return;
+
             PendingEventsByPawnId[pawnId] = existing | mask;
+        }
         else
+        {
             PendingEventsByPawnId[pawnId] = mask;
+        }
 
         hasPendingEvents = true;
     }

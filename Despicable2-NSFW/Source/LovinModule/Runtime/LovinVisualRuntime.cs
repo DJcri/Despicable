@@ -1,5 +1,6 @@
 using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace Despicable;
 /// <summary>
@@ -55,7 +56,7 @@ internal static class LovinVisualRuntime
             return false;
 
         bool wasActive = VisualActivityTracker.IsLovinVisualActive(pawn);
-        bool shouldBeActive = wasActive && CanShowLovinNudity(pawn);
+        bool shouldBeActive = (wasActive || ShouldLovinVisualBeActiveFromSavedState(pawn)) && CanShowLovinNudity(pawn);
         if (!force && wasActive == shouldBeActive)
             return false;
 
@@ -88,6 +89,7 @@ internal static class LovinVisualRuntime
                 if (!HasLovinPartsComp(pawn))
                     continue;
 
+                ReapplySavedLovinPlaybackIfNeeded(pawn, refreshVisuals: false);
                 SyncPawn(pawn, force: true, refreshVisuals: false);
                 RefreshPawnVisuals(pawn);
             }
@@ -107,6 +109,7 @@ internal static class LovinVisualRuntime
                 if (!HasLovinPartsComp(pawn))
                     continue;
 
+                ReapplySavedLovinPlaybackIfNeeded(pawn, refreshVisuals: false);
                 SyncPawn(pawn, force: true, refreshVisuals: false);
                 RefreshPawnVisuals(pawn);
             }
@@ -125,6 +128,34 @@ internal static class LovinVisualRuntime
         pawn.Drawer?.renderer?.SetAllGraphicsDirty();
         if (markPortraitDirty)
             PortraitsCache.SetDirty(pawn);
+    }
+
+    private static bool ShouldLovinVisualBeActiveFromSavedState(Pawn pawn)
+    {
+        if (!CanShowLovinNudity(pawn))
+            return false;
+
+        JobDriver currentDriver = pawn?.jobs?.curDriver;
+        if (currentDriver is JobDriver_LovinBase lovinDriver && lovinDriver.IsLovinPlaybackActive)
+            return true;
+
+        if (currentDriver is JobDriver_SelfLovin selfLovinDriver && selfLovinDriver.IsSelfLovinPlaybackActive)
+            return true;
+
+        return false;
+    }
+
+    private static void ReapplySavedLovinPlaybackIfNeeded(Pawn pawn, bool refreshVisuals)
+    {
+        JobDriver currentDriver = pawn?.jobs?.curDriver;
+        if (currentDriver is JobDriver_LovinBase lovinDriver && lovinDriver.IsLovinPlaybackActive)
+        {
+            lovinDriver.ReapplyLovinRuntimeState(refreshVisuals);
+            return;
+        }
+
+        if (currentDriver is JobDriver_SelfLovin selfLovinDriver && selfLovinDriver.IsSelfLovinPlaybackActive)
+            selfLovinDriver.ReapplySelfLovinRuntimeState(refreshVisuals);
     }
 
     private static bool HasLovinPartsComp(Pawn pawn)

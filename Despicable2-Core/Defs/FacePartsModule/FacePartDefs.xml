@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Defs>
 	<!-- Node Tag Defs -->
 	<PawnRenderNodeTagDef>
@@ -8,6 +8,9 @@
 		<defName>FacePart_Eye</defName>
 	</PawnRenderNodeTagDef>
 	<PawnRenderNodeTagDef>
+		<defName>FacePart_Brow</defName>
+	</PawnRenderNodeTagDef>
+	<PawnRenderNodeTagDef>
 		<defName>FacePart_Mouth</defName>
 	</PawnRenderNodeTagDef>
 	<PawnRenderNodeTagDef>
@@ -15,6 +18,9 @@
 	</PawnRenderNodeTagDef>
 	<PawnRenderNodeTagDef>
 		<defName>FacePart_SecondaryDetail</defName>
+	</PawnRenderNodeTagDef>
+	<PawnRenderNodeTagDef>
+		<defName>FacePart_EyeDetail</defName>
 	</PawnRenderNodeTagDef>
 	
 	<!-- Property Defs -->
@@ -28,7 +34,7 @@
 			<tagDef>FacePart_EyeBase</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Skin</colorType>
-			<baseLayer>51</baseLayer>
+			<baseLayer>55</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -41,7 +47,7 @@
 			<tagDef>FacePart_Detail</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>54</baseLayer>
+			<baseLayer>56</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -54,7 +60,33 @@
 			<tagDef>FacePart_SecondaryDetail</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>55</baseLayer>
+			<baseLayer>57</baseLayer>
+		</properties>
+	</Despicable.FacePartDef>
+	<Despicable.FacePartDef>
+		<defName>FacePart_EyeDetail_L</defName>
+		<properties Class="PawnRenderNodeProperties">
+			<debugLabel>FacePart_EyeDetail_L</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_EyeAddon</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_EyeAddon</workerClass>
+			<texPath>FaceParts/Details/detail_empty</texPath>
+			<tagDef>FacePart_EyeDetail</tagDef>
+			<rotDrawMode>Fresh, Rotting</rotDrawMode>
+			<colorType>Custom</colorType>
+			<baseLayer>56</baseLayer>
+		</properties>
+	</Despicable.FacePartDef>
+	<Despicable.FacePartDef>
+		<defName>FacePart_Brow_L</defName>
+		<properties Class="PawnRenderNodeProperties">
+			<debugLabel>FacePart_Brow_L</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_EyeAddon</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_EyeAddon</workerClass>
+			<texPath>FaceParts/Brows/Thick/brow_thick_flat</texPath>
+			<tagDef>FacePart_Brow</tagDef>
+			<rotDrawMode>Fresh, Rotting</rotDrawMode>
+			<colorType>Custom</colorType>
+			<baseLayer>57</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -63,11 +95,11 @@
 			<debugLabel>FacePart_Eye_L</debugLabel>
 			<nodeClass>Despicable.PawnRenderNode_EyeAddon</nodeClass>
 			<workerClass>Despicable.PawnRenderNodeWorker_EyeAddon</workerClass>
-			<texPath>FaceParts/Eyes/eyes_default</texPath>
+			<texPath>FaceParts/Eyes/eye_normal</texPath>
 			<tagDef>FacePart_Eye</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>56</baseLayer>
+			<baseLayer>58</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -76,11 +108,11 @@
 			<debugLabel>FacePart_Mouth</debugLabel>
 			<nodeClass>Despicable.PawnRenderNode_Mouth</nodeClass>
 			<workerClass>Despicable.PawnRenderNodeWorker_Mouth</workerClass>
-			<texPath>FaceParts/Mouths/mouth_neutral</texPath>
+			<texPath>FaceParts/Mouths/mouth_serious</texPath>
 			<tagDef>FacePart_Mouth</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>57</baseLayer>
+			<baseLayer>59</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<!-- Right-side counterparts -->
@@ -94,7 +126,7 @@
 			<tagDef>FacePart_EyeBase</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Skin</colorType>
-			<baseLayer>53</baseLayer>
+			<baseLayer>55</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -107,7 +139,7 @@
 			<tagDef>FacePart_Detail</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>54</baseLayer>
+			<baseLayer>56</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -120,7 +152,33 @@
 			<tagDef>FacePart_SecondaryDetail</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>55</baseLayer>
+			<baseLayer>57</baseLayer>
+		</properties>
+	</Despicable.FacePartDef>
+	<Despicable.FacePartDef>
+		<defName>FacePart_EyeDetail_R</defName>
+		<properties Class="PawnRenderNodeProperties">
+			<debugLabel>FacePart_EyeDetail_R</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_EyeAddon</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_EyeAddon</workerClass>
+			<texPath>FaceParts/Details/detail_empty</texPath>
+			<tagDef>FacePart_EyeDetail</tagDef>
+			<rotDrawMode>Fresh, Rotting</rotDrawMode>
+			<colorType>Custom</colorType>
+			<baseLayer>56</baseLayer>
+		</properties>
+	</Despicable.FacePartDef>
+	<Despicable.FacePartDef>
+		<defName>FacePart_Brow_R</defName>
+		<properties Class="PawnRenderNodeProperties">
+			<debugLabel>FacePart_Brow_R</debugLabel>
+			<nodeClass>Despicable.PawnRenderNode_EyeAddon</nodeClass>
+			<workerClass>Despicable.PawnRenderNodeWorker_EyeAddon</workerClass>
+			<texPath>FaceParts/Brows/Thick/brow_thick_flat</texPath>
+			<tagDef>FacePart_Brow</tagDef>
+			<rotDrawMode>Fresh, Rotting</rotDrawMode>
+			<colorType>Custom</colorType>
+			<baseLayer>57</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 	<Despicable.FacePartDef>
@@ -129,11 +187,11 @@
 			<debugLabel>FacePart_Eye_R</debugLabel>
 			<nodeClass>Despicable.PawnRenderNode_EyeAddon</nodeClass>
 			<workerClass>Despicable.PawnRenderNodeWorker_EyeAddon</workerClass>
-			<texPath>FaceParts/Eyes/eyes_default</texPath>
+			<texPath>FaceParts/Eyes/eye_normal</texPath>
 			<tagDef>FacePart_Eye</tagDef>
 			<rotDrawMode>Fresh, Rotting</rotDrawMode>
 			<colorType>Custom</colorType>
-			<baseLayer>56</baseLayer>
+			<baseLayer>58</baseLayer>
 		</properties>
 	</Despicable.FacePartDef>
 </Defs>

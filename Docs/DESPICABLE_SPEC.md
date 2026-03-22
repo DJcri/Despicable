@@ -75,6 +75,9 @@ This spec sits above the smaller docs. Keep these aligned with it:
 - `Despicable2-Core/Docs/Manual_Regression_Checklist.md`: manual testing expectations
 - `Despicable2-Core/Docs/Smoke_Test_Policy.md`: smoke-check policy
 - `Despicable2-Core/Docs/Localization_Guardrails.md`: localization audit rules
+- `Despicable2-Core/Docs/FaceParts_Preview_and_Portraits.md`: face customizer, portrait warmup, and preview notes
+- `Despicable2-Core/Docs/AnimGroupStudio_Preview_Workflow.md`: AGS detached preview and renderer notes
+- `Despicable2-NSFW/Docs/Anatomy_Def_Framework.md` and `Anatomy_Content_Author_Guide.md`: anatomy ownership, runtime model, and content authoring
 - `Despicable2-NSFW/Docs/Localization_Guide.md` and `Localization_CodeStringMap.md`: NSFW-specific localization addenda
 
 Use those for detailed policy. Use this file for system ownership and flow mapping.
@@ -163,7 +166,8 @@ The canonical request builder is **not** the menu UI. It is `Core/InteractionEnt
 NSFW owns:
 - explicit-content behavior and assets
 - lovin job logic, drivers, givers, runtime state, and UI
-- genital defs and genital render nodes
+- logical anatomy resolution, hidden anatomy persistence, and anatomy debug tooling
+- genital defs, appearance/placement rules, and genital render nodes
 - NSFW-side hooks and optional adult-content integrations
 - NSFW-side runtime reset behavior
 
@@ -833,6 +837,8 @@ If NSFW was touched:
 - startup and integration registration
 - one basic interaction path
 - lovin-part rehydration or runtime reset if relevant
+- anatomy migration / logical anatomy rehydration if relevant
+- one dev-mode Anatomy Debug pass if anatomy or rendering changed
 
 ### 17.6 Release sanity
 

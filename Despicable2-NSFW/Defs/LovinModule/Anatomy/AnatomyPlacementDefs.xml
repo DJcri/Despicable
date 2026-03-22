@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- Built-in migrated placement rules for existing external genital parts. -->
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalPenisPlacement_Hulk</defName>
+    <part>Genital_Penis</part>
+    <bodyTypes>
+      <li>Hulk</li>
+    </bodyTypes>
+    <offset>(-0.08, 0, -0.18)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalPenisPlacement_Male</defName>
+    <part>Genital_Penis</part>
+    <bodyTypes>
+      <li>Male</li>
+    </bodyTypes>
+    <offset>(0, 0, 0)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalPenisPlacement_Thin</defName>
+    <part>Genital_Penis</part>
+    <bodyTypes>
+      <li>Thin</li>
+    </bodyTypes>
+    <offset>(-0.1, 0, 0)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalPenisPlacement_Fat</defName>
+    <part>Genital_Penis</part>
+    <bodyTypes>
+      <li>Fat</li>
+    </bodyTypes>
+    <offset>(0.2, 0, -0.1)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalVaginaPlacement_Hulk</defName>
+    <part>Genital_Vagina</part>
+    <bodyTypes>
+      <li>Hulk</li>
+    </bodyTypes>
+    <offset>(-0.08, 0, -0.18)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalVaginaPlacement_Male</defName>
+    <part>Genital_Vagina</part>
+    <bodyTypes>
+      <li>Male</li>
+    </bodyTypes>
+    <offset>(0, 0, 0)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalVaginaPlacement_Thin</defName>
+    <part>Genital_Vagina</part>
+    <bodyTypes>
+      <li>Thin</li>
+    </bodyTypes>
+    <offset>(-0.1, 0, 0)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+  <Despicable.AnatomyPlacementDef>
+    <defName>D2_GenitalVaginaPlacement_Fat</defName>
+    <part>Genital_Vagina</part>
+    <bodyTypes>
+      <li>Fat</li>
+    </bodyTypes>
+    <offset>(0.2, 0, -0.1)</offset>
+  </Despicable.AnatomyPlacementDef>
+
+</Defs>

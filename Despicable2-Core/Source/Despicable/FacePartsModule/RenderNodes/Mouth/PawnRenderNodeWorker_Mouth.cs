@@ -23,7 +23,8 @@ public class PawnRenderNodeWorker_Mouth : PawnRenderNodeWorker_FacePart
                 return parms.flipHead;
             }
 
-            if (pawn?.TryGetComp<CompFaceParts>()?.HasBlockingNoseGeneThisTick() == true)
+            CompFaceParts compFaceParts = ResolveCompFaceParts(node, pawn);
+            if (compFaceParts?.HasBlockingNoseGeneThisTick() == true)
                 return false;
 
             return true;
@@ -51,8 +52,9 @@ public class PawnRenderNodeWorker_Mouth : PawnRenderNodeWorker_FacePart
             side = Vector3.left;
         }
 
-        vector += side * (eyeOffset * (parms.pawn.ageTracker.CurLifeStage.eyeSizeFactor ?? 1f));
-        vector *= parms.pawn.ageTracker.CurLifeStage.eyeSizeFactor ?? 1f;
+        float eyeSizeFactor = pawn.ageTracker.CurLifeStage.eyeSizeFactor ?? 1f;
+        vector += side * (eyeOffset * eyeSizeFactor);
+        vector *= eyeSizeFactor;
 
         return vector;
     }

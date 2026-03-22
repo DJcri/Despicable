@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
@@ -12,6 +13,10 @@ internal static class AutoEyePatchRuntime
     private static readonly Dictionary<string, AutoEyePatchHeadResult> _headResultsByKey = new();
     private static readonly Dictionary<Texture2D, Texture2D> _flippedRuntimeTextures = new();
     private static readonly HashSet<int> _pendingFaceRefreshPawnIds = new();
+    private static readonly Queue<string> _pendingHeadGenerationKeys = new();
+    private static readonly HashSet<string> _queuedHeadGenerationKeys = new();
+    private static readonly Dictionary<string, HeadTypeDef> _queuedHeadTypesByKey = new();
+    private static readonly Dictionary<string, HashSet<int>> _waitingPawnIdsByHeadKey = new();
     // Guardrail-Allow-Static: Runtime queue gate owned by AutoEyePatchRuntime; reset via ResetRuntimeState() with the rest of the face-refresh queue.
     private static bool _hasPendingFaceRefresh;
     private static AutoEyePatchStartupSummary _lastSummary = new();
@@ -86,6 +91,10 @@ internal static class AutoEyePatchRuntime
         _headResultsByKey.Clear();
         _flippedRuntimeTextures.Clear();
         _pendingFaceRefreshPawnIds.Clear();
+        _pendingHeadGenerationKeys.Clear();
+        _queuedHeadGenerationKeys.Clear();
+        _queuedHeadTypesByKey.Clear();
+        _waitingPawnIdsByHeadKey.Clear();
         _hasPendingFaceRefresh = false;
         _lastSummary = new AutoEyePatchStartupSummary();
     }
@@ -96,6 +105,13 @@ internal static class AutoEyePatchRuntime
     {
         if (pawn == null)
             return;
+
+        CompFaceParts comp = pawn.TryGetComp<CompFaceParts>();
+        if (comp != null)
+        {
+            comp.NotifyPendingAutoEyePatchFaceRefreshQueued();
+            return;
+        }
 
         if (_pendingFaceRefreshPawnIds.Add(pawn.thingIDNumber))
             _hasPendingFaceRefresh = true;
@@ -124,8 +140,27 @@ internal static class AutoEyePatchRuntime
         if (headType == null || !IsGenerationEnabled())
             return false;
 
-        EnsureGeneratedForHead(headType);
+        EnsureGeneratedForHeadImmediate(headType);
         return TryGetHeadResult(headType, out result);
+    }
+
+    public static bool TryGetOrRequestHeadResult(HeadTypeDef headType, Pawn pawn, out AutoEyePatchHeadResult result)
+    {
+        result = null;
+        if (headType == null || !IsGenerationEnabled())
+            return false;
+
+        if (TryGetHeadResult(headType, out result))
+            return true;
+
+        if (ShouldGenerateImmediatelyNow())
+        {
+            EnsureGeneratedForHeadImmediate(headType);
+            return TryGetHeadResult(headType, out result);
+        }
+
+        RequestHeadGeneration(headType, pawn);
+        return false;
     }
 
     public static void PrewarmForPawn(Pawn pawn)
@@ -133,7 +168,7 @@ internal static class AutoEyePatchRuntime
         if (pawn == null || !IsGenerationEnabled())
             return;
 
-        EnsureGeneratedForHead(pawn.story?.headType);
+        EnsureGeneratedForHeadImmediate(pawn.story?.headType);
     }
 
     public static bool TryGetHeadResult(HeadTypeDef headType, out AutoEyePatchHeadResult result)
@@ -164,8 +199,7 @@ internal static class AutoEyePatchRuntime
         if (headType == null)
             return false;
 
-        EnsureGeneratedForHead(headType);
-        if (!TryGetHeadResult(headType, out AutoEyePatchHeadResult result) || !result.ReplacesLegacyEyeBase)
+        if (!TryGetOrRequestHeadResult(headType, pawn, out AutoEyePatchHeadResult result) || !result.ReplacesLegacyEyeBase)
             return false;
 
         string debugLabel = node.Props?.debugLabel ?? string.Empty;
@@ -288,7 +322,63 @@ internal static class AutoEyePatchRuntime
 
 
 
-    private static void EnsureGeneratedForHead(HeadTypeDef headType)
+    public static void RequestHeadGeneration(HeadTypeDef headType, Pawn pawn = null)
+    {
+        if (headType == null || !IsGenerationEnabled())
+            return;
+
+        string headKey = GetHeadKey(headType);
+        if (TryGetHeadResult(headType, out _))
+            return;
+
+        if (pawn != null)
+        {
+            if (!_waitingPawnIdsByHeadKey.TryGetValue(headKey, out HashSet<int> waitingPawnIds))
+            {
+                waitingPawnIds = new HashSet<int>();
+                _waitingPawnIdsByHeadKey[headKey] = waitingPawnIds;
+            }
+
+            waitingPawnIds.Add(pawn.thingIDNumber);
+        }
+
+        if (_queuedHeadGenerationKeys.Add(headKey))
+        {
+            _queuedHeadTypesByKey[headKey] = headType;
+            _pendingHeadGenerationKeys.Enqueue(headKey);
+        }
+    }
+
+    public static void ProcessQueuedGenerationBudget(int maxHeadsPerTick = 1)
+    {
+        if (maxHeadsPerTick <= 0 || !IsGenerationEnabled())
+            return;
+
+        int processed = 0;
+        while (processed < maxHeadsPerTick && _pendingHeadGenerationKeys.Count > 0)
+        {
+            string headKey = _pendingHeadGenerationKeys.Dequeue();
+            _queuedHeadGenerationKeys.Remove(headKey);
+
+            if (!_queuedHeadTypesByKey.TryGetValue(headKey, out HeadTypeDef headType) || headType == null)
+            {
+                _queuedHeadTypesByKey.Remove(headKey);
+                _waitingPawnIdsByHeadKey.Remove(headKey);
+                continue;
+            }
+
+            _queuedHeadTypesByKey.Remove(headKey);
+            if (!TryGetHeadResult(headType, out _))
+            {
+                GenerateForHead(headType, diagnostics: null);
+            }
+
+            NotifyWaitingPawnsForHead(headKey);
+            processed++;
+        }
+    }
+
+    private static void EnsureGeneratedForHeadImmediate(HeadTypeDef headType)
     {
         if (headType == null || !IsGenerationEnabled())
             return;
@@ -296,7 +386,38 @@ internal static class AutoEyePatchRuntime
         if (TryGetHeadResult(headType, out _))
             return;
 
+        string headKey = GetHeadKey(headType);
+        _queuedHeadGenerationKeys.Remove(headKey);
+        _queuedHeadTypesByKey.Remove(headKey);
         GenerateForHead(headType, diagnostics: null);
+        NotifyWaitingPawnsForHead(headKey);
+    }
+
+    private static bool ShouldGenerateImmediatelyNow()
+    {
+        return WorkshopRenderContext.Active || FacePartsPortraitRenderContext.NonWorkshopPortraitActive;
+    }
+
+    private static void NotifyWaitingPawnsForHead(string headKey)
+    {
+        if (headKey.NullOrEmpty())
+            return;
+
+        if (!_waitingPawnIdsByHeadKey.TryGetValue(headKey, out HashSet<int> waitingPawnIds) || waitingPawnIds == null || waitingPawnIds.Count == 0)
+        {
+            _waitingPawnIdsByHeadKey.Remove(headKey);
+            return;
+        }
+
+        foreach (Pawn pawn in PawnsFinder.AllMapsAndWorld_Alive)
+        {
+            if (pawn == null || !waitingPawnIds.Contains(pawn.thingIDNumber))
+                continue;
+
+            QueuePendingFaceRefresh(pawn);
+        }
+
+        _waitingPawnIdsByHeadKey.Remove(headKey);
     }
 
     private static void PrewarmMirroredRuntimeTextures(AutoEyePatchHeadResult result)

@@ -16,11 +16,15 @@ Use this quick pass after structural changes.
 - Open an existing project
 - Create or rename one stage or role
 - Preview play / stop
+- Scrub to a tick and compare it against live preview at the same moment
+- Confirm detached preview pawns render instead of pulling live colony pawns into preview casting
 - Export once
 
 ## Face Parts
 - Open the face head blacklist manager
-- Confirm head previews render
+- Confirm head previews render as readable cropped heads, not mostly empty transparent tiles
+- Open the face customizer and confirm preview layers render for eyes, brows, mouth, and eye detail
+- Confirm portraits with face parts render cleanly on first open
 - Toggle one blacklist state and save
 
 ## HeroKarma
@@ -56,6 +60,9 @@ Use this quick pass after structural changes.
 - Trigger one basic interaction path
 - Confirm manual and autonomous lovin both block blood-related pawns by default
 - With Birds of a Feather installed, confirm the related-pawn gate automatically allows those pairings without any player-facing toggle
+- In Dev Mode, open **Anatomy Debug** on one pawn and confirm parts, fluids, anchors, and coverage data render
+- Confirm natural anatomy no longer shows up as normal permanent health-tab clutter after migration
+- If GenderWorks is installed, trigger one anatomy-relevant change and confirm logical anatomy resync still drives rendering / staging correctly
 
 ## Harmony-sensitive gameplay
 - Test prisoner release
@@ -66,7 +73,6 @@ Use this quick pass after structural changes.
 - Load an existing save
 - Play briefly without red errors
 
-
 ## No-Ideology compatibility
 
 - Launch without Ideology active.
@@ -75,7 +81,6 @@ Use this quick pass after structural changes.
 - Confirm Mod Settings shows Ideology Standing as unavailable instead of active toggles.
 - Confirm Karma and Local Reputation still function normally.
 - Confirm no Standing patch error spam appears on startup.
-
 
 ## Final freeze / release-candidate checks
 

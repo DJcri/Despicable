@@ -15,10 +15,6 @@ public class FacePartsModule_ExpressionDefOf
     public static ExpressionDef FacialExpression_Smile;
     public static ExpressionDef FacialExpression_Distressed;
     public static ExpressionDef FacialExpression_Berserk;
-    public static ExpressionDef FacialExpression_Lovin;
-    public static ExpressionDef FacialExpression_LipBite;
-    public static ExpressionDef FacialExpression_Gasp;
-    public static ExpressionDef FacialExpression_Orgasm;
     public static ExpressionDef FacialExpression_Drool;
     public static ExpressionDef FacialExpression_Tired;
     public static ExpressionDef FacialExpression_Drunk;

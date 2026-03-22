@@ -675,7 +675,9 @@ public partial class Dialog_AnimGroupStudio
         if (!nodeTag.NullOrEmpty()
             && authorRuntime.GizmosByTag.TryGetValue(nodeTag, out AgsAuthorPreviewGizmoEntry activeGizmo))
         {
-            if (!activeGizmo.DragBasisNodeTag.NullOrEmpty()
+            bool isRoot = string.Equals(activeGizmo.NodeTag, "Root", StringComparison.Ordinal);
+            if (!isRoot
+                && !activeGizmo.DragBasisNodeTag.NullOrEmpty()
                 && !string.Equals(activeGizmo.DragBasisNodeTag, activeGizmo.NodeTag, StringComparison.Ordinal)
                 && authorRuntime.GizmosByTag.TryGetValue(activeGizmo.DragBasisNodeTag, out AgsAuthorPreviewGizmoEntry borrowedBasisGizmo)
                 && TryGetAuthorPreviewTranslationBasisFromGizmo(borrowedBasisGizmo, out basisX, out basisZ))
@@ -959,6 +961,7 @@ public partial class Dialog_AnimGroupStudio
                 // the basis by -editKey.angle to remove the prop's self-rotation and recover
                 // parent-space drag axes.
                 bool draggingProp = IsPropNodeTag(authorRuntime.ActiveGizmoNodeTag);
+                bool draggingRoot = string.Equals(authorRuntime.ActiveGizmoNodeTag, "Root", StringComparison.Ordinal);
                 if (draggingProp && snapBasisX.sqrMagnitude > 0.0000001f && snapBasisZ.sqrMagnitude > 0.0000001f)
                 {
                     // Good: prop has its own valid basis, use it as-is.
@@ -982,7 +985,8 @@ public partial class Dialog_AnimGroupStudio
                 // which cancels the standard CCW rotation matrix sign) so drag axes align with the
                 // space that offset actually lives in. Root nodes are exempt: their basis is already
                 // world-aligned by construction and carries no self-rotation to strip.
-                if (Mathf.Abs(editKey.angle) > 0.0001f
+                if (!draggingRoot
+                    && Mathf.Abs(editKey.angle) > 0.0001f
                     && snapBasisX.sqrMagnitude > 0.0000001f
                     && snapBasisZ.sqrMagnitude > 0.0000001f)
                 {

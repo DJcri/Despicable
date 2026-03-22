@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 // Guardrail-Reason: Auto eye patch texture analysis stays together because pixel probing, symmetry checks, and feature extraction share one cached pass.
@@ -9,7 +10,54 @@ internal static class AutoEyePatchAnalyzer
 {
     private static readonly Dictionary<Texture2D, Color[]> _pixelCache = new();
 
-    public static void ResetRuntimeState() => _pixelCache.Clear();
+    [ThreadStatic] private static bool[] _visitedScratch;
+    [ThreadStatic] private static bool[] _outsideScratch;
+    [ThreadStatic] private static Queue<int> _indexQueueScratch;
+    [ThreadStatic] private static HashSet<int> _footprintIndexScratch;
+    [ThreadStatic] private static HashSet<int> _borderIndexScratch;
+    [ThreadStatic] private static List<Vector2Int> _footprintPixelScratch;
+
+    public static void ResetRuntimeState()
+    {
+        _pixelCache.Clear();
+        _visitedScratch = null;
+        _outsideScratch = null;
+        _indexQueueScratch = null;
+        _footprintIndexScratch = null;
+        _borderIndexScratch = null;
+        _footprintPixelScratch = null;
+    }
+
+    private static bool[] GetScratchBoolBuffer(ref bool[] buffer, int length)
+    {
+        if (buffer == null || buffer.Length < length)
+            buffer = new bool[length];
+        else
+            Array.Clear(buffer, 0, length);
+
+        return buffer;
+    }
+
+    private static Queue<int> GetScratchIndexQueue()
+    {
+        _indexQueueScratch ??= new Queue<int>();
+        _indexQueueScratch.Clear();
+        return _indexQueueScratch;
+    }
+
+    private static HashSet<int> GetScratchIndexSet(ref HashSet<int> set)
+    {
+        set ??= new HashSet<int>();
+        set.Clear();
+        return set;
+    }
+
+    private static List<Vector2Int> GetScratchFootprintPixels()
+    {
+        _footprintPixelScratch ??= new List<Vector2Int>();
+        _footprintPixelScratch.Clear();
+        return _footprintPixelScratch;
+    }
 
     public static void InvalidateCachedPixels(Texture2D texture)
     {
@@ -159,9 +207,9 @@ internal static class AutoEyePatchAnalyzer
 
     private static List<AutoEyePatchDarkCandidate> FindDarkCandidates(Color[] pixels, int width, int height, RectInt scanRect, bool sideMode)
     {
-        bool[] visited = new bool[width * height];
+        bool[] visited = GetScratchBoolBuffer(ref _visitedScratch, width * height);
         List<AutoEyePatchDarkCandidate> results = new();
-        Queue<Vector2Int> queue = new();
+        Queue<int> queue = GetScratchIndexQueue();
         int minPixelCount = Mathf.Max(2, Mathf.RoundToInt((scanRect.width * scanRect.height) * 0.0015f));
         int maxPixelCount = Mathf.Max(minPixelCount + 1, Mathf.RoundToInt((scanRect.width * scanRect.height) * 0.16f));
 
@@ -174,8 +222,7 @@ internal static class AutoEyePatchAnalyzer
                     continue;
 
                 visited[startIndex] = true;
-                queue.Clear();
-                queue.Enqueue(new Vector2Int(x, y));
+                queue.Enqueue(startIndex);
 
                 int count = 0;
                 int minX = x;
@@ -183,38 +230,39 @@ internal static class AutoEyePatchAnalyzer
                 int maxX = x;
                 int maxY = y;
                 float darknessTotal = 0f;
-                List<Vector2Int> footprintPixels = new();
+                List<Vector2Int> footprintPixels = GetScratchFootprintPixels();
 
                 while (queue.Count > 0)
                 {
-                    Vector2Int current = queue.Dequeue();
-                    int idx = (current.y * width) + current.x;
-                    Color c = pixels[idx];
+                    int currentIndex = queue.Dequeue();
+                    int currentX = currentIndex % width;
+                    int currentY = currentIndex / width;
+                    Color c = pixels[currentIndex];
                     count++;
                     darknessTotal += ComputeDarknessScore(c);
-                    footprintPixels.Add(current);
+                    footprintPixels.Add(new Vector2Int(currentX, currentY));
 
-                    if (current.x < minX) minX = current.x;
-                    if (current.y < minY) minY = current.y;
-                    if (current.x > maxX) maxX = current.x;
-                    if (current.y > maxY) maxY = current.y;
+                    if (currentX < minX) minX = currentX;
+                    if (currentY < minY) minY = currentY;
+                    if (currentX > maxX) maxX = currentX;
+                    if (currentY > maxY) maxY = currentY;
 
-                    for (int ny = current.y - 1; ny <= current.y + 1; ny++)
+                    for (int ny = currentY - 1; ny <= currentY + 1; ny++)
                     {
                         if (ny < scanRect.yMin || ny >= scanRect.yMax)
                             continue;
-                        for (int nx = current.x - 1; nx <= current.x + 1; nx++)
+                        for (int nx = currentX - 1; nx <= currentX + 1; nx++)
                         {
                             if (nx < scanRect.xMin || nx >= scanRect.xMax)
                                 continue;
-                            if (nx == current.x && ny == current.y)
+                            if (nx == currentX && ny == currentY)
                                 continue;
                             int nidx = (ny * width) + nx;
                             if (visited[nidx] || !IsPixelDark(pixels[nidx]))
                                 continue;
 
                             visited[nidx] = true;
-                            queue.Enqueue(new Vector2Int(nx, ny));
+                            queue.Enqueue(nidx);
                         }
                     }
                 }
@@ -246,7 +294,7 @@ internal static class AutoEyePatchAnalyzer
                     DarknessScore = darknessTotal / Mathf.Max(1, count),
                     CompactnessScore = compactness,
                     OutlineSafetyScore = outlineSafety,
-                    FootprintPixels = footprintPixels,
+                    FootprintPixels = new List<Vector2Int>(footprintPixels),
                     CroppedAlpha = croppedAlpha,
                     CroppedAlphaWidth = croppedWidth,
                     CroppedAlphaHeight = croppedHeight,
@@ -356,8 +404,8 @@ internal static class AutoEyePatchAnalyzer
         if (croppedAlpha == null || croppedAlpha.Length != width * height || width <= 0 || height <= 0)
             return;
 
-        bool[] outside = new bool[croppedAlpha.Length];
-        Queue<int> queue = new();
+        bool[] outside = GetScratchBoolBuffer(ref _outsideScratch, croppedAlpha.Length);
+        Queue<int> queue = GetScratchIndexQueue();
 
         void EnqueueIfOutsideSeed(int x, int y)
         {
@@ -428,11 +476,11 @@ internal static class AutoEyePatchAnalyzer
         if (pixels == null || footprintPixels == null || footprintPixels.Count == 0)
             return 0f;
 
-        HashSet<int> footprint = new();
+        HashSet<int> footprint = GetScratchIndexSet(ref _footprintIndexScratch);
         for (int i = 0; i < footprintPixels.Count; i++)
             footprint.Add((footprintPixels[i].y * width) + footprintPixels[i].x);
 
-        HashSet<int> border = new();
+        HashSet<int> border = GetScratchIndexSet(ref _borderIndexScratch);
         float totalLuma = 0f;
         int samples = 0;
 

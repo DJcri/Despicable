@@ -55,6 +55,9 @@ public sealed class D2ModSettingsRenderer
             return;
 
         bool facialBefore = settings.facialPartsExtensionEnabled;
+        bool portraitDynamicsBefore = settings.facialDynamicsInPortraits;
+        bool runtimeZoomGateBefore = settings.runtimeFacialDynamicsZoomGateEnabled;
+        float runtimeZoomCutoffBefore = settings.runtimeFacialDynamicsMaxZoomRootSize;
         bool autoEyeBefore = settings.experimentalAutoEyePatchEnabled;
         bool nudityBefore = settings.nudityEnabled;
         bool renderGenitalsBefore = settings.renderGenitalsEnabled;
@@ -88,7 +91,7 @@ public sealed class D2ModSettingsRenderer
 
         bool canRefreshLiveState = Current.ProgramState == ProgramState.Playing && Current.Game != null;
 
-        if (canRefreshLiveState && (facialBefore != settings.facialPartsExtensionEnabled || autoEyeBefore != settings.experimentalAutoEyePatchEnabled))
+        if (canRefreshLiveState && (facialBefore != settings.facialPartsExtensionEnabled || portraitDynamicsBefore != settings.facialDynamicsInPortraits || runtimeZoomGateBefore != settings.runtimeFacialDynamicsZoomGateEnabled || runtimeZoomCutoffBefore != settings.runtimeFacialDynamicsMaxZoomRootSize || autoEyeBefore != settings.experimentalAutoEyePatchEnabled))
             FacePartsUtil.RefreshAllFacePartsForSettingsChange();
 
         if (canRefreshLiveState && (nudityBefore != settings.nudityEnabled || renderGenitalsBefore != settings.renderGenitalsEnabled))
@@ -334,15 +337,22 @@ public sealed class D2ModSettingsRenderer
 
     private static void DrawFacePartsOptionsSection(UIContext ctx, Settings settings, ref D2VStack outer)
     {
-        float height = MeasureSectionHeight(ctx, 1);
+        float height = MeasureSectionHeight(ctx, 6);
         Rect rect = outer.Next(height, UIRectTag.PanelSoft, "FaceParts/Options/Outer");
         using var panel = ctx.GroupPanel("FaceParts/Options", rect, soft: true, pad: true, padOverride: ctx.Style.Pad);
         var v = ctx.D2VStack(panel.Inner, label: "FaceParts/Options/Stack");
         DrawSectionHeader(ctx, ref v, "Options", "FaceParts/Options/Header");
 
-        bool allowAutoPatch = settings.facialPartsExtensionEnabled && !ModMain.IsNlFacialInstalled;
-        string disabledReason = allowAutoPatch ? null : "Facial Parts must be enabled first.";
-        DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "FaceParts/Options/AutoEyePatch"), "Experimental Auto Eye Patch", ref settings.experimentalAutoEyePatchEnabled, enabled: allowAutoPatch, disabledReason: disabledReason, id: "FaceParts/Options/AutoEyePatchToggle");
+        bool facePartsEnabled = settings.facialPartsExtensionEnabled && !ModMain.IsNlFacialInstalled;
+        string facePartsDisabledReason = facePartsEnabled ? null : "Facial Parts must be enabled first.";
+        DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "FaceParts/Options/PortraitDynamics"), "Animate Faces In Portraits", ref settings.facialDynamicsInPortraits, enabled: facePartsEnabled, disabledReason: facePartsDisabledReason, id: "FaceParts/Options/PortraitDynamicsToggle");
+        DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "FaceParts/Options/ZoomGate"), "Gate Runtime Face Dynamics By Zoom", ref settings.runtimeFacialDynamicsZoomGateEnabled, enabled: facePartsEnabled, disabledReason: facePartsDisabledReason, id: "FaceParts/Options/ZoomGateToggle");
+        DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "FaceParts/Options/HostileGate"), "Gate Runtime Face Dynamics For Hostiles", ref settings.runtimeFacialDynamicsGateHostilePawns, enabled: facePartsEnabled, disabledReason: facePartsDisabledReason, id: "FaceParts/Options/HostileGateToggle");
+        DrawCheckboxRow(ctx, v.NextRow(UIRectTag.Checkbox, "FaceParts/Options/VisitorGate"), "Gate Runtime Face Dynamics For Visitors/Traders", ref settings.runtimeFacialDynamicsGateVisitorsAndTraders, enabled: facePartsEnabled, disabledReason: facePartsDisabledReason, id: "FaceParts/Options/VisitorGateToggle");
+
+        using (new TextStateScope(GameFont.Small, TextAnchor.MiddleLeft, false))
+            D2Widgets.LabelClipped(ctx, v.NextRow(UIRectTag.Label, "FaceParts/Options/ZoomCutoffLabel"), "Runtime Face Dynamics Zoom Cutoff", "FaceParts/Options/ZoomCutoffLabelText");
+        settings.runtimeFacialDynamicsMaxZoomRootSize = D2Widgets.HorizontalSlider(ctx, v.NextRow(UIRectTag.Slider, "FaceParts/Options/ZoomCutoffSliderRow"), settings.runtimeFacialDynamicsMaxZoomRootSize, 4f, 20f, showValueLabel: true, label: "FaceParts/Options/ZoomCutoffSlider");
     }
 
     private static void DrawFacePartsManagementSection(UIContext ctx, ref D2VStack outer)

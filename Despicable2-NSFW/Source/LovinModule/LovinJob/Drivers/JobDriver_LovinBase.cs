@@ -67,6 +67,19 @@ public partial class JobDriver_LovinBase : JobDriver
         }
     }
 
+    protected bool lovinPlaybackActive;
+    protected bool hasStartedAnimation;
+
+    public override void ExposeData()
+    {
+        base.ExposeData();
+        Scribe_Values.Look(ref durationTicks, "durationTicks", LovinUtil.DefaultDurationTicks);
+        Scribe_Values.Look(ref lovinPlaybackActive, "lovinPlaybackActive", defaultValue: false);
+        Scribe_Values.Look(ref hasStartedAnimation, "hasStartedAnimation", defaultValue: false);
+    }
+
+    internal bool IsLovinPlaybackActive => lovinPlaybackActive;
+
     public override bool TryMakePreToilReservations(bool errorOnFailed)
     {
         return true;

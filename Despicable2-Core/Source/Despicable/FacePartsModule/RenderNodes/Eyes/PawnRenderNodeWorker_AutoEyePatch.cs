@@ -15,8 +15,7 @@ public class PawnRenderNodeWorker_AutoEyePatch : PawnRenderNodeWorker_FacePart
         if (pawn == null)
             return false;
 
-        if (!node.Props.debugLabel.NullOrEmpty()
-            && node.Props.debugLabel.EndsWith("_R", StringComparison.OrdinalIgnoreCase)
+        if (IsRightCounterpartNode(node)
             && parms.facing != Rot4.South)
         {
             return false;
@@ -25,7 +24,11 @@ public class PawnRenderNodeWorker_AutoEyePatch : PawnRenderNodeWorker_FacePart
         if (parms.facing == Rot4.North)
             return false;
 
-        if (pawn.TryGetComp<CompFaceParts>()?.HasBlockingEyeGeneThisTick() == true)
+        CompFaceParts compFaceParts = ResolveCompFaceParts(node, pawn);
+        if (compFaceParts?.HasBlockingEyeGeneThisTick() == true)
+            return false;
+
+        if (compFaceParts?.IsForeignEyeVisualBlockedForNodeThisTick(node, parms.facing) == true)
             return false;
 
         if (!AutoEyePatchRuntime.TryResolveEyeBaseReplacement(pawn, node, parms.facing, out AutoEyePatchRenderSelection selection))

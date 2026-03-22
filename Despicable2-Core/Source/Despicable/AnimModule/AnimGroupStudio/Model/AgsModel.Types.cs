@@ -234,6 +234,7 @@ public static partial class AgsModel
 
         // Optional extended fields (not required by the simple Author UI).
         public string graphicState;
+        // Legacy compatibility only. New AGS project saves write graphicState instead.
         public int variant = -1;
         public string soundDefName;
         public string facialAnimDefName;
@@ -252,11 +253,18 @@ public static partial class AgsModel
             Scribe_Values.Look(ref visible, "visible", true);
 
             Scribe_Values.Look(ref graphicState, "graphicState", null);
-            Scribe_Values.Look(ref variant, "variant", -1);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+                Scribe_Values.Look(ref variant, "variant", -1);
             Scribe_Values.Look(ref soundDefName, "soundDefName", null);
             Scribe_Values.Look(ref facialAnimDefName, "facialAnimDefName", null);
             Scribe_Values.Look(ref layerBias, "layerBias", 0);
             Scribe_Deep.Look(ref prop, "prop");
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars && graphicState.NullOrEmpty() && variant >= 0)
+            {
+                graphicState = "variant_" + variant;
+                variant = -1;
+            }
         }
     }
 

@@ -11,6 +11,7 @@ using Despicable.AnimGroupStudio;
 using Verse.Sound;
 using Despicable.UIFramework;
 using Despicable.UIFramework.Controls;
+using Despicable.UIFramework.Blueprints;
 using Despicable.UIFramework.Layout;
 using Despicable.AnimModule.AnimGroupStudio.Model;
 
@@ -553,6 +554,57 @@ public partial class Dialog_AnimGroupStudio
                         {
                             editKey.visible = visible;
                             CommitEdit();
+                        }
+                    }
+
+                    if (TryGetGraphicStateOptionsForNodeTag(tr.nodeTag, out var graphicStateOptions))
+                    {
+                        DrawGroupedHeader(scrollCtx, ref v, "Inspector/Graphic", "Graphic", topPadding: true);
+
+                        Rect graphicRow = v.NextRow(UIRectTag.Input, "Inspector/GraphicRow");
+                        var graphicH = new D2HRow(scrollCtx, graphicRow);
+                        D2Widgets.Label(scrollCtx, graphicH.NextFixed(Mathf.Clamp(graphicRow.width * 0.24f, 60f, 74f), UIRectTag.Label, "Inspector/GraphicLabel"), "Graphic", "Inspector/GraphicLabel");
+
+                        string graphicLabel = FormatGraphicStateLabel(k.graphicState);
+                        if (D2Widgets.ButtonText(scrollCtx, graphicH.RemainingMin(Mathf.Clamp(graphicRow.width * 0.34f, 120f, 180f), UIRectTag.Button, "Inspector/GraphicButton"), graphicLabel, "Inspector/GraphicButton"))
+                        {
+                            var opts = new List<D2FloatMenuBlueprint.Option>
+                            {
+                                new D2FloatMenuBlueprint.Option("(Default)", () =>
+                                {
+                                    var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                                    if (editKey != null)
+                                    {
+                                        editKey.graphicState = null;
+                                        editKey.variant = -1;
+                                        CommitAuthorStageKeyEdit(stage);
+                                    }
+                                })
+                            };
+
+                            if (!graphicStateOptions.NullOrEmpty())
+                            {
+                                for (int gi = 0; gi < graphicStateOptions.Count; gi++)
+                                {
+                                    string stateId = graphicStateOptions[gi];
+                                    if (stateId.NullOrEmpty()) continue;
+
+                                    string optionStateId = stateId;
+                                    string optionLabel = FormatGraphicStateLabel(optionStateId);
+                                    opts.Add(new D2FloatMenuBlueprint.Option(optionLabel, () =>
+                                    {
+                                        var editKey = EnsureInspectorEditKeyframe(tr, stage);
+                                        if (editKey != null)
+                                        {
+                                            editKey.graphicState = optionStateId;
+                                            editKey.variant = -1;
+                                            CommitAuthorStageKeyEdit(stage);
+                                        }
+                                    }));
+                                }
+                            }
+
+                            D2FloatMenuBlueprint.Open(opts, searchable: true, title: "Graphic", searchableThreshold: 12);
                         }
                     }
 

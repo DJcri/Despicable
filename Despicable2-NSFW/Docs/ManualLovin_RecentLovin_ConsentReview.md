@@ -43,3 +43,13 @@ Consent / ideology behavior under the current bridge:
 - that means mutual attraction / mutual tolerance / ideology vetoes can still block even if Despicable's `lovinMutualConsent` or `lovinRespectIdeology` settings are off
 
 So the recent-lovin mismatch is fixed by this patch, but the Intimacy bridge still behaves as an approval oracle rather than mirroring Despicable's consent toggles exactly.
+
+
+## Updated manual validation behavior
+
+When Intimacy is installed, Despicable only borrows Intimacy manual validation while both
+`lovinMutualConsent` and `lovinRespectIdeology` remain enabled.
+
+If either manual toggle is disabled, ordered manual lovin and manual self lovin fall back to
+Despicable's own setting-aware checks instead. Hard blockers still apply. Autonomous lovin still
+defers to Intimacy exactly as before.

@@ -14,9 +14,16 @@ public static class VisualActivityTracker
     public static bool AnyExtendedAnimatorsActive => extendedAnimatorPawnIds.Count > 0;
     public static bool AnyLovinVisualsActive => lovinVisualPawnIds.Count > 0;
 
+    public static bool IsExtendedAnimatorActive(Pawn pawn)
+    {
+        return Contains(extendedAnimatorPawnIds, pawn);
+    }
+
     public static void SetExtendedAnimatorActive(Pawn pawn, bool isActive)
     {
         SetState(extendedAnimatorPawnIds, pawn, isActive);
+        pawn?.TryGetComp<CompFaceParts>()?.NotifyExtendedAnimatorStateChanged(isActive);
+        FaceRuntimeActivityManager.NotifyExtendedAnimatorState(pawn, isActive);
     }
 
     public static void SetLovinVisualActive(Pawn pawn, bool isActive)

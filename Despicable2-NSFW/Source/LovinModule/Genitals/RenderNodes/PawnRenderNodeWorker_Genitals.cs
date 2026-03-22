@@ -1,7 +1,5 @@
 using RimWorld;
-
 using UnityEngine;
-
 using Verse;
 
 namespace Despicable;
@@ -11,14 +9,10 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
     public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
     {
         if (!base.CanDrawNow(node, parms))
-        {
             return false;
-        }
 
         if (parms.facing != Rot4.North)
-        {
             return true;
-        }
 
         return parms.flipHead;
     }
@@ -31,9 +25,7 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
         float num = node?.DebugAngleOffset ?? 0f;
 
         if (node?.parent?.Props?.drawData != null)
-        {
             num += node.parent.Props.drawData.RotationOffsetForRot(parms.facing);
-        }
 
         bool handledByWorkshopPortraitInheritance =
             WorkshopRenderContext.Active &&
@@ -44,15 +36,8 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
             int animationTick = node?.tree?.AnimationTick ?? 0;
 
             if (TryGetInheritedAnimationAngle(node, parms, animationDef, animationTick, out float inheritedAngle))
-            {
                 num += inheritedAngle;
-            }
 
-            // In the animation studio preview we want genitals to keep inheriting the
-            // parent node's angle while still responding to direct edits on the
-            // Genitals track itself. Treat the node's own keyed angle as a local
-            // additive tweak on top of the inherited pose, but only in workshop
-            // preview so runtime behavior stays parent-driven.
             if (WorkshopRenderContext.Active
                 && !parms.flags.FlagSet(PawnRenderFlags.Portrait)
                 && TryGetLocalAnimationAngle(node, parms, animationDef, animationTick, out float localAngle))
@@ -62,9 +47,7 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
         }
 
         if (node?.hediff?.Part?.flipGraphic ?? false)
-        {
             num *= -1f;
-        }
 
         return Quaternion.AngleAxis(num, Vector3.up);
     }
@@ -138,33 +121,10 @@ public class PawnRenderNodeWorker_Genitals : PawnRenderNodeWorker_FlipWhenCrawli
     public override Vector3 OffsetFor(PawnRenderNode node, PawnDrawParms parms, out Vector3 pivot)
     {
         Vector3 vector = base.OffsetFor(node, parms, out pivot);
-
-        string bodyType = parms.pawn?.story?.bodyType?.defName;
-        if (string.IsNullOrEmpty(bodyType))
-        {
+        AnatomyPartDef part = (node?.Props as AnatomyPartNodeProperties)?.anatomyPart;
+        if (part == null)
             return vector;
-        }
 
-        BodyTypeGenitalsOffsetDef bodyTypeAppendageOffsetDef =
-            DefDatabase<BodyTypeGenitalsOffsetDef>.GetNamedSilentFail(bodyType);
-
-        Vector3? bodyTypeAppendageOffset = bodyTypeAppendageOffsetDef?.offset;
-
-        if (bodyTypeAppendageOffset != null)
-        {
-            if (parms.facing == Rot4.East)
-            {
-                vector += Vector3.right * bodyTypeAppendageOffset.Value.x;
-            }
-            else if (parms.facing == Rot4.West)
-            {
-                vector += Vector3.left * bodyTypeAppendageOffset.Value.x;
-            }
-
-            vector += Vector3.up * bodyTypeAppendageOffset.Value.y;
-            vector += Vector3.forward * bodyTypeAppendageOffset.Value.z;
-        }
-
-        return vector;
+        return vector + AnatomyPlacementResolver.ResolveOffset(parms.pawn, part, parms.facing);
     }
 }

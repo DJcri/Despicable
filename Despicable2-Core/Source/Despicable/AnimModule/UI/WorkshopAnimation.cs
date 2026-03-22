@@ -166,6 +166,8 @@ public void ExposeData()
 
         /// <summary>
         /// Legacy numeric variant selection. -1 means unset.
+        ///
+        /// Retained only so older workshop files can still load. New saves write graphicState instead.
         /// </summary>
         public int variant = -1;
 
@@ -194,10 +196,17 @@ public void ExposeData()
             Scribe_Values.Look(ref visible, "visible", true);
 
             Scribe_Values.Look(ref graphicState, "graphicState", null);
-            Scribe_Values.Look(ref variant, "variant", -1);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+                Scribe_Values.Look(ref variant, "variant", -1);
             Scribe_Values.Look(ref soundDefName, "soundDefName", null);
             Scribe_Values.Look(ref facialAnimDefName, "facialAnimDefName", null);
             Scribe_Values.Look(ref layerBias, "layerBias", 0);
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars && graphicState.NullOrEmpty() && variant >= 0)
+            {
+                graphicState = "variant_" + variant;
+                variant = -1;
+            }
         }
 
 

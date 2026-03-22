@@ -31,6 +31,7 @@ internal static class FacePreviewCache
 
     private const byte AlphaThreshold = 12;
     private static readonly Dictionary<Texture2D, PreviewCrop> CropByTexture = new();
+    private static readonly Dictionary<int, Texture2D> MirroredTextureByKey = new();
 
     public static Texture2D ResolveHeadTexture(HeadTypeDef headType)
     {
@@ -73,18 +74,32 @@ internal static class FacePreviewCache
         return null;
     }
 
-    public static Texture2D ResolveFacePartTexture(Pawn pawn, FacePartStyleDef style)
+    public static Texture2D ResolveFacePartTexture(Pawn pawn, FacePartStyleDef style, string debugLabel = null, string fallbackTexPath = null, FacePartSideMode selectedSideMode = FacePartSideMode.Both)
     {
-        if (style == null || style.texPath.NullOrEmpty())
+        string path = style?.texPath;
+        if (style != null && !debugLabel.NullOrEmpty())
+        {
+            bool isRightSide = debugLabel.EndsWith("_R", StringComparison.OrdinalIgnoreCase);
+            if (!style.AllowsSide(isRightSide, selectedSideMode))
+                path = fallbackTexPath;
+        }
+
+        if (path.NullOrEmpty())
             return null;
 
-        string path = style.texPath;
         if (path.StartsWith("Gendered/", StringComparison.Ordinal))
             path = FacePartsUtil.GetEyePath(pawn, path);
 
         try
         {
-            return ContentFinder<Texture2D>.Get(path, false);
+            Texture2D texture = FacePartTextureRuntime.PrepareTexture(ContentFinder<Texture2D>.Get(path, false));
+            if (texture == null)
+                return null;
+
+            FacePartSideMode effectiveSideMode = style?.ResolveEffectiveSideMode(selectedSideMode) ?? FacePartSideMode.Both;
+            bool mirror = (!debugLabel.NullOrEmpty() && debugLabel.EndsWith("_R", StringComparison.OrdinalIgnoreCase))
+                || (debugLabel.NullOrEmpty() && effectiveSideMode == FacePartSideMode.RightOnly);
+            return mirror ? GetOrCreateMirroredTexture(texture) : texture;
         }
         catch (Exception ex)
         {
@@ -104,7 +119,7 @@ internal static class FacePreviewCache
 
         try
         {
-            return ContentFinder<Texture2D>.Get(path, false);
+            return FacePartTextureRuntime.PrepareTexture(ContentFinder<Texture2D>.Get(path, false));
         }
         catch (Exception ex)
         {
@@ -209,6 +224,40 @@ internal static class FacePreviewCache
         int columns = ComputeGridColumns(width, tileSize, gap);
         int rows = Mathf.CeilToInt(itemCount / (float)columns);
         return (rows * tileSize) + (Mathf.Max(0, rows - 1) * gap);
+    }
+
+    private static Texture2D GetOrCreateMirroredTexture(Texture2D source)
+    {
+        if (source == null)
+            return null;
+
+        int key = source.GetInstanceID();
+        if (MirroredTextureByKey.TryGetValue(key, out Texture2D cached) && cached != null)
+            return cached;
+
+        int width = source.width;
+        int height = source.height;
+        if (width <= 0 || height <= 0 || !AutoEyePatchAnalyzer.TryReadPixels(source, out Color[] pixels) || pixels == null || pixels.Length != width * height)
+            return source;
+
+        Color[] mirroredPixels = new Color[pixels.Length];
+        for (int y = 0; y < height; y++)
+        {
+            int row = y * width;
+            for (int x = 0; x < width; x++)
+                mirroredPixels[row + x] = pixels[row + (width - 1 - x)];
+        }
+
+        Texture2D mirrored = new Texture2D(width, height, TextureFormat.RGBA32, false, false)
+        {
+            name = string.Concat(source.name ?? "FacePreview", "_D2Mirrored"),
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp,
+            anisoLevel = 0,
+        };
+        FacePartTextureRuntime.FinalizeRuntimeTexture(mirrored, mirroredPixels, width, height, bleedColor: false);
+        MirroredTextureByKey[key] = mirrored;
+        return mirrored;
     }
 
     private static PreviewCrop GetOrCreateCrop(Texture2D texture)

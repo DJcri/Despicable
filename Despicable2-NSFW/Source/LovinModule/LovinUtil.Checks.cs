@@ -623,7 +623,7 @@ public static partial class LovinUtil
                 return true;
             }
 
-            if (IsLovin(pawn))
+            if (IsLovin(pawn) && !IsActiveSelfLovinJob(pawn))
             {
                 reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
                 return true;
@@ -700,7 +700,7 @@ public static partial class LovinUtil
             return true;
         }
 
-        if (IsLovin(pawn))
+        if (IsLovin(pawn) && !IsActiveSelfLovinJob(pawn))
         {
             reason = BuildRoleReason(isOtherPawn: false, "D2N_LovinReason_IsBusy".Translate());
             return true;
@@ -735,6 +735,11 @@ public static partial class LovinUtil
         }
 
         return pawn.CurrentBed().CurOccupants.Count() == 1;
+    }
+
+    internal static bool IsActiveSelfLovinJob(Pawn pawn)
+    {
+        return pawn?.CurJobDef == LovinModule_JobDefOf.Job_SelfLovin;
     }
 
     public static bool IsLovin(Pawn pawn)

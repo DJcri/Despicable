@@ -6,6 +6,24 @@ using Verse;
 namespace Despicable;
 public partial class CompFaceParts
 {
+    private const string FacePartDetailTagDefName = "FacePart_Detail";
+    private const string FacePartSecondaryDetailTagDefName = "FacePart_SecondaryDetail";
+    private const string FacePartDetailLeftDebugLabel = "FacePart_Detail_L";
+    private const string FacePartDetailRightDebugLabel = "FacePart_Detail_R";
+    private const string FacePartSecondaryDetailLeftDebugLabel = "FacePart_SecondaryDetail_L";
+    private const string FacePartSecondaryDetailRightDebugLabel = "FacePart_SecondaryDetail_R";
+    private const string FacePartEyeBaseLeftDebugLabel = "FacePart_EyeBase_L";
+    private const string FacePartEyeBaseRightDebugLabel = "FacePart_EyeBase_R";
+    private const string FacePartAutoEyePatchLeftDebugLabel = "FacePart_AutoEyePatch_L";
+    private const string FacePartAutoEyePatchRightDebugLabel = "FacePart_AutoEyePatch_R";
+
+    // Guardrail-Allow-Static: Shared filtered FacePartDef cache owned by CompFaceParts render setup; safe because defs are immutable for the current load and rebuild on assembly/domain reload.
+    private static List<FacePartDef> cachedRenderableFacePartDefs;
+    // Guardrail-Allow-Static: Shared eye-base source def cache owned by CompFaceParts render setup; safe because the resolved FacePartDef is immutable for the current load.
+    private static FacePartDef cachedEyeBaseLeftFacePartDef;
+    // Guardrail-Allow-Static: Shared eye-base source def cache owned by CompFaceParts render setup; safe because the resolved FacePartDef is immutable for the current load.
+    private static FacePartDef cachedEyeBaseRightFacePartDef;
+
     public override List<PawnRenderNode> CompRenderNodes()
     {
         if (ModMain.IsNlFacialInstalled)
@@ -15,39 +33,25 @@ public partial class CompFaceParts
             return null;
 
         // Assign styles if not already assigned
-        if (mouthStyleDef == null || eyeStyleDef == null)
+        if (!AreStyleSlotsAssigned())
             AssignStylesRandomByWeight();
 
         List<PawnRenderNode> facePartNodes = new();
 
         bool useAutoEyePatchNodes = false;
         if (pawn.story?.headType != null
-            && AutoEyePatchRuntime.TryGetOrEnsureHeadResult(pawn.story.headType, out AutoEyePatchHeadResult autoEyePatchResult)
+            && AutoEyePatchRuntime.TryGetOrRequestHeadResult(pawn.story.headType, pawn, out AutoEyePatchHeadResult autoEyePatchResult)
             && autoEyePatchResult != null
             && autoEyePatchResult.ReplacesLegacyEyeBase)
         {
             useAutoEyePatchNodes = true;
         }
 
-        PawnRenderNodeProperties detailProps = CommonUtil.CloneNodeProperties(DefDatabase<FacePartDef>.GetNamed("FacePart_Detail_L").properties);
-        detailProps.texPath = "FaceParts/Details/detail_empty";
-
-        // Create symmetrical nodes for details
-        PawnRenderNode detailNode = CommonUtil.CreateNodeFromOwnedProps(pawn, detailProps, PawnRenderNodeTagDefOf.Head);
-        if (detailNode != null)
-            facePartNodes.Add(detailNode);
-
-        detailProps = CommonUtil.CloneNodeProperties(DefDatabase<FacePartDef>.GetNamed("FacePart_Detail_R").properties);
-        detailProps.texPath = detailNode?.Props?.texPath ?? "FaceParts/Details/detail_empty";
-        PawnRenderNode detailNodeMirror = CommonUtil.CreateNodeFromOwnedProps(pawn, detailProps, PawnRenderNodeTagDefOf.Head);
-        if (detailNodeMirror != null)
-            facePartNodes.Add(detailNodeMirror);
-
         // Render using animation first, conditional second, style last
-        List<FacePartDef> allFacePartDefs = DefDatabase<FacePartDef>.AllDefsListForReading;
-        for (int i = 0; i < allFacePartDefs.Count; i++)
+        List<FacePartDef> renderableFacePartDefs = GetRenderableFacePartDefs();
+        for (int i = 0; i < renderableFacePartDefs.Count; i++)
         {
-            FacePartDef facePartDef = allFacePartDefs[i];
+            FacePartDef facePartDef = renderableFacePartDefs[i];
             try
             {
                 PawnRenderNodeProperties facePartProps = CommonUtil.CloneNodeProperties(facePartDef.properties);
@@ -67,15 +71,15 @@ public partial class CompFaceParts
                 string debugLabel = facePartProps.debugLabel ?? string.Empty;
                 if (useAutoEyePatchNodes)
                 {
-                    if (debugLabel.Equals("FacePart_EyeBase_L", StringComparison.OrdinalIgnoreCase))
+                    if (debugLabel.Equals(FacePartEyeBaseLeftDebugLabel, StringComparison.OrdinalIgnoreCase))
                     {
-                        TryAddAutoEyePatchNode(facePartNodes, "FacePart_EyeBase_L", "FacePart_AutoEyePatch_L");
+                        TryAddAutoEyePatchNode(facePartNodes, GetEyeBaseLeftFacePartDef(), FacePartAutoEyePatchLeftDebugLabel);
                         continue;
                     }
 
-                    if (debugLabel.Equals("FacePart_EyeBase_R", StringComparison.OrdinalIgnoreCase))
+                    if (debugLabel.Equals(FacePartEyeBaseRightDebugLabel, StringComparison.OrdinalIgnoreCase))
                     {
-                        TryAddAutoEyePatchNode(facePartNodes, "FacePart_EyeBase_R", "FacePart_AutoEyePatch_R");
+                        TryAddAutoEyePatchNode(facePartNodes, GetEyeBaseRightFacePartDef(), FacePartAutoEyePatchRightDebugLabel);
                         continue;
                     }
                 }
@@ -111,9 +115,52 @@ public partial class CompFaceParts
         return facePartNodes;
     }
 
-    private void TryAddAutoEyePatchNode(List<PawnRenderNode> facePartNodes, string sourceDefName, string runtimeDebugLabel)
+    private static List<FacePartDef> GetRenderableFacePartDefs()
     {
-        FacePartDef sourceDef = DefDatabase<FacePartDef>.GetNamedSilentFail(sourceDefName);
+        if (cachedRenderableFacePartDefs != null)
+            return cachedRenderableFacePartDefs;
+
+        List<FacePartDef> renderableFacePartDefs = new();
+        List<FacePartDef> allFacePartDefs = DefDatabase<FacePartDef>.AllDefsListForReading;
+        for (int i = 0; i < allFacePartDefs.Count; i++)
+        {
+            FacePartDef facePartDef = allFacePartDefs[i];
+            if (facePartDef?.properties == null || ShouldSkipFacePartDef(facePartDef.properties))
+                continue;
+
+            renderableFacePartDefs.Add(facePartDef);
+        }
+
+        cachedRenderableFacePartDefs = renderableFacePartDefs;
+        return cachedRenderableFacePartDefs;
+    }
+
+    private static bool ShouldSkipFacePartDef(PawnRenderNodeProperties facePartProps)
+    {
+        string debugLabel = facePartProps.debugLabel ?? string.Empty;
+        string tagDefName = facePartProps.tagDef?.defName ?? string.Empty;
+        return tagDefName.Equals(FacePartDetailTagDefName, StringComparison.OrdinalIgnoreCase)
+            || tagDefName.Equals(FacePartSecondaryDetailTagDefName, StringComparison.OrdinalIgnoreCase)
+            || debugLabel.Equals(FacePartDetailLeftDebugLabel, StringComparison.OrdinalIgnoreCase)
+            || debugLabel.Equals(FacePartDetailRightDebugLabel, StringComparison.OrdinalIgnoreCase)
+            || debugLabel.Equals(FacePartSecondaryDetailLeftDebugLabel, StringComparison.OrdinalIgnoreCase)
+            || debugLabel.Equals(FacePartSecondaryDetailRightDebugLabel, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static FacePartDef GetEyeBaseLeftFacePartDef()
+    {
+        cachedEyeBaseLeftFacePartDef ??= DefDatabase<FacePartDef>.GetNamedSilentFail(FacePartEyeBaseLeftDebugLabel);
+        return cachedEyeBaseLeftFacePartDef;
+    }
+
+    private static FacePartDef GetEyeBaseRightFacePartDef()
+    {
+        cachedEyeBaseRightFacePartDef ??= DefDatabase<FacePartDef>.GetNamedSilentFail(FacePartEyeBaseRightDebugLabel);
+        return cachedEyeBaseRightFacePartDef;
+    }
+
+    private void TryAddAutoEyePatchNode(List<PawnRenderNode> facePartNodes, FacePartDef sourceDef, string runtimeDebugLabel)
+    {
         PawnRenderNodeProperties props = CommonUtil.CloneNodeProperties(sourceDef?.properties);
         if (props == null)
             return;

@@ -2,24 +2,28 @@
 <Defs>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Drunk</defName>
-		<texPathEyes>Gendered/eye_drunk</texPathEyes>
-		<texPathMouth>FaceParts/Mouths/mouth_drunk</texPathMouth>
+		<browVariant>s_shaped</browVariant>
+		<texPathMouth>FaceParts/Mouths/mouth_smug</texPathMouth>
+		<texPathEyeDetailState>FaceParts/Details/Eye/eyedetail_cheekblush</texPathEyeDetailState>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Tired</defName>
-		<texPathEyes>Gendered/eye_tired</texPathEyes>
+		<browVariant>flat</browVariant>
+		<texPathEyeDetailState>FaceParts/Details/Eye/eyedetail_tired</texPathEyeDetailState>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_EyesClosed</defName>
-		<texPathEyes>Gendered/eye_closed</texPathEyes>
+		<texPathEyes>FaceParts/Eyes/eye_shut</texPathEyes>
+		<browVariant>flat</browVariant>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Smile</defName>
+		<browVariant>flat</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_grin</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Smirk</defName>
-		<texPathEyes>Gendered/eye_halflid</texPathEyes>
+		<browVariant>angled</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_smirk</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
@@ -28,19 +32,35 @@
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Berserk</defName>
-		<texPathEyes>FaceParts/Eyes/eye_berserk</texPathEyes>
+		<browVariant>angled</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_frown</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Distressed</defName>
-		<texPathEyes>FaceParts/Eyes/eye_distressed</texPathEyes>
+		<texPathEyes>FaceParts/Eyes/eye_dazed</texPathEyes>
+		<browVariant>s_shaped</browVariant>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Infant</defName>
-		<texPathEyes>Gendered/eye_sparkle</texPathEyes>
+		<browVariant>flat</browVariant>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Drafted</defName>
-		<texPathEyes>Gendered/eye_drafted</texPathEyes>
+		<browVariant>angled</browVariant>
+	</Despicable.ExpressionDef>
+	<!-- Compatibility shim for prebuilt DLLs in source zips: these placeholder defs satisfy
+	     stale Core DefOf field names in older compiled assemblies. Source has been corrected
+	     to stop declaring NSFW-only expressions in Core. -->
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_LvFix</defName>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_LipFixA</defName>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_GFix</defName>
+	</Despicable.ExpressionDef>
+	<Despicable.ExpressionDef>
+		<defName>FacialExpression_OrgFix</defName>
 	</Despicable.ExpressionDef>
 </Defs>

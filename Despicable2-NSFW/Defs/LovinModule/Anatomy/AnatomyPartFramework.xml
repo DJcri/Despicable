@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <Despicable.AnatomySlotDef>
+    <defName>ExternalGenitals</defName>
+    <anchorKey>ExternalGenitals</anchorKey>
+    <parentTagDef>Body</parentTagDef>
+    <anchorTag>Body</anchorTag>
+    <renderable>true</renderable>
+  </Despicable.AnatomySlotDef>
+
+  <Despicable.AnatomySlotDef>
+    <defName>Chest</defName>
+    <anchorKey>Chest</anchorKey>
+    <parentTagDef>Body</parentTagDef>
+    <anchorTag>Body</anchorTag>
+    <renderable>true</renderable>
+  </Despicable.AnatomySlotDef>
+
+  <Despicable.AnatomyProfileDef>
+    <defName>D2_DefaultHumanlikePenisProfile</defName>
+    <humanlikeOnly>true</humanlikeOnly>
+    <genders>
+      <li>Male</li>
+    </genders>
+    <parts>
+      <li>Genital_Penis</li>
+    </parts>
+  </Despicable.AnatomyProfileDef>
+
+  <Despicable.AnatomyProfileDef>
+    <defName>D2_DefaultHumanlikeVaginaProfile</defName>
+    <humanlikeOnly>true</humanlikeOnly>
+    <genders>
+      <li>Female</li>
+    </genders>
+    <parts>
+      <li>Genital_Vagina</li>
+    </parts>
+  </Despicable.AnatomyProfileDef>
+
+  <Despicable.AnatomyProfileDef>
+    <defName>D2_DefaultHumanlikeBreastsProfile</defName>
+    <humanlikeOnly>true</humanlikeOnly>
+    <genders>
+      <li>Female</li>
+    </genders>
+    <parts>
+      <li>AnatomyPart_Breasts</li>
+    </parts>
+  </Despicable.AnatomyProfileDef>
+
+</Defs>

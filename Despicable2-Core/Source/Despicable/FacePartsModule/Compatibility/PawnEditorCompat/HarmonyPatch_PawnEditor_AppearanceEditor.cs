@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Despicable.FacePartsModule.UI;
@@ -11,9 +13,17 @@ internal static class HarmonyPatch_PawnEditor_AppearanceEditor
     private const string LogPrefix = "Pawn Editor compat";
     // Guardrail-Allow-Static: Cached reflected PawnEditor field handle, resolved once per compat patch application.
     private static FieldInfo pawnFieldInfo;
+    private static ConditionalWeakTable<Pawn, AppearanceSignatureBox> appearanceSignatureByPawn = new();
+
+    private sealed class AppearanceSignatureBox
+    {
+        public bool Initialized;
+        public int Signature;
+    }
 
     public static void ResetRuntimeState()
     {
+        appearanceSignatureByPawn = new ConditionalWeakTable<Pawn, AppearanceSignatureBox>();
         // The Harmony postfix remains installed across save/load boundaries.
         // Keep the cached reflected field available when possible. If the dialog
         // shape changes, the postfix will lazily re-resolve it from the live instance.
@@ -93,6 +103,8 @@ internal static class HarmonyPatch_PawnEditor_AppearanceEditor
         if (pawn == null || pawn.RaceProps == null || !pawn.RaceProps.Humanlike)
             return;
 
+        FaceRuntimeActivityManager.NotifyEditorHeartbeat(pawn, Time.frameCount);
+
         Rect buttonRect = BuildFacePartsButtonRect(inRect);
         if (buttonRect.width <= 0f || buttonRect.height <= 0f)
             return;
@@ -108,9 +120,93 @@ internal static class HarmonyPatch_PawnEditor_AppearanceEditor
             return;
         }
 
+        comp.NotifyEditorHeartbeat(Time.frameCount);
+        RefreshEditedPawnFaceIfNeeded(pawn, comp);
+
         TooltipHandler.TipRegion(buttonRect, "D2C_CODE_97865B7F".Translate());
         if (Widgets.ButtonText(buttonRect, "D2C_CODE_D5D334BD".Translate()))
             Find.WindowStack.Add(new Dialog_D2FacePartsCustomizer(pawn, Dialog_D2FacePartsCustomizer.PreviewRenderMode.LiveSquareSandbox));
+    }
+
+    private static void RefreshEditedPawnFaceIfNeeded(Pawn pawn, CompFaceParts comp)
+    {
+        if (pawn == null || comp == null)
+            return;
+
+        AppearanceSignatureBox signatureBox = appearanceSignatureByPawn.GetValue(pawn, static _ => new AppearanceSignatureBox());
+        int signature = ComputeFaceAppearanceSignature(pawn);
+        if (signatureBox.Initialized && signatureBox.Signature == signature)
+            return;
+
+        signatureBox.Initialized = true;
+        signatureBox.Signature = signature;
+
+        comp.RefreshFaceHard(true);
+        RimWorld.PortraitsCache.SetDirty(pawn);
+    }
+
+    private static int ComputeFaceAppearanceSignature(Pawn pawn)
+    {
+        if (pawn == null)
+            return 0;
+
+        unchecked
+        {
+            int signature = 17;
+            AddStringHash(ref signature, pawn.def?.defName);
+            AddStringHash(ref signature, pawn.kindDef?.defName);
+            AddStringHash(ref signature, pawn.story?.headType?.defName);
+            AddStringHash(ref signature, pawn.story?.bodyType?.defName);
+            AddStringHash(ref signature, pawn.ageTracker?.CurLifeStage?.defName);
+            AddColorHash(ref signature, pawn.story?.HairColor ?? Color.white);
+            AddColorHash(ref signature, pawn.story?.SkinColor ?? Color.white);
+            AddStringHash(ref signature, pawn.gender.ToString());
+
+            if (pawn.genes?.GenesListForReading != null)
+            {
+                var genes = pawn.genes.GenesListForReading;
+                signature = (signature * 31) + genes.Count;
+                for (int i = 0; i < genes.Count; i++)
+                {
+                    Gene gene = genes[i];
+                    if (gene == null)
+                        continue;
+
+                    AddStringHash(ref signature, gene.def?.defName);
+                    signature = (signature * 31) + (gene.Active ? 1 : 0);
+                    signature = (signature * 31) + (gene.Overridden ? 1 : 0);
+                }
+            }
+
+            if (pawn.health?.hediffSet?.hediffs != null)
+            {
+                var hediffs = pawn.health.hediffSet.hediffs;
+                signature = (signature * 31) + hediffs.Count;
+                for (int i = 0; i < hediffs.Count; i++)
+                {
+                    Hediff hediff = hediffs[i];
+                    if (hediff == null)
+                        continue;
+
+                    AddStringHash(ref signature, hediff.def?.defName);
+                    AddStringHash(ref signature, hediff.Part?.def?.defName);
+                    AddStringHash(ref signature, hediff.Part?.Label);
+                    AddStringHash(ref signature, hediff.LabelBase);
+                }
+            }
+
+            return signature;
+        }
+    }
+
+    private static void AddStringHash(ref int signature, string value)
+    {
+        signature = (signature * 31) + StringComparer.OrdinalIgnoreCase.GetHashCode(value ?? string.Empty);
+    }
+
+    private static void AddColorHash(ref int signature, Color color)
+    {
+        signature = (signature * 31) + color.GetHashCode();
     }
 
     private static Rect BuildFacePartsButtonRect(Rect inRect)

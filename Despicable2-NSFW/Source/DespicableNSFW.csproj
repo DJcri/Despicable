@@ -57,6 +57,12 @@
       <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DespicableNSFWBootstrap.cs" />
@@ -76,7 +82,29 @@
     <Compile Include="Integrations\Intimacy\IntimacyValidationBridge.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyCompatModule.cs" />
     <Compile Include="Integrations\Intimacy\IntimacyReflectionUtil.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomyAppearanceOverrideDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Debug\AnatomyDebugReportBuilder.cs" />
+    <Compile Include="LovinModule\Anatomy\Debug\Dialog_AnatomyDebugReport.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomyGeneModifierDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomyPartVariantDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\FluidDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomyPartDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomyPlacementDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomyProfileDef.cs" />
+    <Compile Include="LovinModule\Anatomy\Defs\AnatomySlotDef.cs" />
+    <Compile Include="LovinModule\Anatomy\AnatomyFluidInstance.cs" />
+    <Compile Include="LovinModule\Anatomy\AnatomyPartInstance.cs" />
+    <Compile Include="LovinModule\Anatomy\AnatomyPartInstanceFactory.cs" />
     <Compile Include="LovinModule\Anatomy\AnatomyBootstrapper.cs" />
+    <Compile Include="LovinModule\Anatomy\Runtime\AnatomyFluidRuntime.cs" />
+    <Compile Include="LovinModule\Anatomy\RenderNodes\AnatomyPartNodeProperties.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyAnchorResolver.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyAppearanceResolver.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyTextureHeuristicResolver.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyGeneModifierResolver.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyVariantResolver.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyPlacementResolver.cs" />
+    <Compile Include="LovinModule\Anatomy\Resolvers\AnatomyResolver.cs" />
     <Compile Include="LovinModule\Anatomy\AnatomyQuery.cs" />
     <Compile Include="LovinModule\Anatomy\Comp\CompAnatomyBootstrap.cs" />
     <Compile Include="LovinModule\Anatomy\Comp\CompProperties_AnatomyBootstrap.cs" />
@@ -86,7 +114,11 @@
     <Compile Include="LovinModule\Patches\HarmonyPatch_LovinVisualEvents.cs" />
     <Compile Include="LovinModule\Runtime\LovinVisualRuntime.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_FacialAnimDefOf.cs" />
+    <Compile Include="LovinModule\DefOf\LovinModule_FluidDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_AnatomyDefOf.cs" />
+    <Compile Include="LovinModule\LegacyBridge\LegacyAnatomyDefLookup.cs" />
+    <Compile Include="LovinModule\LegacyBridge\LegacyAnatomyMigration.cs" />
+    <Compile Include="LovinModule\LegacyBridge\GameComponent_LegacyAnatomyMigration.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_GenitalDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_InteractionDefOf.cs" />
     <Compile Include="LovinModule\DefOf\LovinModule_JobDefOf.cs" />
@@ -95,6 +127,8 @@
     <Compile Include="LovinModule\DefOf\LovinModule_ThoughtDefOf.cs" />
     <Compile Include="LovinModule\Genitals\BodyTypeGenitalsOffsetDef.cs" />
     <Compile Include="LovinModule\Genitals\GenitalDef.cs" />
+    <Compile Include="LovinModule\Genitals\TextureOverrides\D2GenitalTextureOverrideDef.cs" />
+    <Compile Include="LovinModule\Genitals\TextureOverrides\GenitalTextureOverrideResolver.cs" />
     <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNodeWorker_Genitals.cs" />
     <Compile Include="LovinModule\Genitals\RenderNodes\PawnRenderNode_Genitals.cs" />
     <Compile Include="LovinModule\Hooks\LovinResolveHooks.cs" />

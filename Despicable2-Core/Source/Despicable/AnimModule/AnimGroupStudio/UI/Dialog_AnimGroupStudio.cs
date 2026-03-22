@@ -62,6 +62,7 @@ public partial class Dialog_AnimGroupStudio : Window
     private bool authorScaleLock { get => session.AuthorScaleLock; set => session.AuthorScaleLock = value; }
     private AgsModel.Keyframe authorKeyClipboard { get => session.AuthorKeyClipboard; set => session.AuthorKeyClipboard = value; }
     private Dictionary<string, bool> isPropTagCache => session.PropTagCache;
+    private Dictionary<string, List<string>> graphicStateTagCache => session.GraphicStateTagCache;
 
     // Export UX state
     private string lastExportFolder { get => session.LastExportFolder; set => session.LastExportFolder = value; }

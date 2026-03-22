@@ -174,6 +174,7 @@ public partial class Dialog_AnimGroupStudio
                                                 var wk = wt.keyframes[ki];
                                                 if (wk == null) continue;
     
+                                                string graphicState = !wk.graphicState.NullOrEmpty() ? wk.graphicState : (wk.variant >= 0 ? "variant_" + wk.variant : null);
                                                 t.keys.Add(new AgsModel.Keyframe
                                                 {
                                                     tick = wk.tick,
@@ -182,8 +183,8 @@ public partial class Dialog_AnimGroupStudio
                                                     rotation = wk.rotation,
                                                     scale = wk.scale,
                                                     visible = wk.visible,
-                                                    graphicState = wk.graphicState,
-                                                    variant = wk.variant,
+                                                    graphicState = graphicState,
+                                                    variant = -1,
                                                     soundDefName = wk.soundDefName,
                                                     facialAnimDefName = wk.facialAnimDefName,
                                                     layerBias = Mathf.Clamp(wk.layerBias, -3, 3)

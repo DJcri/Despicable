@@ -25,6 +25,7 @@
 	<Despicable.ExpressionDef>
 		<defName>FA_OrgasmLipBite</defName>
 		<texPathEyes>FaceParts/Eyes/eye_shut</texPathEyes>
+		<browVariant>s_shaped</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_lipbite</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.FacialAnimDef>
@@ -69,6 +70,6 @@
 	</Despicable.FacialAnimDef>
 	<Despicable.ExpressionDef>
 		<defName>FA_Cheekful</defName>
-		<texPathMouth>FaceParts/Mouths/mouth_cheekful</texPathMouth>
+		<texPathMouth>FaceParts/Mouths/mouth_open</texPathMouth>
 	</Despicable.ExpressionDef>
 </Defs>

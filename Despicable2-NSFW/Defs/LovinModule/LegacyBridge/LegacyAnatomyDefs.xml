@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <HediffDef>
+    <defName>D2_Genital_Penis</defName>
+    <label>penis</label>
+    <labelNoun>a penis</labelNoun>
+    <description>Legacy natural external genital anatomy retained only for save migration.</description>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <tags>
+      <li>D2_GenitalAnatomy</li>
+      <li>D2_Penis</li>
+    </tags>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>D2_Genital_Vagina</defName>
+    <label>vagina</label>
+    <labelNoun>a vagina</labelNoun>
+    <description>Legacy natural external genital anatomy retained only for save migration.</description>
+    <scenarioCanAdd>false</scenarioCanAdd>
+    <tags>
+      <li>D2_GenitalAnatomy</li>
+      <li>D2_Vagina</li>
+    </tags>
+  </HediffDef>
+
+</Defs>

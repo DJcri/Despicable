@@ -334,10 +334,9 @@ public sealed partial class AgsExport
                             AgsExportUtil.WriteElement(w, "scale", AgsExportUtil.Vec3ToString(k.scale));
 
                         AgsExportUtil.WriteElement(w, "rotation", Rot4ToExportString(k.rotation));
-                        if (!k.graphicState.NullOrEmpty())
-                            AgsExportUtil.WriteElement(w, "graphicState", k.graphicState);
-                        if (k.variant != -1)
-                            AgsExportUtil.WriteElement(w, "variant", k.variant.ToString(CultureInfo.InvariantCulture));
+                        string graphicState = !k.graphicState.NullOrEmpty() ? k.graphicState : (k.variant >= 0 ? "variant_" + k.variant : null);
+                        if (!graphicState.NullOrEmpty())
+                            AgsExportUtil.WriteElement(w, "graphicState", graphicState);
                         if (!k.soundDefName.NullOrEmpty())
                             AgsExportUtil.WriteElement(w, "sound", k.soundDefName);
                         if (!k.facialAnimDefName.NullOrEmpty())

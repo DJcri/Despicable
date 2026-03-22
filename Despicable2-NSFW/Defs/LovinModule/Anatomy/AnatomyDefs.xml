@@ -15,28 +15,4 @@
     <canScarify>true</canScarify>
   </BodyPartDef>
 
-  <HediffDef>
-    <defName>D2_Genital_Penis</defName>
-    <label>penis</label>
-    <labelNoun>a penis</labelNoun>
-    <description>Natural external genital anatomy.</description>
-    <scenarioCanAdd>false</scenarioCanAdd>
-    <tags>
-      <li>D2_GenitalAnatomy</li>
-      <li>D2_Penis</li>
-    </tags>
-  </HediffDef>
-
-  <HediffDef>
-    <defName>D2_Genital_Vagina</defName>
-    <label>vagina</label>
-    <labelNoun>a vagina</labelNoun>
-    <description>Natural external genital anatomy.</description>
-    <scenarioCanAdd>false</scenarioCanAdd>
-    <tags>
-      <li>D2_GenitalAnatomy</li>
-      <li>D2_Vagina</li>
-    </tags>
-  </HediffDef>
-
 </Defs>

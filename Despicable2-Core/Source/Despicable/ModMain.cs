@@ -162,9 +162,14 @@ internal static class HarmonyPatch_PortraitsCache_Get_DespicableFaceWarmup
         return null;
     }
 
-    private static void Prefix(Pawn pawn)
+    private static void Prefix(Pawn pawn, out FacePartsPortraitRenderContext.Scope __state)
     {
+        __state = new FacePartsPortraitRenderContext.Scope(!WorkshopRenderContext.Active);
+
         if (pawn == null)
+            return;
+
+        if (CompFaceParts.GlobalWarmupNeededCount <= 0)
             return;
 
         using ReentryGuard.Scope guard = ReentryGuard.Enter(PortraitWarmupGuardKey);
@@ -202,6 +207,11 @@ internal static class HarmonyPatch_PortraitsCache_Get_DespicableFaceWarmup
         {
             Log.Error($"[Despicable] - Error warming facial parts before portrait render: {e}");
         }
+    }
+
+    private static void Finalizer(Exception __exception, FacePartsPortraitRenderContext.Scope __state)
+    {
+        __state.Dispose();
     }
 }
 

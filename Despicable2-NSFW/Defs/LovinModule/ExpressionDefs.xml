@@ -2,27 +2,30 @@
 <Defs>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Lovin</defName>
-		<texPathEyes>Gendered/eye_halflid</texPathEyes>
+		<browVariant>s_shaped</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_smirk</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_LipBite</defName>
-		<texPathEyes>Gendered/eye_squint</texPathEyes>
+		<browVariant>angled</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_lipbite</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Gasp</defName>
+		<browVariant>s_shaped</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_gasp</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Moan</defName>
-		<texPathEyes>Gendered/eye_closed</texPathEyes>
+		<texPathEyes>FaceParts/Eyes/eye_shut</texPathEyes>
+		<browVariant>s_shaped</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_open</texPathMouth>
 	</Despicable.ExpressionDef>
 	<Despicable.ExpressionDef>
 		<defName>FacialExpression_Orgasm</defName>
 		<texPathEyes>FaceParts/Eyes/eye_shut</texPathEyes>
+		<browVariant>s_shaped</browVariant>
 		<texPathMouth>FaceParts/Mouths/mouth_gasp</texPathMouth>
-		<texPathDetail>FaceParts/Details/detail_cheekblush</texPathDetail>
+		<texPathEyeDetailState>FaceParts/Details/Eye/eyedetail_cheekblush</texPathEyeDetailState>
 	</Despicable.ExpressionDef>
 </Defs>

@@ -17,7 +17,9 @@ public static class DespicableRuntimeState
 {
     public static void ResetRuntimeState()
     {
+        CompFaceParts.GlobalWarmupNeededCount = 0;
         VisualActivityTracker.ResetRuntimeState();
+        FaceRuntimeActivityManager.ResetRuntimeState();
         HarmonyPatch_DrawTracker_DrawPos.ResetRuntimeState();
         HarmonyPatch_PawnRenderTree_TryGetMatrix.ResetRuntimeState();
         GraphicStateResolver.ResetRuntimeState();
@@ -41,7 +43,12 @@ public static class DespicableRuntimeState
         UIUtil.ResetRuntimeState();
         HarmonyPatch_PawnEditor_AppearanceEditor.ResetRuntimeState();
         AutoEyePatchRuntime.ResetRuntimeState();
+        FaceDetailBoundaryRuntime.ResetRuntimeState();
+        FacePartCompositeRuntime.ResetRuntimeState();
+        FacePartTextureRuntime.ResetRuntimeState();
+        FacePartRuntimeGraphicCache.ResetRuntimeState();
         FacePartsEventRuntime.ResetRuntimeState();
+        FacePartsRestEventRuntime.ResetRuntimeState();
         HKPerkEffects.ResetRuntimeState();
         HKBackendBridge.ResetRuntimeState();
         GameComponent_ExtendedAnimatorRuntime.ResetRuntimeState();

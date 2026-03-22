@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -11,8 +12,38 @@ public partial class CompFaceParts
     private static bool stylePoolsInitialized;
     private static readonly List<FacePartStyleDef> CachedMaleEyeStyles = new();
     private static readonly List<FacePartStyleDef> CachedFemaleEyeStyles = new();
+    private static readonly List<FacePartStyleDef> CachedMaleBrowStyles = new();
+    private static readonly List<FacePartStyleDef> CachedFemaleBrowStyles = new();
     private static readonly List<FacePartStyleDef> CachedMaleMouthStyles = new();
     private static readonly List<FacePartStyleDef> CachedFemaleMouthStyles = new();
+    private static readonly List<FacePartStyleDef> CachedMaleEyeDetailStyles = new();
+    private static readonly List<FacePartStyleDef> CachedFemaleEyeDetailStyles = new();
+    // Guardrail-Allow-Static: Cached empty eye-detail fallback is load-scoped shared definition data, not pawn-specific visual state.
+    private static FacePartStyleDef CachedEmptyEyeDetailStyle;
+    private static readonly HashSet<string> RetiredEyeDetailStyleDefNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "EyeDetail_CheekBlush",
+        "EyeDetail_DarkCircles",
+        "EyeDetail_Tears",
+        "EyeDetail_Tired"
+    };
+
+    public static bool IsRetiredEyeDetailStyle(FacePartStyleDef style)
+    {
+        return style != null
+            && style.renderNodeTag?.defName == "FacePart_EyeDetail"
+            && !style.defName.NullOrEmpty()
+            && RetiredEyeDetailStyleDefNames.Contains(style.defName);
+    }
+
+    private void SanitizeRetiredEyeDetailStyle()
+    {
+        if (!IsRetiredEyeDetailStyle(eyeDetailStyleDef))
+            return;
+
+        EnsureStylePoolsInitialized();
+        eyeDetailStyleDef = CachedEmptyEyeDetailStyle;
+    }
 
     private static void EnsureStylePoolsInitialized()
     {
@@ -21,8 +52,13 @@ public partial class CompFaceParts
 
         CachedMaleEyeStyles.Clear();
         CachedFemaleEyeStyles.Clear();
+        CachedMaleBrowStyles.Clear();
+        CachedFemaleBrowStyles.Clear();
         CachedMaleMouthStyles.Clear();
         CachedFemaleMouthStyles.Clear();
+        CachedMaleEyeDetailStyles.Clear();
+        CachedFemaleEyeDetailStyles.Clear();
+        CachedEmptyEyeDetailStyle = null;
 
         List<FacePartStyleDef> allStyles = DefDatabase<FacePartStyleDef>.AllDefsListForReading;
         for (int i = 0; i < allStyles.Count; i++)
@@ -44,29 +80,140 @@ public partial class CompFaceParts
                 continue;
             }
 
+            if (tagName == "FacePart_Brow")
+            {
+                if (allowMale)
+                    CachedMaleBrowStyles.Add(style);
+                if (allowFemale)
+                    CachedFemaleBrowStyles.Add(style);
+                continue;
+            }
+
             if (tagName == "FacePart_Mouth")
             {
                 if (allowMale)
                     CachedMaleMouthStyles.Add(style);
                 if (allowFemale)
                     CachedFemaleMouthStyles.Add(style);
+                continue;
             }
+
+            if (tagName == "FacePart_EyeDetail")
+            {
+                if (string.Equals(style.texPath, EMPTY_DETAIL_TEX_PATH, StringComparison.OrdinalIgnoreCase))
+                    CachedEmptyEyeDetailStyle ??= style;
+
+                if (IsRetiredEyeDetailStyle(style))
+                    continue;
+
+                if (allowMale)
+                    CachedMaleEyeDetailStyles.Add(style);
+                if (allowFemale)
+                    CachedFemaleEyeDetailStyles.Add(style);
+                continue;
+            }
+
         }
 
         stylePoolsInitialized = true;
     }
 
-    private List<FacePartStyleDef> GetEligibleStylePool(bool forEyes)
+    public static bool IsStyleEligibleForPawn(Pawn pawn, FacePartStyleDef style)
+    {
+        if (style == null)
+            return false;
+
+        if (style.requiredGender != null)
+        {
+            Gender? pawnGender = pawn?.gender;
+            if (pawnGender == null || style.requiredGender.Value != (byte)pawnGender.Value)
+                return false;
+        }
+
+        List<string> requiredGenes = style.requiredGenes;
+        if (requiredGenes == null || requiredGenes.Count == 0)
+            return true;
+
+        List<Gene> pawnGenes = pawn?.genes?.GenesListForReading;
+        if (pawnGenes == null || pawnGenes.Count == 0)
+            return false;
+
+        for (int i = 0; i < requiredGenes.Count; i++)
+        {
+            string requiredGeneDefName = requiredGenes[i];
+            if (requiredGeneDefName.NullOrEmpty())
+                continue;
+
+            bool found = false;
+            for (int geneIndex = 0; geneIndex < pawnGenes.Count; geneIndex++)
+            {
+                string pawnGeneDefName = pawnGenes[geneIndex]?.def?.defName;
+                if (!pawnGeneDefName.NullOrEmpty() && pawnGeneDefName.Equals(requiredGeneDefName, StringComparison.OrdinalIgnoreCase))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                return false;
+        }
+
+        return true;
+    }
+
+    private List<FacePartStyleDef> GetBaseStylePool(string renderNodeTagDefName)
     {
         EnsureStylePoolsInitialized();
         bool female = pawn != null && pawn.gender == Gender.Female;
-        if (forEyes)
-            return female ? CachedFemaleEyeStyles : CachedMaleEyeStyles;
 
-        return female ? CachedFemaleMouthStyles : CachedMaleMouthStyles;
+        return renderNodeTagDefName switch
+        {
+            "FacePart_Eye" => female ? CachedFemaleEyeStyles : CachedMaleEyeStyles,
+            "FacePart_Brow" => female ? CachedFemaleBrowStyles : CachedMaleBrowStyles,
+            "FacePart_Mouth" => female ? CachedFemaleMouthStyles : CachedMaleMouthStyles,
+            "FacePart_EyeDetail" => female ? CachedFemaleEyeDetailStyles : CachedMaleEyeDetailStyles,
+            _ => null
+        };
     }
 
-    private static FacePartStyleDef WeightedRandomStyle(List<FacePartStyleDef> styles)
+    private FacePartStyleDef GetRandomEligibleStyle(string renderNodeTagDefName)
+    {
+        return WeightedRandomEligibleStyle(GetBaseStylePool(renderNodeTagDefName));
+    }
+
+    private bool SanitizeStyleEligibility(ref FacePartStyleDef selectedStyle, string renderNodeTagDefName, FacePartStyleDef fallbackStyle = null)
+    {
+        if (selectedStyle == null || IsStyleEligibleForPawn(pawn, selectedStyle))
+            return false;
+
+        FacePartStyleDef replacementStyle = GetRandomEligibleStyle(renderNodeTagDefName) ?? fallbackStyle;
+        if (selectedStyle == replacementStyle)
+            return false;
+
+        selectedStyle = replacementStyle;
+        return true;
+    }
+
+    private bool SanitizeStyleRequirementSelections()
+    {
+        EnsureStylePoolsInitialized();
+
+        bool changed = false;
+        changed |= SanitizeStyleEligibility(ref eyeStyleDef, "FacePart_Eye");
+        changed |= SanitizeStyleEligibility(ref browStyleDef, "FacePart_Brow");
+        changed |= SanitizeStyleEligibility(ref mouthStyleDef, "FacePart_Mouth");
+        changed |= SanitizeStyleEligibility(ref eyeDetailStyleDef, "FacePart_EyeDetail", CachedEmptyEyeDetailStyle);
+
+        if (!changed)
+            return false;
+
+        InvalidateFaceStructure();
+        shouldUpdate = true;
+        return true;
+    }
+
+    private FacePartStyleDef WeightedRandomEligibleStyle(List<FacePartStyleDef> styles)
     {
         if (styles == null || styles.Count == 0)
             return null;
@@ -75,7 +222,7 @@ public partial class CompFaceParts
         for (int i = 0; i < styles.Count; i++)
         {
             FacePartStyleDef style = styles[i];
-            if (style == null || style.weight <= 0)
+            if (style == null || style.weight <= 0 || !IsStyleEligibleForPawn(pawn, style))
                 continue;
 
             totalWeight += style.weight;
@@ -88,7 +235,7 @@ public partial class CompFaceParts
         for (int i = 0; i < styles.Count; i++)
         {
             FacePartStyleDef style = styles[i];
-            if (style == null || style.weight <= 0)
+            if (style == null || style.weight <= 0 || !IsStyleEligibleForPawn(pawn, style))
                 continue;
 
             roll -= style.weight;
@@ -96,7 +243,14 @@ public partial class CompFaceParts
                 return style;
         }
 
-        return styles[styles.Count - 1];
+        for (int i = styles.Count - 1; i >= 0; i--)
+        {
+            FacePartStyleDef style = styles[i];
+            if (style != null && style.weight > 0 && IsStyleEligibleForPawn(pawn, style))
+                return style;
+        }
+
+        return null;
     }
 
     public void RefreshFaceSoftFast(bool markPortraitDirty = false)
@@ -110,11 +264,10 @@ public partial class CompFaceParts
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
             enabled = false;
-            facialAnim = null;
-            animExpression = null;
+            ClearRuntimeFacialAnimState();
 
             if (needsRefresh)
-                pawn?.Drawer?.renderer?.SetAllGraphicsDirty();
+                RequestFaceGraphicsDirty(pawn?.Drawer?.renderer);
 
             shouldUpdate = false;
             return;
@@ -127,10 +280,10 @@ public partial class CompFaceParts
         {
             if (hadRenderableState)
             {
-                renderer?.renderTree?.SetDirty();
-                renderer?.SetAllGraphicsDirty();
                 if (markPortraitDirty)
-                    PortraitsCache.SetDirty(pawn);
+                    RequestFaceGraphicsAndPortraitDirty(renderer);
+                else
+                    RequestFaceGraphicsDirty(renderer);
             }
 
             DisableFacePartsInstance();
@@ -142,7 +295,13 @@ public partial class CompFaceParts
             return;
         }
 
-        if (faceStructureDirty || mouthStyleDef == null || eyeStyleDef == null)
+        if (SanitizeStyleRequirementSelections())
+        {
+            RefreshFaceHard(markPortraitDirty);
+            return;
+        }
+
+        if (faceStructureDirty || !AreStyleSlotsAssigned())
         {
             RefreshFaceHard(markPortraitDirty);
             return;
@@ -154,10 +313,10 @@ public partial class CompFaceParts
             return;
         }
 
-        renderer.SetAllGraphicsDirty();
-
         if (markPortraitDirty)
-            PortraitsCache.SetDirty(pawn);
+            RequestFaceGraphicsAndPortraitDirty(renderer);
+        else
+            RequestFaceGraphicsDirty(renderer);
 
         shouldUpdate = false;
     }
@@ -173,11 +332,10 @@ public partial class CompFaceParts
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
             enabled = false;
-            facialAnim = null;
-            animExpression = null;
+            ClearRuntimeFacialAnimState();
 
             if (needsRefresh)
-                pawn?.Drawer?.renderer?.SetAllGraphicsDirty();
+                RequestFaceGraphicsDirty(pawn?.Drawer?.renderer);
 
             shouldUpdate = false;
             return;
@@ -190,10 +348,10 @@ public partial class CompFaceParts
         {
             if (hadRenderableState)
             {
-                pawn.Drawer?.renderer?.renderTree?.SetDirty();
-                pawn.Drawer?.renderer?.SetAllGraphicsDirty();
                 if (markPortraitDirty)
-                    PortraitsCache.SetDirty(pawn);
+                    RequestFaceGraphicsAndPortraitDirty(pawn.Drawer?.renderer);
+                else
+                    RequestFaceGraphicsDirty(pawn.Drawer?.renderer);
             }
 
             DisableFacePartsInstance();
@@ -201,8 +359,15 @@ public partial class CompFaceParts
         }
 
         RefreshCachedVisualState(false);
+        SanitizeRetiredEyeDetailStyle();
 
-        if (mouthStyleDef == null || eyeStyleDef == null)
+        if (SanitizeStyleRequirementSelections())
+        {
+            RefreshFaceHard(markPortraitDirty);
+            return;
+        }
+
+        if (!AreStyleSlotsAssigned())
         {
             AssignStylesRandomByWeight();
             RefreshFaceHard(markPortraitDirty);
@@ -216,10 +381,10 @@ public partial class CompFaceParts
             return;
         }
 
-        renderer.SetAllGraphicsDirty();
-
         if (markPortraitDirty)
-            PortraitsCache.SetDirty(pawn);
+            RequestFaceGraphicsAndPortraitDirty(renderer);
+        else
+            RequestFaceGraphicsDirty(renderer);
 
         shouldUpdate = false;
     }
@@ -233,11 +398,10 @@ public partial class CompFaceParts
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
             enabled = false;
-            facialAnim = null;
-            animExpression = null;
+            ClearRuntimeFacialAnimState();
 
             if (needsRefresh)
-                pawn?.Drawer?.renderer?.SetAllGraphicsDirty();
+                RequestFaceGraphicsDirty(pawn?.Drawer?.renderer);
 
             shouldUpdate = false;
             return;
@@ -256,10 +420,10 @@ public partial class CompFaceParts
             return;
         }
 
-        renderer.SetAllGraphicsDirty();
-
         if (markPortraitDirty)
-            PortraitsCache.SetDirty(pawn);
+            RequestFaceGraphicsAndPortraitDirty(renderer);
+        else
+            RequestFaceGraphicsDirty(renderer);
 
         shouldUpdate = false;
     }
@@ -272,7 +436,10 @@ public partial class CompFaceParts
         bool visualStateChanged = RefreshCachedVisualState(false);
 
         bool needsStructuralRebuild = faceStructureDirty;
-        if (mouthStyleDef == null || eyeStyleDef == null)
+        if (SanitizeStyleRequirementSelections())
+            needsStructuralRebuild = true;
+
+        if (!AreStyleSlotsAssigned())
         {
             AssignStylesRandomByWeight();
             needsStructuralRebuild = true;
@@ -287,23 +454,26 @@ public partial class CompFaceParts
 
         if (needsStructuralRebuild)
         {
-            renderer.renderTree?.SetDirty();
-            renderer.SetAllGraphicsDirty();
+            if (markPortraitDirty)
+                RequestFaceGraphicsAndPortraitDirty(renderer);
+            else
+                RequestFaceGraphicsDirty(renderer);
         }
         else if (visualStateChanged)
         {
-            renderer.SetAllGraphicsDirty();
+            if (markPortraitDirty)
+                RequestFaceGraphicsAndPortraitDirty(renderer);
+            else
+                RequestFaceGraphicsDirty(renderer);
         }
 
         if (!faceWarmInitialized || needsStructuralRebuild)
             renderer.EnsureGraphicsInitialized();
 
-        if (markPortraitDirty)
-            PortraitsCache.SetDirty(pawn);
-
         faceWarmInitialized = true;
         faceStructureDirty = false;
         shouldUpdate = false;
+        ReconcileGlobalPortraitWarmupNeededCount();
     }
 
     public void RefreshFaceHard(bool markPortraitDirty = true)
@@ -317,13 +487,12 @@ public partial class CompFaceParts
         {
             bool needsRefresh = enabled || facialAnim != null || animExpression != null;
             enabled = false;
-            facialAnim = null;
-            animExpression = null;
+            ClearRuntimeFacialAnimState();
 
             if (needsRefresh)
             {
                 pawn?.Drawer?.renderer?.renderTree?.SetDirty();
-                pawn?.Drawer?.renderer?.SetAllGraphicsDirty();
+                RequestFaceGraphicsDirty(pawn?.Drawer?.renderer);
             }
 
             faceWarmInitialized = false;
@@ -339,10 +508,10 @@ public partial class CompFaceParts
         {
             if (hadRenderableState)
             {
-                pawn.Drawer?.renderer?.renderTree?.SetDirty();
-                pawn.Drawer?.renderer?.SetAllGraphicsDirty();
                 if (markPortraitDirty)
-                    PortraitsCache.SetDirty(pawn);
+                    RequestFaceGraphicsAndPortraitDirty(pawn.Drawer?.renderer);
+                else
+                    RequestFaceGraphicsDirty(pawn.Drawer?.renderer);
             }
 
             DisableFacePartsInstance();
@@ -356,8 +525,10 @@ public partial class CompFaceParts
         }
 
         RefreshCachedVisualState(false);
+        SanitizeRetiredEyeDetailStyle();
+        SanitizeStyleRequirementSelections();
 
-        if (mouthStyleDef == null || eyeStyleDef == null)
+        if (!AreStyleSlotsAssigned())
             AssignStylesRandomByWeight();
 
         PawnRenderer renderer = pawn.Drawer?.renderer;
@@ -367,18 +538,18 @@ public partial class CompFaceParts
             return;
         }
 
-        renderer.renderTree?.SetDirty();
-        renderer.SetAllGraphicsDirty();
+        if (markPortraitDirty)
+            RequestFaceGraphicsAndPortraitDirty(renderer);
+        else
+            RequestFaceGraphicsDirty(renderer);
 
         if (!faceWarmInitialized)
             renderer.EnsureGraphicsInitialized();
 
-        if (markPortraitDirty)
-            PortraitsCache.SetDirty(pawn);
-
         faceWarmInitialized = true;
         faceStructureDirty = false;
         shouldUpdate = false;
+        ReconcileGlobalPortraitWarmupNeededCount();
     }
 
     public void RefreshFaceNow(bool markPortraitDirty = true)
@@ -388,14 +559,29 @@ public partial class CompFaceParts
 
     public void AssignStylesRandomByWeight()
     {
-        FacePartStyleDef selectedEye = WeightedRandomStyle(GetEligibleStylePool(true));
-        FacePartStyleDef selectedMouth = WeightedRandomStyle(GetEligibleStylePool(false));
+        FacePartStyleDef selectedEye = GetRandomEligibleStyle("FacePart_Eye");
+        FacePartStyleDef selectedBrow = GetRandomEligibleStyle("FacePart_Brow");
+        FacePartStyleDef selectedMouth = GetRandomEligibleStyle("FacePart_Mouth");
+        FacePartStyleDef selectedEyeDetail = GetRandomEligibleStyle("FacePart_EyeDetail");
 
         if (selectedEye != null)
             eyeStyleDef = selectedEye;
 
+        if (selectedBrow != null)
+            browStyleDef = selectedBrow;
+
         if (selectedMouth != null)
             mouthStyleDef = selectedMouth;
+
+        if (selectedEyeDetail != null)
+        {
+            eyeDetailStyleDef = selectedEyeDetail;
+            eyeDetailSideMode = selectedEyeDetail.allowSideSelection
+                ? (Rand.Bool ? FacePartSideMode.RightOnly : FacePartSideMode.LeftOnly)
+                : selectedEyeDetail.ResolveEffectiveSideMode();
+        }
+
+        faceDetailStyleDef = null;
 
         InvalidateFaceStructure();
         shouldUpdate = true;

@@ -22,7 +22,8 @@
 	<!-- Blink anim expressions -->
 	<Despicable.ExpressionDef>
 		<defName>FA_Blink_1</defName>
-		<texPathEyes>Gendered/eye_halflid</texPathEyes>
+		<texPathEyes>FaceParts/Eyes/eye_halflid</texPathEyes>
+		<browVariant>flat</browVariant>
 	</Despicable.ExpressionDef>
 	<!--Infant Drool-->
 	<Despicable.FacialAnimDef>
